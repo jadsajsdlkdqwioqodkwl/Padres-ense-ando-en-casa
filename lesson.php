@@ -1,72 +1,59 @@
 <?php
-// 1. Conexión a la base de datos (Asumimos que crearás includes/config.php)
 require_once 'includes/config.php';
 
-// 2. Obtener la lección desde la URL (ej: tusitio.com/lesson.php?id=1)
-$lesson_id = isset($_GET['id']) ? (int)$_GET['id'] : 1; // Por defecto carga la 1 para pruebas
+// 1. Qué lección toca?
+$lesson_id = isset($_GET['id']) ? (int)$_GET['id'] : 1;
 
-// 3. Consultar la base de datos
-$stmt = $pdo->prepare("
-    SELECT l.*, m.title as module_title 
-    FROM lessons l 
-    JOIN modules m ON l.module_id = m.id 
-    WHERE l.id = ?
-");
+// 2. Buscamos en la BD
+$stmt = $pdo->prepare("SELECT * FROM lessons WHERE id = ?");
 $stmt->execute([$lesson_id]);
-$lesson = $stmt->fetch(PDO::FETCH_ASSOC);
+$lesson = $stmt->fetch();
 
-// Si la lección no existe, lo mandamos al index (mapa)
-if (!$lesson) {
-    header("Location: index.php");
-    exit;
-}
+if (!$lesson) { die("<h2>Lesson not found. Go back to <a href='course.php'>Course</a></h2>"); }
 
-// 4. Decodificar la magia (Convierte el JSON de la BD en un Array de PHP)
-$lesson_data = json_decode($lesson['content_data'], true);
-
-// 5. Variables para la vista
+// 3. Decodificamos la información del juego
+$lesson_data = json_decode($lesson['content_json'], true);
 $page_title = $lesson['title'];
-$module_title = $lesson['module_title'];
-
-// ==========================================
-// 🎨 INICIO DEL RENDERIZADO VISUAL
-// ==========================================
+$current_stars = 0; // Se llenará con lo que pusiste en navbar.php
 ?>
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <?php include 'includes/head.php'; // Aquí van tus variables CSS y <style> globales ?>
+    <?php include 'includes/head.php'; ?>
+    <link rel="stylesheet" href="assets/css/main.css">
+    <link rel="stylesheet" href="assets/css/lessons.css">
 </head>
 <body>
-
     <?php include 'includes/audio_engine.php'; ?>
-
+    
     <div class="container">
-        
         <?php include 'includes/navbar.php'; ?>
-
-        <h2><?php echo htmlspecialchars($module_title); ?></h2>
-        <h1>Lesson <?php echo $lesson['order_num'] . ': ' . htmlspecialchars($lesson['title']); ?></h1>
-
-        <?php include 'includes/teaching_guide.php'; ?>
-
-        <div class="game-wrapper">
+        <?php include 'includes/companion.php'; ?>
+        
+        <div class="lesson-header text-center" style="margin-bottom: 20px;">
+            <h2><?php echo htmlspecialchars($lesson['title']); ?></h2>
+            <div class="teaching-guide">
+                <strong>👨‍🏫 Parents:</strong> Help your child click and interact!
+            </div>
+        </div>
+        
+        <div class="lesson-content">
             <?php 
-            // Esto busca en la carpeta /templates/ el archivo correspondiente
-            // Ej: /templates/type_drag_drop.php
-            $template_file = 'templates/type_' . $lesson['template_type'] . '.php';
-            
+            $template_file = 'templates/type_' . $lesson['type'] . '.php';
             if (file_exists($template_file)) {
                 include $template_file;
             } else {
-                echo "<div style='color:red; text-align:center;'>Error: Plantilla no encontrada ({$template_file}).</div>";
+                echo "<p>Juego en construcción (Tipo: " . $lesson['type'] . ")</p>";
             }
             ?>
         </div>
-
+        
+        <?php include 'includes/footer.php'; ?>
     </div>
-
+    
     <?php include 'includes/controls.php'; ?>
-
+    
+    <script src="assets/js/engine.js"></script>
+    <script src="assets/js/global.js"></script>
 </body>
 </html>
