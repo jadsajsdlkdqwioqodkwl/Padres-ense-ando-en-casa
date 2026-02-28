@@ -1,4 +1,5 @@
 <?php
+// includes/config.php
 session_start();
 
 define('DB_HOST', 'db_kids'); 
@@ -14,20 +15,19 @@ try {
     die("Error de conexión a la base de datos: " . $e->getMessage());
 }
 
-// Función global para obtener las estrellas actuales del niño
-function getUserStars($pdo, $user_id) {
-    $stmt = $pdo->prepare("SELECT total_stars FROM users WHERE id = ?");
+// Obtener información completa del usuario activo
+function getUserInfo($pdo, $user_id) {
+    $stmt = $pdo->prepare("SELECT child_name, total_stars FROM users WHERE id = ?");
     $stmt->execute([$user_id]);
-    return $stmt->fetchColumn() ?: 0;
+    return $stmt->fetch();
 }
 
 // ==========================================
 // 🛡️ SISTEMA DE PROTECCIÓN (REDIRECCIÓN)
 // ==========================================
 $current_page = basename($_SERVER['PHP_SELF']);
-$public_pages = ['login.php', 'register.php']; // Páginas que no requieren login
+$public_pages = ['login.php', 'register.php']; 
 
-// Si no hay sesión iniciada y no está en una página pública, lo mandamos al login
 if (!isset($_SESSION['user_id']) && !in_array($current_page, $public_pages)) {
     header("Location: login.php");
     exit;
