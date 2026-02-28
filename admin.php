@@ -93,6 +93,17 @@ $lessons = $stmt->fetchAll();
                     <input type="number" name="reward_stars" value="3" required>
                 </div>
             </div>
+            <div class="form-group">
+                <label>Tipo de Juego:</label>
+                <select name="template_type">
+                    <option value="flashcards">Flashcards (Tarjetas)</option>
+                    <option value="matching">Matching (Unir Parejas)</option>
+                    <option value="drag_drop">Drag & Drop (Arrastrar)</option>
+                    <option value="coloring">Coloring (Pintar)</option>
+                    <option value="writing">Writing (Escribir)</option>
+                    <option value="exam" style="font-weight: bold; color: var(--primary);">📝 Examen Final de Módulo</option>
+                </select>
+            </div>
 
             <div class="form-group">
                 <label>Título de la Lección (Para el niño):</label>
