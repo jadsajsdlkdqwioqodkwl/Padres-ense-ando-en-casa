@@ -1,62 +1,62 @@
 SET NAMES utf8mb4;
 SET CHARACTER SET utf8mb4;
-SET FOREIGN_KEY_CHECKS = 0; -- Desactiva la protección temporalmente para actualizar
+SET FOREIGN_KEY_CHECKS = 0;
 
+-- Limpieza segura
+DELETE FROM progress WHERE lesson_id IN (SELECT id FROM lessons WHERE module_id = 1);
 DELETE FROM lessons WHERE module_id = 1;
 DELETE FROM modules WHERE id = 1;
 
 INSERT IGNORE INTO modules (id, title, color_theme, order_num) 
 VALUES (1, 'Mundo 1: Primeros Pasos', '#2B3A67', 1);
 
+-- STAGE 1: Vocabulario Visual y Auditivo (Meteor Strike)
 INSERT INTO lessons (module_id, title, template_type, order_num, reward_stars, content_data) 
-VALUES (1, 'Colores Mágicos', 'color_rescue', 1, 10, '
+VALUES (1, 'Lluvia de Mascotas', 'meteor_strike', 1, 10, '
 {
-  "time_limit": 20,
   "rounds": [
-    { "color_name": "Red", "phonetic": "red", "color_hex": "#ff4757", "item": "🍎", "translation": "Rojo", "context_es": "¡Atento! Encuentra el color de la manzana.", "distractors": [{"name": "Blue", "hex": "#3742fa"}, {"name": "Green", "hex": "#2ed573"}] },
-    { "color_name": "Green", "phonetic": "grin", "color_hex": "#2ed573", "item": "🌳", "translation": "Verde", "context_es": "¡Ahora busca el color de las hojas del árbol!", "distractors": [{"name": "Yellow", "hex": "#f1c40f"}, {"name": "Red", "hex": "#ff4757"}] }
+    { "target_word": "DOG", "phonetic": "dog", "translation": "Perro", "speed": 5, "context_es": "¡Toca el meteorito que diga Perro!", "items": [ {"id": 1, "content": "DOG", "is_correct": true}, {"id": 2, "content": "CAT", "is_correct": false}, {"id": 3, "content": "BIRD", "is_correct": false} ] },
+    { "target_word": "CAT", "phonetic": "cat", "translation": "Gato", "speed": 6, "context_es": "¡Rápido! Ahora salva al Gato.", "items": [ {"id": 1, "content": "CAT", "is_correct": true}, {"id": 2, "content": "FISH", "is_correct": false}, {"id": 3, "content": "DOG", "is_correct": false} ] },
+    { "target_word": "BIRD", "phonetic": "berd", "translation": "Pájaro", "speed": 7, "context_es": "¡Último! Encuentra al Pájaro.", "items": [ {"id": 1, "content": "BIRD", "is_correct": true}, {"id": 2, "content": "DUCK", "is_correct": false}, {"id": 3, "content": "CAT", "is_correct": false} ] }
   ]
 }');
 
+-- STAGE 2: Ortografía y Memoria (Word Defender)
 INSERT INTO lessons (module_id, title, template_type, order_num, reward_stars, content_data) 
-VALUES (1, 'Mascotas al Rescate', 'defender', 2, 10, '
+VALUES (1, 'Defensor de la Granja', 'defender', 2, 15, '
 {
   "time_limit": 25,
   "rounds": [
-    { "word": "CAT", "phonetic": "cat", "translation": "Gato", "distractors": ["M", "B", "Z"], "context_es": "¡Aleja al monstruo escribiendo GATO en inglés!" },
-    { "word": "DOG", "phonetic": "dog", "translation": "Perro", "distractors": ["F", "L", "P"], "context_es": "¡Ahora defiende al PERRO!" }
+    { "word": "DUCK", "phonetic": "dac", "translation": "Pato", "distractors": ["M", "B", "Z"], "context_es": "¡Aleja al monstruo escribiendo PATO en inglés!" },
+    { "word": "COW", "phonetic": "cau", "translation": "Vaca", "distractors": ["F", "L", "P"], "context_es": "¡Ahora defiende a la VACA!" },
+    { "word": "PIG", "phonetic": "pig", "translation": "Cerdo", "distractors": ["X", "Y", "A"], "context_es": "¡Protege al CERDO!" }
   ]
 }');
 
+-- STAGE 3: Gramática Básica - Significados (Grammar Train)
 INSERT INTO lessons (module_id, title, template_type, order_num, reward_stars, content_data) 
-VALUES (1, 'El Cielo Cae', 'meteor_strike', 3, 10, '
+VALUES (1, 'El Tren de los Animales', 'grammar_train', 3, 20, '
 {
   "rounds": [
-    { "target_word": "SUN", "phonetic": "san", "translation": "Sol", "speed": 6, "context_es": "¡Destruye el meteorito que diga Sol!", "items": [ {"id": 1, "content": "SUN", "is_correct": true}, {"id": 2, "content": "MOON", "is_correct": false}, {"id": 3, "content": "STAR", "is_correct": false} ] },
-    { "target_word": "MOON", "phonetic": "mun", "translation": "Luna", "speed": 7, "context_es": "¡Rápido! Ahora busca el meteorito que dice Luna.", "items": [ {"id": 1, "content": "MOON", "is_correct": true}, {"id": 2, "content": "SUN", "is_correct": false}, {"id": 3, "content": "CLOUD", "is_correct": false} ] }
+    {
+      "sentence": ["THE", "DOG", "BARKS"],
+      "translations": ["El", "Perro", "Ladra"],
+      "phonetics": ["da", "dog", "barcs"],
+      "sentence_phonetic": "da dog barcs",
+      "distractors": ["CAT", "MEOWS"],
+      "distractors_phonetics": ["cat", "miaus"],
+      "context_es": "¡Carga los vagones uniendo el inglés con su significado!"
+    },
+    {
+      "sentence": ["THE", "CAT", "SLEEPS"],
+      "translations": ["El", "Gato", "Duerme"],
+      "phonetics": ["da", "cat", "slips"],
+      "sentence_phonetic": "da cat slips",
+      "distractors": ["DOG", "RUNS"],
+      "distractors_phonetics": ["dog", "rans"],
+      "context_es": "¡Arma el tren del gato dormilón!"
+    }
   ]
 }');
 
-INSERT INTO lessons (module_id, title, template_type, order_num, reward_stars, content_data) 
-VALUES (1, 'Puente de Emociones', 'sentence_survival', 4, 15, '
-{
-  "rounds": [
-    { "sentence": ["I", "AM", "HAPPY"], "phonetic": "ai am jápi", "translation": "Yo soy feliz", "distractors": ["SAD", "YOU"], "context_es": "¡Construye el puente diciendo: Yo soy feliz!" },
-    { "sentence": ["YOU", "ARE", "TALL"], "phonetic": "iú ar tol", "translation": "Tú eres alto", "distractors": ["I", "SHORT"], "context_es": "¡Cruza el río diciendo: Tú eres alto!" }
-  ]
-}');
-
-INSERT INTO lessons (module_id, title, template_type, order_num, reward_stars, content_data) 
-VALUES (1, 'Examen Inicial (Jefe)', 'exam', 5, 30, '
-{
-  "time_limit": 10,
-  "lives": 3,
-  "questions": [
-    {"q": "¿Cómo se dice Perro?", "options": ["Dog", "Cat", "Sun"], "answer": "Dog"},
-    {"q": "¿Qué significa SUN?", "options": ["Sol", "Luna", "Estrella"], "answer": "Sol"},
-    {"q": "Completa: I AM ___ (Yo soy feliz)", "options": ["HAPPY", "TALL", "SAD"], "answer": "HAPPY"},
-    {"q": "¿Cómo se dice Rojo?", "options": ["Red", "Blue", "Green"], "answer": "Red"}
-  ]
-}');
-
-SET FOREIGN_KEY_CHECKS = 1; -- Vuelve a activar la protección
+SET FOREIGN_KEY_CHECKS = 1;
