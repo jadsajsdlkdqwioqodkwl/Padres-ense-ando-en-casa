@@ -1,4 +1,51 @@
-<div class="text-center">
+<?php
+require_once 'includes/config.php';
+
+// Simulamos que estamos en el Módulo 1 por ahora
+$module_id = isset($_GET['module']) ? (int)$_GET['module'] : 1;
+$user_id = $_SESSION['user_id'] ?? 1;
+
+// Obtener título del módulo
+$stmtMod = $pdo->prepare("SELECT title FROM modules WHERE id = ?");
+$stmtMod->execute([$module_id]);
+$module_title = $stmtMod->fetchColumn() ?: "Mi Curso";
+
+// Obtener lecciones y verificar si el niño ya las completó
+$stmtLessons = $pdo->prepare("
+    SELECT l.id, l.title, l.reward_stars, l.order_num, p.is_completed, p.stars_earned
+    FROM lessons l
+    LEFT JOIN progress p ON l.id = p.lesson_id AND p.user_id = ?
+    WHERE l.module_id = ?
+    ORDER BY l.order_num ASC
+");
+$stmtLessons->execute([$user_id, $module_id]);
+$lessons = $stmtLessons->fetchAll();
+
+$page_title = $module_title;
+?>
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <?php include 'includes/head.php'; ?>
+    <link rel="stylesheet" href="assets/css/main.css">
+    <style>
+        .level-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-top: 30px; }
+        .level-card { 
+            background: white; border-radius: 15px; padding: 20px; text-align: center; 
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05); text-decoration: none; color: inherit;
+            border: 3px solid transparent; transition: 0.3s; display: block;
+        }
+        .level-card:hover { transform: translateY(-5px); box-shadow: 0 10px 20px rgba(0,0,0,0.1); }
+        .level-card.completed { border-color: var(--success); background: #f0fdf4; }
+        .level-card.locked { opacity: 0.6; pointer-events: none; filter: grayscale(100%); }
+        .level-icon { font-size: 40px; margin-bottom: 10px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <?php include 'includes/navbar.php'; ?>
+        
+        <div class="text-center">
             <h1><?php echo htmlspecialchars($module_title); ?></h1>
             <p>¡Selecciona una lección para empezar a jugar!</p>
         </div>
@@ -9,7 +56,7 @@
                 $is_completed = $lesson['is_completed'] ? true : false;
                 $stars_display = $is_completed ? "⭐ " . $lesson['stars_earned'] : "🎁 " . $lesson['reward_stars'] . " Estrellas";
                 
-                // Quitamos el bloqueo para que en tu MVP puedas testear todos los juegos libres
+                // Niveles desbloqueados para testear
                 $locked_class = ''; 
                 $completed_class = $is_completed ? 'completed' : '';
                 $icon = $is_completed ? '✅' : '▶️';
@@ -25,5 +72,7 @@
             ?>
         </div>
     </div>
-    <?php include 'includes/footer.php'; ?> </body>
+    
+    <?php include 'includes/footer.php'; ?>
+</body>
 </html>
