@@ -175,7 +175,11 @@ $total_questions = count($questions);
         isTransitioning = false;
         const q = questions[currentQ];
         
-        if(typeof playTTS !== 'undefined') playTTS(q.q);
+        // MODIFICACIÓN DE AUDIO: Ahora lee q.phonetic si existe, si no, lee la pregunta normal
+        if(typeof playTTS !== 'undefined') {
+            const textToRead = q.phonetic || q.q;
+            playTTS(textToRead);
+        }
 
         document.getElementById('q-text').innerText = q.q;
         const optionsDiv = document.getElementById('options-container');

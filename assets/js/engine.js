@@ -14,29 +14,31 @@ function toggleMusic() {
     isMusicPlaying = !isMusicPlaying;
 }
 
-function playTTS(text, lang = 'en-US') {
+function playTTS(text) {
     if(!text) return;
     
-    // ¡LA MAGIA!: Cancela cualquier audio que esté sonando o en cola.
-    // Si el niño presiona 5 botones rápido, solo sonará el último al instante.
+    // ¡LA MAGIA!: Cancela cualquier audio que esté sonando o en cola para evitar retrasos.
     window.speechSynthesis.cancel();
 
     const utterance = new SpeechSynthesisUtterance(text);
-    utterance.lang = lang;
-    utterance.rate = 0.85; // Velocidad perfecta para aprender
+    
+    // Forzamos SIEMPRE el español para tu estrategia fonética ("ápol", "iélou")
+    utterance.lang = 'es-ES'; 
+    utterance.rate = 0.85;
 
+    // Buscamos una voz de Google o femenina en español para que suene más amigable
     const voices = window.speechSynthesis.getVoices();
-    let bestVoice = voices.find(v => v.lang.startsWith(lang.split('-')[0]) && (v.name.includes('Google') || v.name.includes('Female')));
-    if(!bestVoice) bestVoice = voices.find(v => v.lang.startsWith(lang.split('-')[0]));
+    let bestVoice = voices.find(v => v.lang.startsWith('es') && (v.name.includes('Google') || v.name.includes('Female')));
+    if(!bestVoice) bestVoice = voices.find(v => v.lang.startsWith('es'));
     
     if(bestVoice) utterance.voice = bestVoice;
     window.speechSynthesis.speak(utterance);
 }
 
-// Ahora ignora el español y solo reproduce la palabra clave en inglés
+// Simplificamos Spanglish: Ahora solo lee la palabra principal fonética y ya.
 function playSpanglish(introEs, wordEn, transEs) {
     if (wordEn) {
-        playTTS(wordEn, 'en-US');
+        playTTS(wordEn);
     }
 }
 

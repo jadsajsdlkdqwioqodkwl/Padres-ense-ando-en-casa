@@ -12,12 +12,13 @@ $guide = $lesson_data['guide'] ?? ['intro' => '¡Hola! Antes de empezar, repasen
         <?php if (!empty($guide['steps'])): ?>
         <div style="max-height: 50vh; overflow-y: auto; padding-right: 10px;">
             <?php foreach($guide['steps'] as $step): ?>
+                <?php $phonetic_word = $step['ph'] ?? $step['en']; ?>
                 <div style="background: #f8f9fa; padding: 15px; margin-bottom: 12px; border-radius: 12px; border-left: 5px solid var(--accent); display: flex; justify-content: space-between; align-items: center;">
                     <div>
-                        <div style="font-size: 18px;"><strong>"<?php echo $step['en']; ?>"</strong> <span style="color: #d9534f; font-family: monospace;"><?php echo $step['ph']; ?></span></div>
-                        <div style="font-size: 14px; color: #666;">Significa: <?php echo $step['es']; ?></div>
+                        <div style="font-size: 18px;"><strong>"<?php echo htmlspecialchars($step['en']); ?>"</strong> <span style="color: #d9534f; font-family: monospace;"><?php echo htmlspecialchars($step['ph'] ?? ''); ?></span></div>
+                        <div style="font-size: 14px; color: #666;">Significa: <?php echo htmlspecialchars($step['es']); ?></div>
                     </div>
-                    <button style="background: var(--accent); color: white; border: none; padding: 10px 15px; border-radius: 20px; cursor: pointer; font-weight: bold;" onclick="playTTS('<?php echo addslashes($step['en']); ?>', 'en-US')">🔊</button>
+                    <button style="background: var(--accent); color: white; border: none; padding: 10px 15px; border-radius: 20px; cursor: pointer; font-weight: bold;" onclick="playTTS('<?php echo addslashes($phonetic_word); ?>')">🔊</button>
                 </div>
             <?php endforeach; ?>
         </div>

@@ -200,25 +200,18 @@ $rounds = $lesson_data['rounds'] ?? [
         document.getElementById('btn-start').style.display = 'none';
 
         attachDragEvents();
-        setTimeout(playSpanglishIntro, 500);
     }
 
     // ==========================================
     // SPANGLISH Y DRAG & DROP
     // ==========================================
-function playSpanglishIntro() {
+    function playSpanglishIntro() {
         document.getElementById('btn-start').style.display = 'block';
         const round = roundsData[currentRoundIndex];
         
-        // Unimos el array ["I", "AM", "HAPPY"] en una sola frase "I AM HAPPY"
-        const fullSentenceEN = round.sentence.join(' ');
-
-        // Usa el nuevo motor: (Contexto ES, Palabra EN, Significado ES)
-        playSpanglish(
-            round.context_es, 
-            fullSentenceEN, 
-            "Que significa " + round.translation
-        );
+        // MODIFICACIÓN DE AUDIO: Lee la fonética completa
+        const phoneticToRead = round.phonetic || round.sentence.join(' ');
+        if(typeof playTTS !== 'undefined') playTTS(phoneticToRead);
     }
 
     function startGame() {
@@ -259,8 +252,9 @@ function playSpanglishIntro() {
     }
 
     function readWord(word) {
+        // MODIFICACIÓN DE AUDIO: Usa el nuevo motor unificado
         if(typeof playTTS !== 'undefined') {
-            const u = new SpeechSynthesisUtterance(word); u.lang = 'en-US'; window.speechSynthesis.speak(u);
+            playTTS(word);
         }
     }
 
@@ -332,8 +326,10 @@ function playSpanglishIntro() {
             hero.style.left = 'calc(100% - 60px)';
             if(typeof sfxWin !== 'undefined') sfxWin.play();
             
-            const fullSentenceText = currentSentence.join(' ');
-            if(typeof playTTS !== 'undefined') playTTS("¡Excelente! " + fullSentenceText);
+            // MODIFICACIÓN DE AUDIO: Lee la frase final completada
+            const round = roundsData[currentRoundIndex];
+            const phoneticToRead = round.phonetic || currentSentence.join(' ');
+            if(typeof playTTS !== 'undefined') playTTS(phoneticToRead);
 
             currentRoundIndex++;
             

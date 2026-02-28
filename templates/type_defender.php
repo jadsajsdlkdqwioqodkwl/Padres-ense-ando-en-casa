@@ -5,6 +5,7 @@ $reward_stars = $lesson['reward_stars'] ?? 5;
 $rounds = $lesson_data['rounds'] ?? [
     [
         'word' => strtoupper($lesson_data['word'] ?? 'APPLE'),
+        'phonetic' => $lesson_data['phonetic'] ?? 'ápol',
         'translation' => $lesson_data['translation'] ?? 'Manzana',
         'distractors' => $lesson_data['distractors'] ?? ['X', 'Z', 'M'],
         'context_es' => $lesson_data['context_es'] ?? "El monstruo quiere nuestro pastel. ¡Escribe la palabra mágica!"
@@ -13,44 +14,23 @@ $rounds = $lesson_data['rounds'] ?? [
 ?>
 
 <style>
-    .game-board { 
-        position: relative; width: 100%; height: 320px; /* Un poco más alto para que el modal respire */
-        background: var(--bg); border-radius: 20px; overflow: hidden; 
-        border: 4px solid var(--primary); margin-bottom: 20px; 
-    }
-    
+    .game-board { position: relative; width: 100%; height: 320px; background: var(--bg); border-radius: 20px; overflow: hidden; border: 4px solid var(--primary); margin-bottom: 20px; }
     .css-cake { position: absolute; right: 20px; bottom: 20px; width: 60px; height: 50px; background: #ff9ff3; border-radius: 10px 10px 0 0; border: 3px solid var(--dark); z-index: 2; }
     .css-cake::before { content: ''; position: absolute; top: -15px; left: 25px; width: 5px; height: 15px; background: #ff4757; border-radius: 5px; } 
-    
     .css-monster { position: absolute; left: 10px; bottom: 20px; width: 70px; height: 70px; background: #ff6b6b; border: 3px solid var(--dark); border-radius: 40% 60% 70% 30% / 40% 50% 60% 50%; animation: morph 2s linear infinite, wobble 0.5s alternate infinite; transition: left 0.5s linear; z-index: 3; }
     .css-monster::before, .css-monster::after { content: ''; position: absolute; top: 15px; width: 15px; height: 15px; background: white; border-radius: 50%; border: 2px solid var(--dark); }
     .css-monster::before { left: 15px; } .css-monster::after { right: 15px; }
     .css-monster-mouth { position: absolute; bottom: 10px; left: 20px; width: 30px; height: 15px; background: var(--dark); border-radius: 0 0 15px 15px; }
-
     .slot-container { display: flex; justify-content: center; gap: 10px; margin-bottom: 20px; }
     .letter-slot { width: 55px; height: 65px; border: 3px dashed #999; border-radius: 12px; display: flex; justify-content: center; align-items: center; font-size: 32px; font-weight: bold; background: white; box-shadow: inset 0 3px 6px rgba(0,0,0,0.1); transition: 0.3s; }
     .letter-slot.filled { border-style: solid; border-color: var(--success); background: #f0fdf4; color: var(--success); transform: scale(1.05); }
-    
     .bubbles-container { display: flex; justify-content: center; flex-wrap: wrap; gap: 12px; min-height: 80px;}
     .drag-bubble { width: 55px; height: 55px; background: var(--accent); color: white; border-radius: 15px; display: flex; justify-content: center; align-items: center; font-size: 28px; font-weight: bold; cursor: pointer; box-shadow: 0 6px 0 #d35400; transition: transform 0.1s, opacity 0.3s; user-select: none; z-index: 10; }
     .drag-bubble:active { transform: translateY(4px); box-shadow: 0 2px 0 #d35400; }
     .drag-bubble.hidden { opacity: 0; pointer-events: none; transform: scale(0); }
-
-    /* Modal pequeño y centrado dentro del tablero */
-    .mission-modal {
-        position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-        background: rgba(255,255,255,0.95); z-index: 100;
-        display: flex; flex-direction: column; justify-content: center; align-items: center;
-        border-radius: 15px; transition: opacity 0.5s; padding: 15px; text-align: center;
-    }
-    .btn-action { 
-        background: var(--success); color: white; border: none; padding: 12px 25px; 
-        font-size: 18px; font-weight: bold; border-radius: 30px; cursor: pointer; 
-        box-shadow: 0 6px 0 #27ae60; margin-top: 10px;
-    }
-
+    .mission-modal { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.95); z-index: 100; display: flex; flex-direction: column; justify-content: center; align-items: center; border-radius: 15px; transition: opacity 0.5s; padding: 15px; text-align: center; }
+    .btn-action { background: var(--success); color: white; border: none; padding: 12px 25px; font-size: 18px; font-weight: bold; border-radius: 30px; cursor: pointer; box-shadow: 0 6px 0 #27ae60; margin-top: 10px; }
     .round-indicator { position: absolute; top: 10px; left: 10px; background: var(--primary); color: white; font-weight: bold; padding: 5px 15px; border-radius: 20px; font-size: 14px; z-index: 50; }
-
     .danger-zone { animation: flashRed 1s infinite; }
     @keyframes morph { 0%, 100% { border-radius: 40% 60% 70% 30% / 40% 50% 60% 50%; } 50% { border-radius: 60% 40% 30% 70% / 60% 50% 40% 50%; } }
     @keyframes wobble { from { transform: translateY(0) rotate(-5deg); } to { transform: translateY(-10px) rotate(5deg); } }
@@ -130,7 +110,7 @@ $rounds = $lesson_data['rounds'] ?? [
         document.getElementById('slots-container').innerHTML = slotsHTML;
 
         let letters = round.word.split('');
-        let allChars = letters.concat(round.distractors).sort(() => Math.random() - 0.5);
+        let allChars = letters.concat(round.distractors || []).sort(() => Math.random() - 0.5);
         
         let bubblesHTML = '';
         allChars.forEach((char, idx) => {
@@ -148,7 +128,9 @@ $rounds = $lesson_data['rounds'] ?? [
    function playSpanglishIntro() {
         document.getElementById('btn-start').style.display = 'block';
         const round = roundsData[currentRoundIndex];
-        playSpanglish('', round.word, '');
+        // Usamos la fonética si existe, si no, la palabra normal
+        const phoneticToRead = round.phonetic || round.word;
+        playSpanglish('', phoneticToRead, '');
     }
 
     function startGame() {
@@ -258,6 +240,10 @@ $rounds = $lesson_data['rounds'] ?? [
         monster.style.animation = 'zap 0.8s forwards'; 
         
         if(typeof sfxWin !== 'undefined') sfxWin.play();
+
+        // Leemos la palabra al completarla usando la fonética
+        const phoneticToRead = roundsData[currentRoundIndex].phonetic || roundsData[currentRoundIndex].word;
+        if(typeof playTTS !== 'undefined') playTTS(phoneticToRead);
 
         currentRoundIndex++;
         

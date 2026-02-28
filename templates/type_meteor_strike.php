@@ -8,6 +8,7 @@ $reward_stars = $lesson['reward_stars'] ?? 10;
 $rounds = $lesson_data['rounds'] ?? [
     [
         'target_word' => $lesson_data['target_word'] ?? 'APPLE',
+        'phonetic' => $lesson_data['phonetic'] ?? 'ápol',
         'translation' => $lesson_data['translation'] ?? 'Manzana',
         'speed' => $lesson_data['speed'] ?? 7,
         'context_es' => $lesson_data['context_es'] ?? "¡Alerta! Una lluvia de meteoritos amenaza al dinosaurio. Toca solo el meteorito que tenga...",
@@ -24,62 +25,20 @@ $rounds = $lesson_data['rounds'] ?? [
     /* ==========================================
        ENTORNO DE JUEGO Y DIBUJOS CSS
     ========================================== */
-    .meteor-board {
-        position: relative; width: 100%; height: 420px; 
-        background: linear-gradient(to bottom, var(--dark) 0%, #2c3e50 100%);
-        border-radius: 20px; overflow: hidden;
-        border: 4px solid var(--primary); margin-bottom: 20px;
-        box-shadow: inset 0 0 50px rgba(0,0,0,0.8);
-    }
-
-    .round-indicator { 
-        position: absolute; top: 15px; left: 15px; color: white; 
-        font-weight: bold; font-size: 14px; z-index: 50; 
-        background: var(--primary); padding: 5px 15px; border-radius: 20px;
-    }
-
-    /* Suelo */
-    .ground {
-        position: absolute; bottom: 0; width: 100%; height: 50px;
-        background: #4e342e; border-top: 8px solid #5d4037; z-index: 5;
-    }
-
-    /* El Dinosaurio CSS puro */
-    .css-dino {
-        position: absolute; bottom: 50px; left: 50%; transform: translateX(-50%);
-        width: 60px; height: 70px; background: var(--success);
-        border-radius: 30px 30px 10px 10px; z-index: 10;
-        box-shadow: inset -5px -5px 0 rgba(0,0,0,0.2);
-        animation: dinoIdle 1s infinite alternate; transition: 0.3s;
-    }
-    .css-dino::before { 
-        content: ''; position: absolute; top: 15px; right: 15px; width: 10px; height: 10px; 
-        background: white; border-radius: 50%; border: 3px solid #333; 
-    }
-    .css-dino::after { 
-        content: ''; position: absolute; top: 30px; right: 5px; width: 20px; height: 5px; 
-        background: #333; border-radius: 5px; 
-    }
+    .meteor-board { position: relative; width: 100%; height: 420px; background: linear-gradient(to bottom, var(--dark) 0%, #2c3e50 100%); border-radius: 20px; overflow: hidden; border: 4px solid var(--primary); margin-bottom: 20px; box-shadow: inset 0 0 50px rgba(0,0,0,0.8); }
+    .round-indicator { position: absolute; top: 15px; left: 15px; color: white; font-weight: bold; font-size: 14px; z-index: 50; background: var(--primary); padding: 5px 15px; border-radius: 20px; }
+    .ground { position: absolute; bottom: 0; width: 100%; height: 50px; background: #4e342e; border-top: 8px solid #5d4037; z-index: 5; }
+    .css-dino { position: absolute; bottom: 50px; left: 50%; transform: translateX(-50%); width: 60px; height: 70px; background: var(--success); border-radius: 30px 30px 10px 10px; z-index: 10; box-shadow: inset -5px -5px 0 rgba(0,0,0,0.2); animation: dinoIdle 1s infinite alternate; transition: 0.3s; }
+    .css-dino::before { content: ''; position: absolute; top: 15px; right: 15px; width: 10px; height: 10px; background: white; border-radius: 50%; border: 3px solid #333; }
+    .css-dino::after { content: ''; position: absolute; top: 30px; right: 5px; width: 20px; height: 5px; background: #333; border-radius: 5px; }
     .css-dino.panic { background: #e74c3c; animation: shake 0.2s infinite; }
     .css-dino.dead { transform: translateX(-50%) scaleY(0.2); background: #333; bottom: 45px;}
 
     /* ==========================================
        METEORITOS
     ========================================== */
-    .meteor {
-        position: absolute; top: -100px;
-        width: 75px; height: 75px; background: var(--accent);
-        border-radius: 50%; cursor: pointer; z-index: 8;
-        display: flex; justify-content: center; align-items: center;
-        font-size: 45px; box-shadow: 0 0 20px #d35400, inset -5px -5px 0 rgba(0,0,0,0.3);
-        transition: transform 0.1s; user-select: none;
-    }
-    .meteor::before {
-        content: ''; position: absolute; top: -40px; left: 15px;
-        width: 45px; height: 60px; background: linear-gradient(to top, #f39c12, transparent);
-        border-radius: 50%; z-index: -1; opacity: 0.8;
-        animation: flicker 0.2s infinite alternate;
-    }
+    .meteor { position: absolute; top: -100px; width: 75px; height: 75px; background: var(--accent); border-radius: 50%; cursor: pointer; z-index: 8; display: flex; justify-content: center; align-items: center; font-size: 45px; box-shadow: 0 0 20px #d35400, inset -5px -5px 0 rgba(0,0,0,0.3); transition: transform 0.1s; user-select: none; }
+    .meteor::before { content: ''; position: absolute; top: -40px; left: 15px; width: 45px; height: 60px; background: linear-gradient(to top, #f39c12, transparent); border-radius: 50%; z-index: -1; opacity: 0.8; animation: flicker 0.2s infinite alternate; }
     .meteor:active { transform: scale(0.9); }
     .meteor.destroyed { pointer-events: none; animation: popExplosion 0.4s forwards; }
     .meteor.radar-glow { box-shadow: 0 0 40px #00d2d3, inset 0 0 20px white; border: 3px solid #00d2d3; }
@@ -88,27 +47,13 @@ $rounds = $lesson_data['rounds'] ?? [
        INTERFAZ Y MODAL
     ========================================== */
     .hud { position: absolute; top: 15px; right: 15px; display: flex; gap: 15px; z-index: 15; align-items: center; }
-    .target-box { 
-        background: rgba(255,255,255,0.9); padding: 5px 15px; border-radius: 20px; 
-        font-size: 18px; font-weight: bold; color: var(--primary); 
-        box-shadow: 0 4px 10px rgba(0,0,0,0.3); border: 2px solid var(--accent); 
-    }
+    .target-box { background: rgba(255,255,255,0.9); padding: 5px 15px; border-radius: 20px; font-size: 18px; font-weight: bold; color: var(--primary); box-shadow: 0 4px 10px rgba(0,0,0,0.3); border: 2px solid var(--accent); }
     .lives-box { font-size: 20px; letter-spacing: 3px; color: #e74c3c; text-shadow: 0 2px 4px rgba(0,0,0,0.5);}
 
-    .mission-modal {
-        position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-        background: rgba(255,255,255,0.95); z-index: 100;
-        display: flex; flex-direction: column; justify-content: center; align-items: center;
-        border-radius: 15px; transition: opacity 0.5s; padding: 20px; text-align: center;
-    }
-    .btn-action { 
-        background: var(--success); color: white; border: none; padding: 15px 30px; 
-        font-size: 20px; font-weight: bold; border-radius: 30px; cursor: pointer; 
-        box-shadow: 0 6px 0 #27ae60; margin-top: 15px;
-    }
+    .mission-modal { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.95); z-index: 100; display: flex; flex-direction: column; justify-content: center; align-items: center; border-radius: 15px; transition: opacity 0.5s; padding: 20px; text-align: center; }
+    .btn-action { background: var(--success); color: white; border: none; padding: 15px 30px; font-size: 20px; font-weight: bold; border-radius: 30px; cursor: pointer; box-shadow: 0 6px 0 #27ae60; margin-top: 15px; }
     .btn-action:active { transform: translateY(4px); box-shadow: 0 2px 0 #27ae60; }
 
-    /* Animaciones */
     @keyframes dinoIdle { 0% { transform: translateX(-50%) translateY(0); } 100% { transform: translateX(-50%) translateY(5px); } }
     @keyframes shake { 0%, 100% { transform: translateX(-50%) rotate(0deg); } 25% { transform: translateX(-55%) rotate(-10deg); } 75% { transform: translateX(-45%) rotate(10deg); } }
     @keyframes flicker { 0% { height: 60px; opacity: 0.6; } 100% { height: 80px; opacity: 1; } }
@@ -151,9 +96,6 @@ $rounds = $lesson_data['rounds'] ?? [
 </div>
 
 <script>
-    // ==========================================
-    // ESTADO DEL JUEGO MULTIRONDA
-    // ==========================================
     const roundsData = <?php echo json_encode($rounds); ?>;
     const board = document.getElementById('game-board');
     const dino = document.getElementById('dino');
@@ -171,15 +113,11 @@ $rounds = $lesson_data['rounds'] ?? [
     let meteorY = -100;
     let currentIsCorrect = false;
 
-    // Iniciar
     loadRound(currentRoundIndex);
 
-    // ==========================================
-    // CARGADOR DE RONDAS
-    // ==========================================
     function loadRound(index) {
         const round = roundsData[index];
-        roundItems = [...round.items].sort(() => Math.random() - 0.5); // Barajar meteoritos de esta ronda
+        roundItems = [...round.items].sort(() => Math.random() - 0.5); 
         currentSpeed = round.speed || 7;
         currentItemIndex = 0;
 
@@ -199,19 +137,12 @@ $rounds = $lesson_data['rounds'] ?? [
         setTimeout(playSpanglishIntro, 500);
     }
 
-    // ==========================================
-    // SPANGLISH Y START
-    // ==========================================
    function playSpanglishIntro() {
         document.getElementById('btn-start').style.display = 'block';
         const round = roundsData[currentRoundIndex];
-
-        // Usa el nuevo motor: (Contexto ES, Palabra EN, Significado ES)
-        playSpanglish(
-            round.context_es, 
-            round.target_word, 
-            "Que significa " + round.translation
-        );
+        // Fonética
+        const phoneticToRead = round.phonetic || round.target_word;
+        playSpanglish('', phoneticToRead, '');
     }
 
     function startGame() {
@@ -222,13 +153,9 @@ $rounds = $lesson_data['rounds'] ?? [
         setTimeout(spawnMeteor, 500);
     }
 
-    // ==========================================
-    // MOTOR DE CAÍDA
-    // ==========================================
     function spawnMeteor() {
         if (!gameActive) return;
         
-        // Loop de items si el jugador falla los incorrectos y se acaban
         if (currentItemIndex >= roundItems.length) {
             currentItemIndex = 0;
             roundItems.sort(() => Math.random() - 0.5);
@@ -249,13 +176,12 @@ $rounds = $lesson_data['rounds'] ?? [
 
         board.appendChild(activeMeteor);
 
-        // Disparar
         activeMeteor.addEventListener('mousedown', () => checkHit(data.is_correct));
         activeMeteor.addEventListener('touchstart', (e) => { e.preventDefault(); checkHit(data.is_correct); });
 
         const boardHeight = board.offsetHeight;
         const groundLevel = boardHeight - 80; 
-        const step = groundLevel / (currentSpeed * 20); // Mueve cada 50ms
+        const step = groundLevel / (currentSpeed * 20); 
 
         clearInterval(fallInterval);
         fallInterval = setInterval(() => {
@@ -279,9 +205,6 @@ $rounds = $lesson_data['rounds'] ?? [
         }, 50);
     }
 
-    // ==========================================
-    // INTERACCIÓN Y RADAR
-    // ==========================================
     function checkHit(isCorrect) {
         if (!gameActive || !activeMeteor) return;
 
@@ -290,7 +213,7 @@ $rounds = $lesson_data['rounds'] ?? [
 
         if (isCorrect) {
             if(typeof sfxCorrect !== 'undefined') sfxCorrect.play();
-            setTimeout(() => checkNextRound(), 400); // Avanzar de ronda
+            setTimeout(() => checkNextRound(), 400); 
         } else {
             if(typeof sfxWrong !== 'undefined') sfxWrong.play();
             takeDamage("¡Ese no era el correcto!");
@@ -308,9 +231,9 @@ $rounds = $lesson_data['rounds'] ?? [
         document.getElementById('btn-radar').style.animation = 'radarScan 1s';
         setTimeout(() => document.getElementById('btn-radar').style.animation = 'none', 1000);
 
-        const target = roundsData[currentRoundIndex].target_word;
+        const targetPhonetic = roundsData[currentRoundIndex].phonetic || roundsData[currentRoundIndex].target_word;
         if(typeof playTTS !== 'undefined') {
-            const u = new SpeechSynthesisUtterance(target); u.lang = 'en-US'; window.speechSynthesis.speak(u);
+            playTTS(targetPhonetic);
         }
 
         if(currentIsCorrect) {
@@ -318,7 +241,6 @@ $rounds = $lesson_data['rounds'] ?? [
             setTimeout(() => activeMeteor.classList.remove('radar-glow'), 1500);
         }
 
-        // Penalización: Cae 60px de golpe
         meteorY += 60;
         activeMeteor.style.top = meteorY + 'px';
         activeMeteor.style.transition = 'top 0.2s';
@@ -337,27 +259,22 @@ $rounds = $lesson_data['rounds'] ?? [
         if (lives <= 0) executeLoss("¡El dinosaurio fue aplastado!");
     }
 
-    // ==========================================
-    // CAMBIO DE RONDA Y FIN DEL JUEGO
-    // ==========================================
     function checkNextRound() {
         gameActive = false;
         dino.classList.remove('panic');
         
-        const currentTarget = roundsData[currentRoundIndex].target_word;
-        if(typeof playTTS !== 'undefined') playTTS(currentTarget);
+        const currentPhonetic = roundsData[currentRoundIndex].phonetic || roundsData[currentRoundIndex].target_word;
+        if(typeof playTTS !== 'undefined') playTTS(currentPhonetic);
         if(typeof sfxWin !== 'undefined') sfxWin.play();
 
         currentRoundIndex++;
 
         if (currentRoundIndex < roundsData.length) {
-            // Siguiente Ronda
             setTimeout(() => {
                 if (activeMeteor) activeMeteor.remove();
                 loadRound(currentRoundIndex);
             }, 1000);
         } else {
-            // Ganador Total
             setTimeout(() => {
                 executeWin();
             }, 800);
