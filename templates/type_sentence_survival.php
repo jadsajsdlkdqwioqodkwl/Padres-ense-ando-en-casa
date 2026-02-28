@@ -206,15 +206,19 @@ $rounds = $lesson_data['rounds'] ?? [
     // ==========================================
     // SPANGLISH Y DRAG & DROP
     // ==========================================
-    function playSpanglishIntro() {
+function playSpanglishIntro() {
         document.getElementById('btn-start').style.display = 'block';
         const round = roundsData[currentRoundIndex];
+        
+        // Unimos el array ["I", "AM", "HAPPY"] en una sola frase "I AM HAPPY"
+        const fullSentenceEN = round.sentence.join(' ');
 
-        if(typeof playTTS !== 'undefined') {
-            const u1 = new SpeechSynthesisUtterance("Arma la oración para decir"); u1.lang = 'es-ES';
-            const u2 = new SpeechSynthesisUtterance(round.translation); u2.lang = 'es-ES';
-            window.speechSynthesis.speak(u1); window.speechSynthesis.speak(u2);
-        }
+        // Usa el nuevo motor: (Contexto ES, Palabra EN, Significado ES)
+        playSpanglish(
+            round.context_es, 
+            fullSentenceEN, 
+            "Que significa " + round.translation
+        );
     }
 
     function startGame() {

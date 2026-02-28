@@ -1,6 +1,4 @@
 document.addEventListener('DOMContentLoaded', () => {
-    console.log("Motor de juegos English 15 cargado correctamente.");
-    // Forzar la carga de voces en segundo plano
     window.speechSynthesis.getVoices();
 });
 
@@ -16,26 +14,34 @@ function toggleMusic() {
     isMusicPlaying = !isMusicPlaying;
 }
 
-function triggerMascotReaction(type) {
-    // Código de mascota (opcional, si lo sigues usando)
-}
-
-function playTTS(text) {
+// Lector de textos en un solo idioma
+function playTTS(text, lang = 'en-US') {
     if(!text) return;
     const utterance = new SpeechSynthesisUtterance(text);
-    utterance.lang = 'en-US'; 
-    utterance.rate = 0.85; // Un poco más lento para que el niño entienda bien
+    utterance.lang = lang;
+    utterance.rate = 0.85;
 
-    // MAGIA: Buscar la mejor voz disponible
     const voices = window.speechSynthesis.getVoices();
-    let bestVoice = voices.find(v => v.lang.startsWith('en') && (v.name.includes('Female') || v.name.includes('Google US English') || v.name.includes('Samantha')));
-    
-    // Si no encuentra una específica, agarra la primera en inglés
-    if(!bestVoice) bestVoice = voices.find(v => v.lang.startsWith('en'));
+    let bestVoice = voices.find(v => v.lang.startsWith(lang.split('-')[0]) && (v.name.includes('Google') || v.name.includes('Female')));
+    if(!bestVoice) bestVoice = voices.find(v => v.lang.startsWith(lang.split('-')[0]));
     
     if(bestVoice) utterance.voice = bestVoice;
-    
     window.speechSynthesis.speak(utterance);
+}
+
+// EL MOTOR SPANGLISH DEFINITIVO (Usa voces distintas sin mezclarse)
+function playSpanglish(introEs, wordEn, transEs) {
+    if (introEs) playTTS(introEs, 'es-ES');
+    
+    // Pequeña pausa antes de la palabra en inglés
+    setTimeout(() => {
+        if (wordEn) playTTS(wordEn, 'en-US');
+        
+        // Pequeña pausa antes de la traducción
+        setTimeout(() => {
+            if (transEs) playTTS(transEs, 'es-ES');
+        }, 800);
+    }, 1500); // Da tiempo a que termine el intro en español
 }
 
 function fireConfetti() {

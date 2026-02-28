@@ -241,16 +241,16 @@ $rounds = $lesson_data['rounds'] ?? [
     // ==========================================
     // AUDIO SPANGLISH
     // ==========================================
-    function playLessonAudio() {
+   function playLessonAudio() {
         document.getElementById('btn-start').style.display = 'block';
         const round = roundsData[currentRoundIndex];
         
-        if(typeof playTTS !== 'undefined') {
-            const u1 = new SpeechSynthesisUtterance("Encuentra el color"); u1.lang = 'es-ES';
-            const u2 = new SpeechSynthesisUtterance(round.color_name); u2.lang = 'en-US';
-            const u3 = new SpeechSynthesisUtterance("que significa " + round.translation); u3.lang = 'es-ES';
-            window.speechSynthesis.speak(u1); window.speechSynthesis.speak(u2); window.speechSynthesis.speak(u3);
-        }
+        // Usa el nuevo motor: (Contexto ES, Palabra EN, Significado ES)
+        playSpanglish(
+            round.context_es, 
+            round.color_name, 
+            "Que significa " + round.translation
+        );
     }
 
     // ==========================================

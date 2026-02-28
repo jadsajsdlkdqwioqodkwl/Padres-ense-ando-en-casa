@@ -211,19 +211,16 @@ $rounds = $lesson_data['rounds'] ?? [
     // ==========================================
     // MOTOR SPANGLISH Y TUTORIAL
     // ==========================================
-    function playSpanglishIntro() {
+   function playSpanglishIntro() {
         document.getElementById('btn-start').style.display = 'block';
         const round = roundsData[currentRoundIndex];
-
-        if(typeof playTTS !== 'undefined') {
-            const u1 = new SpeechSynthesisUtterance("La palabra mágica es"); u1.lang = 'es-ES';
-            const u2 = new SpeechSynthesisUtterance(round.word); u2.lang = 'en-US';
-            const u3 = new SpeechSynthesisUtterance("Que significa " + round.translation); u3.lang = 'es-ES';
-            
-            window.speechSynthesis.speak(u1);
-            window.speechSynthesis.speak(u2);
-            window.speechSynthesis.speak(u3);
-        }
+        
+        // Usa el nuevo motor: (Contexto ES, Palabra EN, Significado ES)
+        playSpanglish(
+            round.context_es, 
+            round.word, 
+            "Que significa " + round.translation
+        );
     }
 
     function startGame() {
