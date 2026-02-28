@@ -1,4 +1,3 @@
-cat << 'EOF' > schema.sql
 SET NAMES utf8mb4;
 SET CHARACTER SET utf8mb4;
 
@@ -19,4 +18,3 @@ INSERT INTO lessons (module_id, title, template_type, content_data, reward_stars
 INSERT INTO lessons (module_id, title, template_type, content_data, reward_stars, order_num) VALUES (1, 'Escribir', 'writing', '{"guide": {"intro": "Lee el cuento y luego escribe la palabra secreta.", "steps": [{"en": "Apple", "es": "Manzana", "ph": "[apol]"}]}, "word": "APPLE", "hint_img": "https://api.iconify.design/noto:red-apple.svg", "story_en": "I have a red APPLE.", "story_es": "Tengo una manzana roja."}', 4, 5);
 
 INSERT INTO lessons (module_id, title, template_type, content_data, reward_stars, order_num) VALUES (1, 'Examen Final', 'exam', '{"guide": {"intro": "¡No le soples! Deja que responda solo.", "steps": []}, "questions": [{"q": "¿Cómo se dice Perro?", "options": ["Cat", "Dog", "Bird"], "answer": "Dog"}, {"q": "¿Qué significa Apple?", "options": ["Manzana", "Pera", "Plátano"], "answer": "Manzana"}]}', 10, 6);
-EOF
