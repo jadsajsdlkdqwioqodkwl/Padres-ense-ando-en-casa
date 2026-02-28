@@ -1,0 +1,50 @@
+/* assets/css/main.css */
+:root {
+    --primary: #2B3A67; 
+    --accent: #FF7F50; 
+    --bg: #F0F4F8;
+    --card-bg: #FFFFFF;
+    --success: #4CAF50;
+    --border-color: #eee;
+    --text-muted: #666;
+}
+
+* { box-sizing: border-box; }
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: var(--bg);
+    margin: 0;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 30px;
+    padding-bottom: 100px; /* Espacio para los controles flotantes */
+    color: #333;
+}
+
+.container {
+    background: var(--card-bg);
+    width: 100%;
+    max-width: 800px;
+    padding: 40px;
+    border-radius: 16px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+    position: relative;
+}
+
+h1, h2, h3 { color: var(--primary); margin-top: 0; }
+.text-center { text-align: center; }
+
+/* Botones genéricos */
+.btn {
+    padding: 12px 25px;
+    font-size: 18px;
+    font-weight: bold;
+    border: none;
+    border-radius: 30px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+.btn:active { transform: scale(0.95); }
