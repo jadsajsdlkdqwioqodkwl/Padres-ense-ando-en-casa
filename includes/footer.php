@@ -26,15 +26,12 @@
     </style>
 
     <footer class="site-footer">
-        <span class="footer-mascot-msg">🐶 "Keep practicing, you are doing great!"</span>
-        <p>&copy; <?php echo date('Y'); ?> <strong>English 15</strong> - Interactive Learning Platform</p>
-        <p>Lesson: <?php echo isset($page_title) ? htmlspecialchars($page_title) : 'Interactive App'; ?></p>
+        <span class="footer-mascot-msg">🐶 "¡Sigue practicando, lo estás haciendo genial!"</span>
+        <p>&copy; <?php echo date('Y'); ?> <strong>English 15</strong> - Plataforma de Aprendizaje Interactivo</p>
+        <p>Lección: <?php echo isset($page_title) ? htmlspecialchars($page_title) : 'App Interactiva'; ?></p>
     </footer>
 
-    <script>
-        // Si hay una mascota, podemos hacer que se despida al final de la página
-        console.log("English 15 Engine: Lesson Loaded Successfully.");
-    </script>
-
+    <script src="assets/js/engine.js"></script>
+    <script src="assets/js/global.js"></script>
 </body>
 </html>

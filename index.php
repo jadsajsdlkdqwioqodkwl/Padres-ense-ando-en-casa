@@ -1,9 +1,7 @@
 <?php
 require_once 'includes/config.php';
 
-// Obtenemos las estrellas del usuario actual
 $user_id = $_SESSION['user_id'] ?? 1;
-// Si la tabla users existe, saca las estrellas. Si no, pon 0 por ahora.
 $total_stars = 0; 
 try {
     $stmt = $pdo->prepare("SELECT total_stars FROM users WHERE id = ?");
@@ -11,7 +9,7 @@ try {
     $total_stars = $stmt->fetchColumn() ?: 0;
 } catch(Exception $e) {}
 
-$page_title = "Home";
+$page_title = "Inicio";
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -29,11 +27,11 @@ $page_title = "Home";
 </head>
 <body>
     <div class="container dashboard">
-        <h1>Welcome to English 15! 🚀</h1>
+        <h1>¡Bienvenido a English 15! 🚀</h1>
         <div class="big-mascot">🐶</div>
-        <div class="star-display">You have <?php echo $total_stars; ?> ⭐</div>
-        <p style="font-size: 18px; color: var(--text-muted); margin-bottom: 30px;">Ready to learn new words and play fun games?</p>
-        <a href="course.php" class="btn-start">Play Now ➡️</a>
+        <div class="star-display">Tienes <?php echo $total_stars; ?> ⭐</div>
+        <p style="font-size: 18px; color: var(--text-muted); margin-bottom: 30px;">¿Listo para aprender nuevas palabras y divertirte?</p>
+        <a href="course.php" class="btn-start">Jugar Ahora ➡️</a>
     </div>
 </body>
 </html>

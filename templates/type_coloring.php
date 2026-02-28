@@ -3,7 +3,7 @@ $colors = $lesson_data['colors'] ?? ['#FF7F50', '#4CAF50', '#FFD700', '#2B3A67']
 $reward_stars = $lesson['reward_stars'] ?? 3;
 ?>
 <div class="game-area text-center">
-    <h3>Pick a color and tap to paint! 🎨</h3>
+    <h3>¡Elige un color y toca para pintar! 🎨</h3>
     <div style="display:flex; justify-content:center; gap:15px; margin:20px 0;">
         <?php foreach ($colors as $index => $color): ?>
             <div class="color-swatch" style="background:<?php echo $color; ?>; width:50px; height:50px; border-radius:50%; cursor:pointer; border:4px solid <?php echo $index === 0 ? '#333' : 'transparent'; ?>;" data-color="<?php echo $color; ?>"></div>
