@@ -45,7 +45,14 @@ $module_title = $lesson['module_title'];
             ?>
         </div>
     </div>
-
+<div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px;">
+    <a href="course.php?module=<?php echo $lesson['module_id']; ?>" style="background: var(--light); color: var(--dark); padding: 10px 20px; border-radius: 20px; text-decoration: none; font-weight: bold; border: 1px solid #ddd; transition: 0.2s;">⬅️ Volver</a>
+    
+    <div style="display: flex; align-items: center; gap: 15px;">
+        <h1 style="margin: 0; font-size: 24px;">Lección <?php echo $lesson['order_num']; ?></h1>
+        <button onclick="document.getElementById('parent-modal').style.display='flex'" style="font-size: 18px; background: var(--primary); color: white; border: none; cursor: pointer; border-radius: 50%; width: 35px; height: 35px; box-shadow: 0 4px 6px rgba(0,0,0,0.2);">i</button>
+    </div>
+</div>
     <?php include 'includes/controls.php'; ?>
     <?php include 'includes/footer.php'; ?>
 </body>

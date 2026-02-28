@@ -20,6 +20,7 @@ $child_name = $user_info ? $user_info['child_name'] : 'Explorador';
         <span class="user-badge">👤 <?php echo htmlspecialchars($child_name); ?></span>
         <div class="stars-badge">⭐ <span id="star-count"><?php echo $current_stars; ?></span></div>
         <a href="index.php" class="nav-link">⬅️ Módulos</a>
+        <a href="trophies.php" class="nav-link" style="background: var(--accent); color: white;">🏆 Trofeos</a>
         <a href="logout.php" class="nav-link nav-logout">Salir</a>
     </div>
 </div>

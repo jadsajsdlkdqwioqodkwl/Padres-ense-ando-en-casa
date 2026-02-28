@@ -1,24 +1,23 @@
 <?php
 // ==========================================
-// CONFIGURACIÓN ESCALABLE: METEOR STRIKE
+// CONFIGURACIÓN ESCALABLE: METEOR STRIKE PRO (MULTIRONDA)
 // ==========================================
-$target_word = $lesson_data['target_word'] ?? 'APPLE';
-$translation = $lesson_data['translation'] ?? 'Manzana';
+$reward_stars = $lesson['reward_stars'] ?? 10;
 
-// Array de items que caerán. Puedes meter URLs de imágenes en 'img' o usar emojis por ahora.
-$falling_items = $lesson_data['items'] ?? [
-    ['id' => 1, 'content' => '🍎', 'is_correct' => true],
-    ['id' => 2, 'content' => '🍌', 'is_correct' => false],
-    ['id' => 3, 'content' => '🍇', 'is_correct' => false],
-    ['id' => 4, 'content' => '🍓', 'is_correct' => false],
-    ['id' => 5, 'content' => '🍉', 'is_correct' => false]
+// Estructura Multironda dinámica
+$rounds = $lesson_data['rounds'] ?? [
+    [
+        'target_word' => $lesson_data['target_word'] ?? 'APPLE',
+        'translation' => $lesson_data['translation'] ?? 'Manzana',
+        'speed' => $lesson_data['speed'] ?? 7,
+        'context_es' => $lesson_data['context_es'] ?? "¡Alerta! Una lluvia de meteoritos amenaza al dinosaurio. Toca solo el meteorito que tenga...",
+        'items' => $lesson_data['items'] ?? [
+            ['id' => 1, 'content' => '🍎', 'is_correct' => true],
+            ['id' => 2, 'content' => '🍌', 'is_correct' => false],
+            ['id' => 3, 'content' => '🍇', 'is_correct' => false]
+        ]
+    ]
 ];
-
-// Mezclamos para que el orden de caída sea aleatorio
-shuffle($falling_items);
-
-$speed_seconds = $lesson_data['speed'] ?? 6; // Segundos que tarda en caer un meteorito (menor = más difícil)
-$reward_stars = $lesson['reward_stars'] ?? 15;
 ?>
 
 <style>
@@ -26,93 +25,123 @@ $reward_stars = $lesson['reward_stars'] ?? 15;
        ENTORNO DE JUEGO Y DIBUJOS CSS
     ========================================== */
     .meteor-board {
-        position: relative; width: 100%; height: 400px; 
-        background: linear-gradient(to bottom, #2c3e50 0%, #34495e 100%);
+        position: relative; width: 100%; height: 420px; 
+        background: linear-gradient(to bottom, var(--dark) 0%, #2c3e50 100%);
         border-radius: 20px; overflow: hidden;
         border: 4px solid var(--primary); margin-bottom: 20px;
-        box-shadow: inset 0 0 50px rgba(0,0,0,0.5);
+        box-shadow: inset 0 0 50px rgba(0,0,0,0.8);
+    }
+
+    .round-indicator { 
+        position: absolute; top: 15px; left: 15px; color: white; 
+        font-weight: bold; font-size: 14px; z-index: 50; 
+        background: var(--primary); padding: 5px 15px; border-radius: 20px;
     }
 
     /* Suelo */
     .ground {
         position: absolute; bottom: 0; width: 100%; height: 50px;
-        background: #795548; border-top: 8px solid #8d6e63; z-index: 5;
+        background: #4e342e; border-top: 8px solid #5d4037; z-index: 5;
     }
 
-    /* El Dinosaurio (Dibujado con CSS) */
+    /* El Dinosaurio CSS puro */
     .css-dino {
         position: absolute; bottom: 50px; left: 50%; transform: translateX(-50%);
-        width: 60px; height: 70px; background: #2ecc71;
+        width: 60px; height: 70px; background: var(--success);
         border-radius: 30px 30px 10px 10px; z-index: 10;
         box-shadow: inset -5px -5px 0 rgba(0,0,0,0.2);
-        animation: dinoIdle 1s infinite alternate;
-        transition: 0.3s;
+        animation: dinoIdle 1s infinite alternate; transition: 0.3s;
     }
-    .css-dino::before { /* Ojo */
-        content: ''; position: absolute; top: 15px; right: 15px;
-        width: 10px; height: 10px; background: white; border-radius: 50%;
-        border: 3px solid #333;
+    .css-dino::before { 
+        content: ''; position: absolute; top: 15px; right: 15px; width: 10px; height: 10px; 
+        background: white; border-radius: 50%; border: 3px solid #333; 
     }
-    .css-dino::after { /* Boca */
-        content: ''; position: absolute; top: 30px; right: 5px;
-        width: 20px; height: 5px; background: #333; border-radius: 5px;
+    .css-dino::after { 
+        content: ''; position: absolute; top: 30px; right: 5px; width: 20px; height: 5px; 
+        background: #333; border-radius: 5px; 
     }
     .css-dino.panic { background: #e74c3c; animation: shake 0.2s infinite; }
     .css-dino.dead { transform: translateX(-50%) scaleY(0.2); background: #333; bottom: 45px;}
 
     /* ==========================================
-       METEORITOS Y ANIMACIONES
+       METEORITOS
     ========================================== */
     .meteor {
-        position: absolute; top: -100px; /* Inicia fuera de pantalla */
-        width: 70px; height: 70px; background: #e67e22;
+        position: absolute; top: -100px;
+        width: 75px; height: 75px; background: var(--accent);
         border-radius: 50%; cursor: pointer; z-index: 8;
         display: flex; justify-content: center; align-items: center;
-        font-size: 40px; box-shadow: 0 0 20px #d35400, inset -5px -5px 0 rgba(0,0,0,0.3);
+        font-size: 45px; box-shadow: 0 0 20px #d35400, inset -5px -5px 0 rgba(0,0,0,0.3);
         transition: transform 0.1s; user-select: none;
     }
-    
-    /* La cola de fuego del meteorito */
     .meteor::before {
         content: ''; position: absolute; top: -40px; left: 15px;
-        width: 40px; height: 60px; background: linear-gradient(to top, #f39c12, transparent);
+        width: 45px; height: 60px; background: linear-gradient(to top, #f39c12, transparent);
         border-radius: 50%; z-index: -1; opacity: 0.8;
         animation: flicker 0.2s infinite alternate;
     }
-
     .meteor:active { transform: scale(0.9); }
     .meteor.destroyed { pointer-events: none; animation: popExplosion 0.4s forwards; }
+    .meteor.radar-glow { box-shadow: 0 0 40px #00d2d3, inset 0 0 20px white; border: 3px solid #00d2d3; }
 
-    /* UI del Juego */
-    .hud { position: absolute; top: 15px; left: 15px; right: 15px; display: flex; justify-content: space-between; z-index: 15; }
+    /* ==========================================
+       INTERFAZ Y MODAL
+    ========================================== */
+    .hud { position: absolute; top: 15px; right: 15px; display: flex; gap: 15px; z-index: 15; align-items: center; }
     .target-box { 
-        background: rgba(255,255,255,0.9); padding: 10px 20px; border-radius: 20px; 
-        font-size: 24px; font-weight: bold; color: var(--primary);
-        box-shadow: 0 4px 10px rgba(0,0,0,0.3); border: 3px solid var(--accent);
-        cursor: pointer; animation: pulse 2s infinite;
+        background: rgba(255,255,255,0.9); padding: 5px 15px; border-radius: 20px; 
+        font-size: 18px; font-weight: bold; color: var(--primary); 
+        box-shadow: 0 4px 10px rgba(0,0,0,0.3); border: 2px solid var(--accent); 
     }
-    .lives-box { font-size: 24px; letter-spacing: 5px; color: #e74c3c; text-shadow: 0 2px 4px rgba(0,0,0,0.5);}
+    .lives-box { font-size: 20px; letter-spacing: 3px; color: #e74c3c; text-shadow: 0 2px 4px rgba(0,0,0,0.5);}
 
-    /* Keyframes */
+    .mission-modal {
+        position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+        background: rgba(255,255,255,0.95); z-index: 100;
+        display: flex; flex-direction: column; justify-content: center; align-items: center;
+        border-radius: 15px; transition: opacity 0.5s; padding: 20px; text-align: center;
+    }
+    .btn-action { 
+        background: var(--success); color: white; border: none; padding: 15px 30px; 
+        font-size: 20px; font-weight: bold; border-radius: 30px; cursor: pointer; 
+        box-shadow: 0 6px 0 #27ae60; margin-top: 15px;
+    }
+    .btn-action:active { transform: translateY(4px); box-shadow: 0 2px 0 #27ae60; }
+
+    /* Animaciones */
     @keyframes dinoIdle { 0% { transform: translateX(-50%) translateY(0); } 100% { transform: translateX(-50%) translateY(5px); } }
     @keyframes shake { 0%, 100% { transform: translateX(-50%) rotate(0deg); } 25% { transform: translateX(-55%) rotate(-10deg); } 75% { transform: translateX(-45%) rotate(10deg); } }
     @keyframes flicker { 0% { height: 60px; opacity: 0.6; } 100% { height: 80px; opacity: 1; } }
-    @keyframes popExplosion { 
-        0% { transform: scale(1); filter: brightness(1); } 
-        50% { transform: scale(1.5); filter: brightness(2); background: white; } 
-        100% { transform: scale(0); opacity: 0; } 
-    }
+    @keyframes popExplosion { 0% { transform: scale(1); filter: brightness(1); } 50% { transform: scale(1.5); filter: brightness(2); background: white; } 100% { transform: scale(0); opacity: 0; } }
+    @keyframes radarScan { 0% { box-shadow: 0 0 0 rgba(0,210,211,0.5); } 50% { box-shadow: 0 0 50px rgba(0,210,211,0.8); } 100% { box-shadow: 0 0 0 rgba(0,210,211,0); } }
 </style>
 
-<div class="game-area text-center" style="border: none; background: transparent;">
-    <h3>☄️ ¡Protege al Dinosaurio!</h3>
-    <p style="color: #666; margin-bottom: 10px;">Toca el meteorito que tenga la palabra correcta.</p>
+<div class="game-area text-center" style="border: none; background: transparent; padding-top: 5px;">
+    
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+        <h3 style="margin: 0; color: var(--primary);">☄️ Meteor Strike</h3>
+        <button onclick="useRadar()" id="btn-radar" style="background: #00cec9; border: none; border-radius: 50%; width: 45px; height: 45px; font-size: 20px; cursor: pointer; box-shadow: 0 4px 0 #00b894; color: white;" title="Radar de Emergencia">📡</button>
+    </div>
 
     <div class="meteor-board" id="game-board">
-        <div class="hud">
-            <div class="target-box" onclick="playAudioHint()">
-                🔊 <?php echo htmlspecialchars($target_word); ?>
+        <div class="round-indicator" id="round-indicator">Stage 1</div>
+
+        <div class="mission-modal" id="tutorial-modal">
+            <h2 style="color: var(--primary); margin-top: 0;">🔭 El Observatorio</h2>
+            <p style="color: var(--text-muted); font-size: 18px; margin-bottom: 10px;" id="tut-context">Cargando...</p>
+            <div style="font-size: 35px; font-weight: bold; color: var(--accent); margin: 15px 0; letter-spacing: 2px;" id="tut-word">
+                WORD
             </div>
+            <p style="color: #666; font-size: 20px;" id="tut-trans">(Traducción)</p>
+            
+            <div style="display: flex; gap: 15px; margin-top: 10px;">
+                <button class="btn-action" style="background: var(--primary); box-shadow: 0 6px 0 #3b2a9e;" onclick="playSpanglishIntro()">🔊 Escuchar</button>
+                <button class="btn-action" id="btn-start" onclick="startGame()" style="display: none;">▶️ ¡Iniciar Defensa!</button>
+            </div>
+        </div>
+
+        <div class="hud" id="hud" style="display: none;">
+            <div class="target-box" id="target-box">WORD</div>
             <div class="lives-box" id="lives">❤️❤️❤️</div>
         </div>
 
@@ -123,68 +152,110 @@ $reward_stars = $lesson['reward_stars'] ?? 15;
 
 <script>
     // ==========================================
-    // ESTADO DEL JUEGO Y VARIABLES
+    // ESTADO DEL JUEGO MULTIRONDA
     // ==========================================
-    const itemsData = <?php echo json_encode($falling_items); ?>;
-    const baseSpeed = <?php echo $speed_seconds; ?>;
+    const roundsData = <?php echo json_encode($rounds); ?>;
     const board = document.getElementById('game-board');
     const dino = document.getElementById('dino');
     const livesDisplay = document.getElementById('lives');
     
+    let currentRoundIndex = 0;
+    let roundItems = [];
+    let currentSpeed = 7;
+    
     let lives = 3;
-    let gameActive = true;
+    let gameActive = false;
     let currentItemIndex = 0;
     let activeMeteor = null;
     let fallInterval = null;
     let meteorY = -100;
-    
-    // Reproducir audio inicial
-    setTimeout(playAudioHint, 500);
+    let currentIsCorrect = false;
 
-    function playAudioHint() {
-        if(typeof playTTS !== 'undefined') playTTS('Find the <?php echo addslashes($target_word); ?>');
+    // Iniciar
+    loadRound(currentRoundIndex);
+
+    // ==========================================
+    // CARGADOR DE RONDAS
+    // ==========================================
+    function loadRound(index) {
+        const round = roundsData[index];
+        roundItems = [...round.items].sort(() => Math.random() - 0.5); // Barajar meteoritos de esta ronda
+        currentSpeed = round.speed || 7;
+        currentItemIndex = 0;
+
+        document.getElementById('round-indicator').innerText = `Stage ${index + 1}/${roundsData.length}`;
+        document.getElementById('tut-context').innerText = round.context_es || "Toca solo el meteorito que tenga...";
+        document.getElementById('tut-word').innerText = round.target_word;
+        document.getElementById('tut-trans').innerText = `(${round.translation})`;
+        document.getElementById('target-box').innerText = round.target_word;
+
+        document.getElementById('tutorial-modal').style.display = 'flex';
+        document.getElementById('tutorial-modal').style.opacity = '1';
+        document.getElementById('hud').style.display = 'none';
+        document.getElementById('btn-start').style.display = 'none';
+
+        dino.classList.remove('panic', 'dead');
+        
+        setTimeout(playSpanglishIntro, 500);
     }
 
     // ==========================================
-    // MOTOR DE CAÍDA (PHYSICS SIMPLIFICADO)
+    // SPANGLISH Y START
+    // ==========================================
+    function playSpanglishIntro() {
+        document.getElementById('btn-start').style.display = 'block';
+        const round = roundsData[currentRoundIndex];
+
+        if(typeof playTTS !== 'undefined') {
+            const u1 = new SpeechSynthesisUtterance("Destruye el meteorito con la palabra"); u1.lang = 'es-ES';
+            const u2 = new SpeechSynthesisUtterance(round.target_word); u2.lang = 'en-US';
+            const u3 = new SpeechSynthesisUtterance("Que significa " + round.translation); u3.lang = 'es-ES';
+            window.speechSynthesis.speak(u1); window.speechSynthesis.speak(u2); window.speechSynthesis.speak(u3);
+        }
+    }
+
+    function startGame() {
+        document.getElementById('tutorial-modal').style.opacity = '0';
+        document.getElementById('hud').style.display = 'flex';
+        setTimeout(() => document.getElementById('tutorial-modal').style.display = 'none', 500);
+        gameActive = true;
+        setTimeout(spawnMeteor, 500);
+    }
+
+    // ==========================================
+    // MOTOR DE CAÍDA
     // ==========================================
     function spawnMeteor() {
-        if (!gameActive || currentItemIndex >= itemsData.length) {
-            if (gameActive && currentItemIndex >= itemsData.length) {
-                // Si se acaban los items y no ha ganado, recargamos (para no dejarlo trabado)
-                executeLoss("Se acabaron los meteoritos...");
-            }
-            return;
+        if (!gameActive) return;
+        
+        // Loop de items si el jugador falla los incorrectos y se acaban
+        if (currentItemIndex >= roundItems.length) {
+            currentItemIndex = 0;
+            roundItems.sort(() => Math.random() - 0.5);
         }
 
-        const data = itemsData[currentItemIndex];
+        const data = roundItems[currentItemIndex];
         currentItemIndex++;
+        currentIsCorrect = data.is_correct;
 
-        // Crear elemento en el DOM
         activeMeteor = document.createElement('div');
         activeMeteor.className = 'meteor';
-        
-        // Si tienes imágenes en tu BD, cambia esto a un tag <img>
         activeMeteor.innerHTML = data.content; 
         
-        // Posición X aleatoria (evitando que se salga de los bordes)
-        const randomX = Math.floor(Math.random() * (board.offsetWidth - 80)) + 10;
+        const randomX = Math.floor(Math.random() * (board.offsetWidth - 85)) + 10;
         activeMeteor.style.left = randomX + 'px';
         meteorY = -100;
         activeMeteor.style.top = meteorY + 'px';
 
         board.appendChild(activeMeteor);
 
-        // Lógica de clic (Disparar al meteorito)
+        // Disparar
         activeMeteor.addEventListener('mousedown', () => checkHit(data.is_correct));
-        activeMeteor.addEventListener('touchstart', (e) => { e.preventDefault(); checkHit(data.is_correct); }); // Soporte Mobile
+        activeMeteor.addEventListener('touchstart', (e) => { e.preventDefault(); checkHit(data.is_correct); });
 
-        // Iniciar caída
         const boardHeight = board.offsetHeight;
-        const groundLevel = boardHeight - 70; // Altura del suelo + dino
-
-        // Calculamos cuánto baja cada 50ms basado en la velocidad base
-        const step = groundLevel / (baseSpeed * 20); 
+        const groundLevel = boardHeight - 80; 
+        const step = groundLevel / (currentSpeed * 20); // Mueve cada 50ms
 
         clearInterval(fallInterval);
         fallInterval = setInterval(() => {
@@ -193,18 +264,14 @@ $reward_stars = $lesson['reward_stars'] ?? 15;
             meteorY += step;
             activeMeteor.style.top = meteorY + 'px';
 
-            // El dino se asusta cuando está cerca
             if (meteorY > groundLevel * 0.6) dino.classList.add('panic');
             else dino.classList.remove('panic');
 
-            // Colisión con el suelo (El jugador no hizo nada)
             if (meteorY >= groundLevel) {
                 clearInterval(fallInterval);
                 if (data.is_correct) {
-                    // Era el correcto y lo dejó caer = Pierde vida
-                    takeDamage("¡Dejaste caer la respuesta correcta!");
+                    takeDamage("¡Dejaste caer el correcto!");
                 } else {
-                    // Era falso y lo dejó caer = Bien, pasamos al siguiente
                     activeMeteor.remove();
                     spawnMeteor();
                 }
@@ -213,24 +280,21 @@ $reward_stars = $lesson['reward_stars'] ?? 15;
     }
 
     // ==========================================
-    // INTERACCIÓN Y CONSECUENCIAS
+    // INTERACCIÓN Y RADAR
     // ==========================================
     function checkHit(isCorrect) {
         if (!gameActive || !activeMeteor) return;
 
-        clearInterval(fallInterval); // Detener caída al tocar
+        clearInterval(fallInterval);
         activeMeteor.classList.add('destroyed');
 
         if (isCorrect) {
-            // ¡Victoria!
             if(typeof sfxCorrect !== 'undefined') sfxCorrect.play();
-            setTimeout(() => executeWin(), 400);
+            setTimeout(() => checkNextRound(), 400); // Avanzar de ronda
         } else {
-            // ¡Error! Tocó el falso
             if(typeof sfxWrong !== 'undefined') sfxWrong.play();
             takeDamage("¡Ese no era el correcto!");
             
-            // Destruir el actual y lanzar el siguiente rápido
             setTimeout(() => {
                 if (activeMeteor) activeMeteor.remove();
                 if(gameActive) spawnMeteor();
@@ -238,39 +302,71 @@ $reward_stars = $lesson['reward_stars'] ?? 15;
         }
     }
 
-    function takeDamage(msg) {
-        lives--;
-        updateLivesDisplay();
+    function useRadar() {
+        if(!gameActive || !activeMeteor) return;
         
-        // Animación de daño al entorno
-        board.style.boxShadow = "inset 0 0 50px rgba(255,0,0,0.8)";
-        setTimeout(() => board.style.boxShadow = "inset 0 0 50px rgba(0,0,0,0.5)", 300);
+        document.getElementById('btn-radar').style.animation = 'radarScan 1s';
+        setTimeout(() => document.getElementById('btn-radar').style.animation = 'none', 1000);
 
-        if (lives <= 0) {
-            executeLoss("¡El dinosaurio fue aplastado!");
+        const target = roundsData[currentRoundIndex].target_word;
+        if(typeof playTTS !== 'undefined') {
+            const u = new SpeechSynthesisUtterance(target); u.lang = 'en-US'; window.speechSynthesis.speak(u);
         }
+
+        if(currentIsCorrect) {
+            activeMeteor.classList.add('radar-glow');
+            setTimeout(() => activeMeteor.classList.remove('radar-glow'), 1500);
+        }
+
+        // Penalización: Cae 60px de golpe
+        meteorY += 60;
+        activeMeteor.style.top = meteorY + 'px';
+        activeMeteor.style.transition = 'top 0.2s';
+        setTimeout(() => activeMeteor.style.transition = 'none', 200);
     }
 
-    function updateLivesDisplay() {
+    function takeDamage(msg) {
+        lives--;
         let text = '';
         for(let i=0; i<lives; i++) text += '❤️';
         livesDisplay.innerText = text;
+        
+        board.style.boxShadow = "inset 0 0 50px rgba(231,76,60,0.8)";
+        setTimeout(() => board.style.boxShadow = "inset 0 0 50px rgba(0,0,0,0.8)", 300);
+
+        if (lives <= 0) executeLoss("¡El dinosaurio fue aplastado!");
+    }
+
+    // ==========================================
+    // CAMBIO DE RONDA Y FIN DEL JUEGO
+    // ==========================================
+    function checkNextRound() {
+        gameActive = false;
+        dino.classList.remove('panic');
+        
+        const currentTarget = roundsData[currentRoundIndex].target_word;
+        if(typeof playTTS !== 'undefined') playTTS(currentTarget);
+        if(typeof sfxWin !== 'undefined') sfxWin.play();
+
+        currentRoundIndex++;
+
+        if (currentRoundIndex < roundsData.length) {
+            // Siguiente Ronda
+            setTimeout(() => {
+                if (activeMeteor) activeMeteor.remove();
+                loadRound(currentRoundIndex);
+            }, 1000);
+        } else {
+            // Ganador Total
+            setTimeout(() => {
+                executeWin();
+            }, 800);
+        }
     }
 
     function executeWin() {
-        gameActive = false;
-        dino.classList.remove('panic');
-        if(typeof playTTS !== 'undefined') playTTS('<?php echo addslashes($target_word); ?>');
-        
-        setTimeout(() => {
-            if(typeof sfxWin !== 'undefined') sfxWin.play();
-            if(typeof fireConfetti !== 'undefined') fireConfetti();
-            
-            // Liberar siguiente nivel
-            if(typeof unlockNextButton !== 'undefined') {
-                unlockNextButton(<?php echo $lesson['id']; ?>, <?php echo $reward_stars; ?>, <?php echo $lesson['module_id']; ?>);
-            }
-        }, 800);
+        if(typeof fireConfetti !== 'undefined') fireConfetti();
+        if(typeof unlockNextButton !== 'undefined') unlockNextButton(<?php echo $lesson['id']; ?>, <?php echo $reward_stars; ?>, <?php echo $lesson['module_id']; ?>);
     }
 
     function executeLoss(msg) {
@@ -284,7 +380,4 @@ $reward_stars = $lesson['reward_stars'] ?? 15;
             location.reload();
         }, 1200);
     }
-
-    // Iniciar el ciclo de juego
-    setTimeout(spawnMeteor, 1000);
 </script>

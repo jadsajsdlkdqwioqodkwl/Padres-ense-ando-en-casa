@@ -42,7 +42,26 @@ $page_title = "Módulos";
         <?php include 'includes/navbar.php'; ?>
 
         <div class="welcome-section">
-            <div class="big-mascot">🐶</div>
+            <div class="big-mascot"><style>
+    .hero-character {
+        width: 80px; height: 100px; background: var(--success);
+        margin: 0 auto 20px; border-radius: 50% 50% 20% 20%;
+        position: relative; animation: float 3s infinite ease-in-out;
+    }
+    .hero-character::before, .hero-character::after {
+        content: ''; position: absolute; top: 25px; width: 12px; height: 12px;
+        background: white; border-radius: 50%; border: 3px solid #333;
+    }
+    .hero-character::before { left: 15px; } .hero-character::after { right: 15px; }
+    .mouth { position: absolute; bottom: 25px; left: 25px; width: 25px; height: 8px; border-bottom: 4px solid #333; border-radius: 50%; }
+    @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-15px); } }
+</style>
+
+<div class="welcome-section">
+    <div class="hero-character"><div class="mouth"></div></div>
+    <h1>¡Hola, <?php echo htmlspecialchars($child_name); ?>! 🚀</h1>
+    <p style="font-size: 18px; color: var(--text-muted);">Elige un módulo para continuar tu aventura</p>
+</div></div>
             <h1>¡Hola, <?php echo htmlspecialchars($child_name); ?>! 🚀</h1>
             <p style="font-size: 18px; color: var(--text-muted);">Elige un módulo para continuar tu aventura</p>
         </div>
