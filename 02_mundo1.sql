@@ -1,5 +1,6 @@
 SET NAMES utf8mb4;
 SET CHARACTER SET utf8mb4;
+SET FOREIGN_KEY_CHECKS = 0; -- Desactiva la protección temporalmente para actualizar
 
 DELETE FROM lessons WHERE module_id = 1;
 DELETE FROM modules WHERE id = 1;
@@ -57,3 +58,5 @@ VALUES (1, 'Examen Inicial (Jefe)', 'exam', 5, 30, '
     {"q": "¿Cómo se dice Rojo?", "options": ["Red", "Blue", "Green"], "answer": "Red"}
   ]
 }');
+
+SET FOREIGN_KEY_CHECKS = 1; -- Vuelve a activar la protección

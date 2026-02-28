@@ -1,5 +1,6 @@
 SET NAMES utf8mb4;
 SET CHARACTER SET utf8mb4;
+SET FOREIGN_KEY_CHECKS = 0; -- Desactiva la protección temporalmente para actualizar
 
 DELETE FROM lessons WHERE module_id = 2;
 DELETE FROM modules WHERE id = 2;
@@ -61,3 +62,5 @@ VALUES (2, 'Examen de la Profesora (Jefe)', 'exam', 5, 40, '
     {"q": "¿Cómo se dice Borrador?", "options": ["Eraser", "Paper", "Ruler"], "answer": "Eraser"}
   ]
 }');
+
+SET FOREIGN_KEY_CHECKS = 1; -- Vuelve a activar la protección
