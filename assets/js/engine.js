@@ -1,67 +1,45 @@
-// assets/js/engine.js
-
 document.addEventListener('DOMContentLoaded', () => {
     console.log("Motor de juegos English 15 cargado correctamente.");
+    // Forzar la carga de voces en segundo plano
+    window.speechSynthesis.getVoices();
 });
 
-// Variables globales de audio
 let isMusicPlaying = false;
 const bgMusic = document.getElementById('bg-music');
-if(bgMusic) bgMusic.volume = 0.15; // Volumen suave para no aturdir
+if(bgMusic) bgMusic.volume = 0.15;
 
 function toggleMusic() {
     const musicBtn = document.getElementById('music-toggle');
     if (!bgMusic || !musicBtn) return;
-
-    if (isMusicPlaying) { 
-        bgMusic.pause(); 
-        musicBtn.innerText = '🔇'; 
-    } else { 
-        bgMusic.play().catch(e => console.log("Navegador requiere interacción previa")); 
-        musicBtn.innerText = '🎵'; 
-    }
+    if (isMusicPlaying) { bgMusic.pause(); musicBtn.innerText = '🔇'; } 
+    else { bgMusic.play().catch(e => console.log("Navegador requiere interacción previa")); musicBtn.innerText = '🎵'; }
     isMusicPlaying = !isMusicPlaying;
 }
 
-// Emociones de la mascota
 function triggerMascotReaction(type) {
-    const mascot = document.getElementById('mascot');
-    const mascotText = document.getElementById('mascot-text');
-    
-    if(!mascot || !mascotText) return;
-
-    if(type === 'correct') { 
-        mascot.innerText = '😎'; 
-        mascotText.innerText = '¡Genial!'; 
-        setTimeout(() => { mascot.innerText = '🐶'; mascotText.innerText = '¡Sigue así!'; }, 2000); 
-    }
-    if(type === 'wrong') { 
-        mascot.innerText = '🤔'; 
-        mascotText.innerText = '¡Intenta de nuevo!'; 
-        setTimeout(() => { mascot.innerText = '🐶'; mascotText.innerText = '¡Tú puedes!'; }, 2000); 
-    }
-    if(type === 'win') { 
-        mascot.innerText = '🥳'; 
-        mascotText.innerText = '¡Eres una estrella!'; 
-    }
+    // Código de mascota (opcional, si lo sigues usando)
 }
 
-// Reproductor de voz nativo del navegador (Ideal para el padre)
 function playTTS(text) {
     if(!text) return;
     const utterance = new SpeechSynthesisUtterance(text);
-    utterance.lang = 'en-US'; // Pronunciación en inglés
-    utterance.rate = 0.8; // Ligeramente más lento para que el niño entienda
+    utterance.lang = 'en-US'; 
+    utterance.rate = 0.85; // Un poco más lento para que el niño entienda bien
+
+    // MAGIA: Buscar la mejor voz disponible
+    const voices = window.speechSynthesis.getVoices();
+    let bestVoice = voices.find(v => v.lang.startsWith('en') && (v.name.includes('Female') || v.name.includes('Google US English') || v.name.includes('Samantha')));
+    
+    // Si no encuentra una específica, agarra la primera en inglés
+    if(!bestVoice) bestVoice = voices.find(v => v.lang.startsWith('en'));
+    
+    if(bestVoice) utterance.voice = bestVoice;
+    
     window.speechSynthesis.speak(utterance);
 }
 
 function fireConfetti() {
     if (typeof confetti !== 'undefined') {
-        confetti({ 
-            particleCount: 200, 
-            spread: 90, 
-            origin: { y: 0.6 },
-            colors: ['#2B3A67', '#FF7F50', '#FFD700', '#4CAF50']
-        });
+        confetti({ particleCount: 200, spread: 90, origin: { y: 0.6 }, colors: ['#2B3A67', '#FF7F50', '#FFD700', '#4CAF50'] });
     }
 }
