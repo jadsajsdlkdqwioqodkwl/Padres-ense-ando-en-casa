@@ -19,9 +19,9 @@ CREATE TABLE IF NOT EXISTS lessons (
     id INT AUTO_INCREMENT PRIMARY KEY,
     module_id INT,
     title VARCHAR(100) NOT NULL,
-    template_type VARCHAR(50) NOT NULL, -- Define qué PHP de /templates/ cargar
-    content_data JSON NOT NULL,         -- Variables del juego (palabras, imágenes)
-    reward_stars INT DEFAULT 3,         -- Dopamina
+    template_type VARCHAR(50) NOT NULL,
+    content_data JSON NOT NULL,
+    reward_stars INT DEFAULT 3,
     order_num INT NOT NULL,
     FOREIGN KEY (module_id) REFERENCES modules(id)
 );
@@ -42,21 +42,25 @@ CREATE TABLE IF NOT EXISTS progress (
 -- 🛠️ DATOS DE PRUEBA (Para que arranque tu app)
 -- ==========================================
 
--- Creamos al niño (ID 1)
-INSERT INTO users (child_name, parent_phone, total_stars) 
-VALUES ('Explorador', '+51928529656', 12);
+INSERT INTO users (child_name, parent_phone, total_stars) VALUES ('Explorador', '+51928529656', 0);
+INSERT INTO modules (title, order_num) VALUES ('My World', 1);
 
--- Creamos el Módulo 1
-INSERT INTO modules (title, order_num) 
-VALUES ('My World', 1);
-
--- Creamos la Lección 1 (My Face) inyectando el JSON
+-- Lección 1: Flashcards (Tarjetas de vocabulario)
 INSERT INTO lessons (module_id, title, template_type, content_data, reward_stars, order_num) 
-VALUES (
-    1, 
-    'My Face', 
-    'drag_drop', 
-    '{"words": ["EYES", "NOSE", "MOUTH"], "match_ids": ["drop-eyes", "drop-nose", "drop-mouth"]}', 
-    3, 
-    1
-);
+VALUES (1, 'Mi Familia', 'flashcards', '{"flashcards": [{"en": "Mom", "es": "Mamá", "ph": "[mam]"}, {"en": "Dad", "es": "Papá", "ph": "[dad]"}]}', 2, 1);
+
+-- Lección 2: Drag & Drop (Arrastrar a la cara)
+INSERT INTO lessons (module_id, title, template_type, content_data, reward_stars, order_num) 
+VALUES (1, 'Mi Cara', 'drag_drop', '{"items": [{"word": "EYES", "icon": "👀"}, {"word": "NOSE", "icon": "👃"}, {"word": "MOUTH", "icon": "👄"}]}', 3, 2);
+
+-- Lección 3: Matching (Unir parejas de animales)
+INSERT INTO lessons (module_id, title, template_type, content_data, reward_stars, order_num) 
+VALUES (1, 'Animales', 'matching', '{"pairs": [{"left": "Dog", "right": "🐶", "id": 1}, {"left": "Cat", "right": "🐱", "id": 2}]}', 3, 3);
+
+-- Lección 4: Coloring (Pintar)
+INSERT INTO lessons (module_id, title, template_type, content_data, reward_stars, order_num) 
+VALUES (1, 'Pintar', 'coloring', '{"colors": ["#FF7F50", "#4CAF50", "#FFD700", "#2B3A67"]}', 3, 4);
+
+-- Lección 5: Writing (Escribir la palabra)
+INSERT INTO lessons (module_id, title, template_type, content_data, reward_stars, order_num) 
+VALUES (1, 'Escribir', 'writing', '{"word": "APPLE", "hint": "🍎"}', 4, 5);
