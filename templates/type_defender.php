@@ -7,81 +7,49 @@ $rounds = $lesson_data['rounds'] ?? [
         'word' => strtoupper($lesson_data['word'] ?? 'APPLE'),
         'translation' => $lesson_data['translation'] ?? 'Manzana',
         'distractors' => $lesson_data['distractors'] ?? ['X', 'Z', 'M'],
-        'context_es' => $lesson_data['context_es'] ?? "El monstruo glotón quiere comerse nuestro pastel. ¡Escribe la palabra para asustarlo!"
+        'context_es' => $lesson_data['context_es'] ?? "El monstruo quiere nuestro pastel. ¡Escribe la palabra mágica!"
     ]
 ];
 ?>
 
 <style>
     .game-board { 
-        position: relative; width: 100%; height: 250px; 
+        position: relative; width: 100%; height: 320px; /* Un poco más alto para que el modal respire */
         background: var(--bg); border-radius: 20px; overflow: hidden; 
         border: 4px solid var(--primary); margin-bottom: 20px; 
     }
     
-    .css-cake { 
-        position: absolute; right: 20px; bottom: 20px; width: 60px; height: 50px; 
-        background: #ff9ff3; border-radius: 10px 10px 0 0; border: 3px solid var(--dark); z-index: 2;
-    }
-    .css-cake::before { 
-        content: ''; position: absolute; top: -15px; left: 25px; width: 5px; height: 15px; 
-        background: #ff4757; border-radius: 5px; 
-    } 
+    .css-cake { position: absolute; right: 20px; bottom: 20px; width: 60px; height: 50px; background: #ff9ff3; border-radius: 10px 10px 0 0; border: 3px solid var(--dark); z-index: 2; }
+    .css-cake::before { content: ''; position: absolute; top: -15px; left: 25px; width: 5px; height: 15px; background: #ff4757; border-radius: 5px; } 
     
-    .css-monster { 
-        position: absolute; left: 10px; bottom: 20px; width: 70px; height: 70px; 
-        background: #ff6b6b; border: 3px solid var(--dark);
-        border-radius: 40% 60% 70% 30% / 40% 50% 60% 50%;
-        animation: morph 2s linear infinite, wobble 0.5s alternate infinite;
-        transition: left 0.5s linear; z-index: 3;
-    }
-    .css-monster::before, .css-monster::after { 
-        content: ''; position: absolute; top: 15px; width: 15px; height: 15px; 
-        background: white; border-radius: 50%; border: 2px solid var(--dark);
-    }
+    .css-monster { position: absolute; left: 10px; bottom: 20px; width: 70px; height: 70px; background: #ff6b6b; border: 3px solid var(--dark); border-radius: 40% 60% 70% 30% / 40% 50% 60% 50%; animation: morph 2s linear infinite, wobble 0.5s alternate infinite; transition: left 0.5s linear; z-index: 3; }
+    .css-monster::before, .css-monster::after { content: ''; position: absolute; top: 15px; width: 15px; height: 15px; background: white; border-radius: 50%; border: 2px solid var(--dark); }
     .css-monster::before { left: 15px; } .css-monster::after { right: 15px; }
-    .css-monster-mouth { 
-        position: absolute; bottom: 10px; left: 20px; width: 30px; height: 15px; 
-        background: var(--dark); border-radius: 0 0 15px 15px; 
-    }
+    .css-monster-mouth { position: absolute; bottom: 10px; left: 20px; width: 30px; height: 15px; background: var(--dark); border-radius: 0 0 15px 15px; }
 
     .slot-container { display: flex; justify-content: center; gap: 10px; margin-bottom: 20px; }
-    .letter-slot { 
-        width: 55px; height: 65px; border: 3px dashed #999; border-radius: 12px; 
-        display: flex; justify-content: center; align-items: center; 
-        font-size: 32px; font-weight: bold; background: white; 
-        box-shadow: inset 0 3px 6px rgba(0,0,0,0.1); transition: 0.3s; 
-    }
+    .letter-slot { width: 55px; height: 65px; border: 3px dashed #999; border-radius: 12px; display: flex; justify-content: center; align-items: center; font-size: 32px; font-weight: bold; background: white; box-shadow: inset 0 3px 6px rgba(0,0,0,0.1); transition: 0.3s; }
     .letter-slot.filled { border-style: solid; border-color: var(--success); background: #f0fdf4; color: var(--success); transform: scale(1.05); }
     
     .bubbles-container { display: flex; justify-content: center; flex-wrap: wrap; gap: 12px; min-height: 80px;}
-    .drag-bubble { 
-        width: 55px; height: 55px; background: var(--accent); color: white; 
-        border-radius: 15px; display: flex; justify-content: center; align-items: center; 
-        font-size: 28px; font-weight: bold; cursor: pointer; 
-        box-shadow: 0 6px 0 #d35400; transition: transform 0.1s, opacity 0.3s; user-select: none; z-index: 10;
-    }
+    .drag-bubble { width: 55px; height: 55px; background: var(--accent); color: white; border-radius: 15px; display: flex; justify-content: center; align-items: center; font-size: 28px; font-weight: bold; cursor: pointer; box-shadow: 0 6px 0 #d35400; transition: transform 0.1s, opacity 0.3s; user-select: none; z-index: 10; }
     .drag-bubble:active { transform: translateY(4px); box-shadow: 0 2px 0 #d35400; }
     .drag-bubble.hidden { opacity: 0; pointer-events: none; transform: scale(0); }
 
-    /* FIX: Modal corregido. Ahora cubre la pantalla sin cortarse */
+    /* Modal pequeño y centrado dentro del tablero */
     .mission-modal {
-        position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-        background: rgba(255,255,255,0.95); z-index: 1000;
+        position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+        background: rgba(255,255,255,0.95); z-index: 100;
         display: flex; flex-direction: column; justify-content: center; align-items: center;
-        transition: opacity 0.5s; padding: 20px; text-align: center;
+        border-radius: 15px; transition: opacity 0.5s; padding: 15px; text-align: center;
     }
     .btn-action { 
-        background: var(--success); color: white; border: none; padding: 15px 30px; 
-        font-size: 20px; font-weight: bold; border-radius: 30px; cursor: pointer; 
-        box-shadow: 0 6px 0 #27ae60; margin-top: 15px;
+        background: var(--success); color: white; border: none; padding: 12px 25px; 
+        font-size: 18px; font-weight: bold; border-radius: 30px; cursor: pointer; 
+        box-shadow: 0 6px 0 #27ae60; margin-top: 10px;
     }
 
-    .round-indicator { 
-        position: absolute; top: 10px; left: 10px; 
-        background: var(--primary); color: white; font-weight: bold; 
-        padding: 5px 15px; border-radius: 20px; font-size: 14px; z-index: 50; 
-    }
+    .round-indicator { position: absolute; top: 10px; left: 10px; background: var(--primary); color: white; font-weight: bold; padding: 5px 15px; border-radius: 20px; font-size: 14px; z-index: 50; }
 
     .danger-zone { animation: flashRed 1s infinite; }
     @keyframes morph { 0%, 100% { border-radius: 40% 60% 70% 30% / 40% 50% 60% 50%; } 50% { border-radius: 60% 40% 30% 70% / 60% 50% 40% 50%; } }
@@ -98,19 +66,21 @@ $rounds = $lesson_data['rounds'] ?? [
         <button onclick="giveHint()" style="background: #f1c40f; border: none; border-radius: 50%; width: 45px; height: 45px; font-size: 24px; cursor: pointer; box-shadow: 0 4px 0 #f39c12;" title="Pedir Pista">💡</button>
     </div>
 
-    <div class="mission-modal" id="tutorial-modal">
-        <h2 style="color: var(--primary); margin-top: 0;">📜 Misión</h2>
-        <p style="color: var(--text-muted); font-size: 18px; margin-bottom: 10px;" id="tut-context"></p>
-        <div style="font-size: 35px; font-weight: bold; color: var(--accent); margin: 15px 0; letter-spacing: 5px;" id="tut-word">WORD</div>
-        <p style="color: #666; font-size: 20px;" id="tut-trans">(Traducción)</p>
-        
-        <div style="display: flex; flex-direction: column; gap: 15px; margin-top: 20px;">
-            <button class="btn-action" id="btn-start" onclick="initFirstAudioAndStart()" style="font-size: 24px;">▶️ Empezar Misión</button>
-        </div>
-    </div>
-
     <div class="game-board" id="game-board">
         <div class="round-indicator" id="round-indicator">Ronda 1</div>
+
+        <div class="mission-modal" id="tutorial-modal">
+            <h2 style="color: var(--primary); margin-top: 0; margin-bottom: 5px;">📜 Misión</h2>
+            <p style="color: var(--text-muted); font-size: 16px; margin-bottom: 5px;" id="tut-context"></p>
+            <div style="font-size: 30px; font-weight: bold; color: var(--accent); margin: 5px 0; letter-spacing: 5px;" id="tut-word">WORD</div>
+            <p style="color: #666; font-size: 18px; margin-bottom: 10px;" id="tut-trans">(Traducción)</p>
+            
+            <div style="display: flex; gap: 15px; margin-top: 5px;">
+                <button class="btn-action" style="background: var(--primary); box-shadow: 0 6px 0 #3b2a9e;" onclick="playSpanglishIntro()">🔊 Escuchar</button>
+                <button class="btn-action" id="btn-start" onclick="startGame()" style="display: none;">▶️ ¡A Jugar!</button>
+            </div>
+        </div>
+
         <div class="css-monster" id="monster"><div class="css-monster-mouth"></div></div>
         <div class="css-cake" id="cake"></div>
     </div>
@@ -136,10 +106,9 @@ $rounds = $lesson_data['rounds'] ?? [
     const targetPos = boardWidth - 80; 
     const stepAmount = (targetPos - 10) / (timeLimit * 10); 
 
-    loadRound(currentRoundIndex, true);
+    loadRound(currentRoundIndex);
 
-    // isFirstLoad evita que el modal se cierre automáticamente en la ronda 1
-    function loadRound(index, isFirstLoad = false) {
+    function loadRound(index) {
         const round = roundsData[index];
         wordLength = round.word.length;
         currentCorrect = 0;
@@ -171,37 +140,20 @@ $rounds = $lesson_data['rounds'] ?? [
 
         document.getElementById('tutorial-modal').style.display = 'flex';
         document.getElementById('tutorial-modal').style.opacity = '1';
+        document.getElementById('btn-start').style.display = 'none';
 
         attachDragEvents();
-
-        if(!isFirstLoad) {
-            // A partir de la ronda 2, se lee automáticamente y se cierra solo
-            document.getElementById('btn-start').style.display = 'none';
-            playSpanglishIntro();
-            setTimeout(startGame, 3500); // Dar tiempo al audio antes de empezar
-        }
-    }
-
-    // FIX: Mecanismo de desbloqueo de audio
-    function initFirstAudioAndStart() {
-        // Reproduce un sonido silencioso o el bg-music para desbloquear el AudioContext de Chrome/Safari
-        const bgMusic = document.getElementById('bg-music');
-        if (bgMusic && bgMusic.paused) { bgMusic.play().catch(e=>{}); }
-        
-        document.getElementById('btn-start').style.display = 'none';
-        playSpanglishIntro();
-        setTimeout(startGame, 3500); // Da tiempo a la explicación antes de soltar al monstruo
     }
 
    function playSpanglishIntro() {
+        document.getElementById('btn-start').style.display = 'block';
         const round = roundsData[currentRoundIndex];
-        playSpanglish(round.context_es, round.word, "Que significa " + round.translation);
+        playSpanglish('', round.word, '');
     }
 
     function startGame() {
         document.getElementById('tutorial-modal').style.opacity = '0';
         setTimeout(() => document.getElementById('tutorial-modal').style.display = 'none', 500);
-        
         gameActive = true;
         startMonster();
     }
@@ -212,7 +164,6 @@ $rounds = $lesson_data['rounds'] ?? [
             if (!gameActive) return;
             monsterPos += stepAmount;
             monster.style.left = monsterPos + 'px';
-
             if (monsterPos > targetPos * 0.7) gameBoard.classList.add('danger-zone');
             if (monsterPos >= targetPos) gameOver(false);
         }, 100);
@@ -250,7 +201,7 @@ $rounds = $lesson_data['rounds'] ?? [
     }
 
     function readLetter(char) {
-        if(typeof playTTS !== 'undefined') playTTS(char, 'en-US');
+        if(typeof playTTS !== 'undefined') playTTS(char);
     }
 
     function processMove(bubbleEl) {
@@ -285,10 +236,7 @@ $rounds = $lesson_data['rounds'] ?? [
         if(!gameActive || currentCorrect >= wordLength) return;
         
         const expectedChar = document.getElementById('slot-' + currentCorrect).getAttribute('data-expected');
-        
-        playTTS("La siguiente letra es", "es-ES", () => {
-            playTTS(expectedChar, "en-US");
-        });
+        readLetter(expectedChar);
 
         monsterPos += 10;
         monster.style.left = monsterPos + 'px';
@@ -307,21 +255,16 @@ $rounds = $lesson_data['rounds'] ?? [
         gameActive = false;
         clearInterval(monsterInterval);
         gameBoard.classList.remove('danger-zone');
-
         monster.style.animation = 'zap 0.8s forwards'; 
         
-        const currentWord = roundsData[currentRoundIndex].word;
-        if(typeof playTTS !== 'undefined') {
-            playTTS("¡Muy bien!", "es-ES", () => playTTS(currentWord, "en-US"));
-        }
         if(typeof sfxWin !== 'undefined') sfxWin.play();
 
         currentRoundIndex++;
         
         if (currentRoundIndex < roundsData.length) {
-            setTimeout(() => { loadRound(currentRoundIndex); }, 2000);
+            setTimeout(() => { loadRound(currentRoundIndex); }, 1500);
         } else {
-            setTimeout(() => { gameOver(true); }, 1500);
+            setTimeout(() => { gameOver(true); }, 1000);
         }
     }
 

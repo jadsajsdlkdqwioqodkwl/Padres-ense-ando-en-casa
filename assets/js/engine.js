@@ -14,41 +14,29 @@ function toggleMusic() {
     isMusicPlaying = !isMusicPlaying;
 }
 
-// FIX: Añadido soporte para Callbacks (onEndCallback) para evitar bloqueos
-function playTTS(text, lang = 'en-US', onEndCallback = null) {
-    if(!text) {
-        if(onEndCallback) onEndCallback();
-        return;
-    }
+function playTTS(text, lang = 'en-US') {
+    if(!text) return;
+    
+    // ¡LA MAGIA!: Cancela cualquier audio que esté sonando o en cola.
+    // Si el niño presiona 5 botones rápido, solo sonará el último al instante.
+    window.speechSynthesis.cancel();
+
     const utterance = new SpeechSynthesisUtterance(text);
     utterance.lang = lang;
-    utterance.rate = 0.85;
+    utterance.rate = 0.85; // Velocidad perfecta para aprender
 
     const voices = window.speechSynthesis.getVoices();
     let bestVoice = voices.find(v => v.lang.startsWith(lang.split('-')[0]) && (v.name.includes('Google') || v.name.includes('Female')));
     if(!bestVoice) bestVoice = voices.find(v => v.lang.startsWith(lang.split('-')[0]));
     
     if(bestVoice) utterance.voice = bestVoice;
-    
-    if(onEndCallback) utterance.onend = onEndCallback;
-    
     window.speechSynthesis.speak(utterance);
 }
 
-// FIX: Motor Spanglish encadenado. Garantiza que primero hable español, LUEGO inglés, LUEGO español.
+// Ahora ignora el español y solo reproduce la palabra clave en inglés
 function playSpanglish(introEs, wordEn, transEs) {
-    if (introEs) {
-        playTTS(introEs, 'es-ES', () => {
-            setTimeout(() => {
-                if (wordEn) playTTS(wordEn, 'en-US', () => {
-                    setTimeout(() => { if (transEs) playTTS(transEs, 'es-ES'); }, 500);
-                });
-            }, 300);
-        });
-    } else if (wordEn) {
-        playTTS(wordEn, 'en-US', () => {
-            setTimeout(() => { if (transEs) playTTS(transEs, 'es-ES'); }, 500);
-        });
+    if (wordEn) {
+        playTTS(wordEn, 'en-US');
     }
 }
 
