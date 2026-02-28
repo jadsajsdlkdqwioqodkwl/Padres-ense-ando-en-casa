@@ -5,13 +5,15 @@
 $time_limit = $lesson_data['time_limit'] ?? 30; 
 $reward_stars = $lesson['reward_stars'] ?? 15;
 
-// Estructura Multironda: Adaptamos a JSON antiguo o array de rondas nuevo
+// Estructura Multironda: Adaptamos al JSON y metemos por defecto tu lección de la manzana
 $rounds = $lesson_data['rounds'] ?? [
     [
-        'sentence' => $lesson_data['sentence'] ?? ['I', 'AM', 'HAPPY'],
-        'translation' => $lesson_data['translation'] ?? 'Yo soy feliz',
-        'distractors' => $lesson_data['distractors'] ?? ['YOU', 'SAD'],
-        'context_es' => $lesson_data['context_es'] ?? "¡Construye el puente en el orden correcto para cruzar el río!"
+        'sentence' => $lesson_data['sentence'] ?? ['I', 'HAVE', 'A', 'RED', 'APPLE'],
+        'phonetic' => $lesson_data['phonetic'] ?? 'ai jav ei red ápol',
+        'translation' => $lesson_data['translation'] ?? 'Yo tengo una manzana roja',
+        'distractors' => $lesson_data['distractors'] ?? ['HAS', 'BLUE'],
+        'word_phonetics' => $lesson_data['word_phonetics'] ?? ['HAS' => 'jas', 'BLUE' => 'blú'],
+        'context_es' => $lesson_data['context_es'] ?? "¡Construye el puente para cruzar el río!"
     ]
 ];
 ?>
@@ -155,6 +157,7 @@ $rounds = $lesson_data['rounds'] ?? [
     let currentRoundIndex = 0;
     let currentWordIndex = 0;
     let currentSentence = [];
+    let currentPhoneticsMap = {}; // El diccionario inteligente
     
     let gameActive = false;
     const hero = document.getElementById('hero');
@@ -173,6 +176,25 @@ $rounds = $lesson_data['rounds'] ?? [
         document.getElementById('round-indicator').innerText = `Ronda ${index + 1}/${roundsData.length}`;
         document.getElementById('tut-context').innerText = round.context_es;
         document.getElementById('tut-trans').innerText = `"${round.translation}"`;
+
+        // --- MAPEO FONÉTICO INTELIGENTE ---
+        currentPhoneticsMap = {};
+        if (round.phonetic && round.sentence) {
+            const phWords = round.phonetic.split(' ');
+            // Si hay 5 sonidos y 5 palabras, las emparejamos
+            if (phWords.length === round.sentence.length) {
+                round.sentence.forEach((w, i) => {
+                    currentPhoneticsMap[w.toUpperCase()] = phWords[i];
+                });
+            }
+        }
+        // Añadimos los distractores si existen
+        if (round.word_phonetics) {
+            for (const [key, value] of Object.entries(round.word_phonetics)) {
+                currentPhoneticsMap[key.toUpperCase()] = value;
+            }
+        }
+        // ----------------------------------
 
         // 1. Resetear Héroe
         hero.style.left = '10px';
@@ -203,13 +225,11 @@ $rounds = $lesson_data['rounds'] ?? [
     }
 
     // ==========================================
-    // SPANGLISH Y DRAG & DROP
+    // AUDIO Y CONTROLES
     // ==========================================
     function playSpanglishIntro() {
         document.getElementById('btn-start').style.display = 'block';
         const round = roundsData[currentRoundIndex];
-        
-        // MODIFICACIÓN DE AUDIO: Lee la fonética completa
         const phoneticToRead = round.phonetic || round.sentence.join(' ');
         if(typeof playTTS !== 'undefined') playTTS(phoneticToRead);
     }
@@ -252,9 +272,11 @@ $rounds = $lesson_data['rounds'] ?? [
     }
 
     function readWord(word) {
-        // MODIFICACIÓN DE AUDIO: Usa el nuevo motor unificado
         if(typeof playTTS !== 'undefined') {
-            playTTS(word);
+            const wordUpper = word.toUpperCase();
+            // Busca la palabra en el diccionario inteligente, si no la encuentra la lee normal
+            const phoneticToRead = currentPhoneticsMap[wordUpper] || wordUpper;
+            playTTS(phoneticToRead);
         }
     }
 
@@ -326,7 +348,7 @@ $rounds = $lesson_data['rounds'] ?? [
             hero.style.left = 'calc(100% - 60px)';
             if(typeof sfxWin !== 'undefined') sfxWin.play();
             
-            // MODIFICACIÓN DE AUDIO: Lee la frase final completada
+            // Al terminar, lee la frase completa fonéticamente
             const round = roundsData[currentRoundIndex];
             const phoneticToRead = round.phonetic || currentSentence.join(' ');
             if(typeof playTTS !== 'undefined') playTTS(phoneticToRead);

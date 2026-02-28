@@ -1,7 +1,9 @@
 SET NAMES utf8mb4;
 SET CHARACTER SET utf8mb4;
-SET FOREIGN_KEY_CHECKS = 0; -- Desactiva la protección temporalmente para actualizar
+SET FOREIGN_KEY_CHECKS = 0;
 
+-- LA MAGIA ANTI-ERRORES: Borramos el progreso de prueba primero
+DELETE FROM progress WHERE lesson_id IN (SELECT id FROM lessons WHERE module_id = 2);
 DELETE FROM lessons WHERE module_id = 2;
 DELETE FROM modules WHERE id = 2;
 
@@ -63,4 +65,4 @@ VALUES (2, 'Examen de la Profesora (Jefe)', 'exam', 5, 40, '
   ]
 }');
 
-SET FOREIGN_KEY_CHECKS = 1; -- Vuelve a activar la protección
+SET FOREIGN_KEY_CHECKS = 1;
