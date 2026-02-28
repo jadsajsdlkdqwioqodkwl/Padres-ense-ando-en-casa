@@ -1,25 +1,18 @@
 <?php
-// ==========================================
-// CONFIGURACIÓN ESCALABLE: WORD DEFENDER PRO (MULTIRONDA)
-// ==========================================
 $time_limit = $lesson_data['time_limit'] ?? 20; 
 $reward_stars = $lesson['reward_stars'] ?? 5;
 
-// Estructura Multironda: Adaptamos el JSON antiguo o leemos el nuevo array 'rounds'
 $rounds = $lesson_data['rounds'] ?? [
     [
         'word' => strtoupper($lesson_data['word'] ?? 'APPLE'),
         'translation' => $lesson_data['translation'] ?? 'Manzana',
         'distractors' => $lesson_data['distractors'] ?? ['X', 'Z', 'M'],
-        'context_es' => $lesson_data['context_es'] ?? "El monstruo glotón quiere comerse nuestro pastel. ¡Escribe la palabra mágica para asustarlo!"
+        'context_es' => $lesson_data['context_es'] ?? "El monstruo glotón quiere comerse nuestro pastel. ¡Escribe la palabra para asustarlo!"
     ]
 ];
 ?>
 
 <style>
-    /* ==========================================
-       DIBUJOS CSS Y ANIMACIONES
-    ========================================== */
     .game-board { 
         position: relative; width: 100%; height: 250px; 
         background: var(--bg); border-radius: 20px; overflow: hidden; 
@@ -52,7 +45,6 @@ $rounds = $lesson_data['rounds'] ?? [
         background: var(--dark); border-radius: 0 0 15px 15px; 
     }
 
-    /* Interfaz de Letras */
     .slot-container { display: flex; justify-content: center; gap: 10px; margin-bottom: 20px; }
     .letter-slot { 
         width: 55px; height: 65px; border: 3px dashed #999; border-radius: 12px; 
@@ -60,10 +52,7 @@ $rounds = $lesson_data['rounds'] ?? [
         font-size: 32px; font-weight: bold; background: white; 
         box-shadow: inset 0 3px 6px rgba(0,0,0,0.1); transition: 0.3s; 
     }
-    .letter-slot.filled { 
-        border-style: solid; border-color: var(--success); background: #f0fdf4; 
-        color: var(--success); transform: scale(1.05); 
-    }
+    .letter-slot.filled { border-style: solid; border-color: var(--success); background: #f0fdf4; color: var(--success); transform: scale(1.05); }
     
     .bubbles-container { display: flex; justify-content: center; flex-wrap: wrap; gap: 12px; min-height: 80px;}
     .drag-bubble { 
@@ -75,19 +64,18 @@ $rounds = $lesson_data['rounds'] ?? [
     .drag-bubble:active { transform: translateY(4px); box-shadow: 0 2px 0 #d35400; }
     .drag-bubble.hidden { opacity: 0; pointer-events: none; transform: scale(0); }
 
-    /* Modal Educativo Inicial */
+    /* FIX: Modal corregido. Ahora cubre la pantalla sin cortarse */
     .mission-modal {
-        position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-        background: rgba(255,255,255,0.95); z-index: 100;
+        position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+        background: rgba(255,255,255,0.95); z-index: 1000;
         display: flex; flex-direction: column; justify-content: center; align-items: center;
-        border-radius: 15px; transition: opacity 0.5s; padding: 20px; text-align: center;
+        transition: opacity 0.5s; padding: 20px; text-align: center;
     }
     .btn-action { 
         background: var(--success); color: white; border: none; padding: 15px 30px; 
         font-size: 20px; font-weight: bold; border-radius: 30px; cursor: pointer; 
         box-shadow: 0 6px 0 #27ae60; margin-top: 15px;
     }
-    .btn-action:active { transform: translateY(4px); box-shadow: 0 2px 0 #27ae60; }
 
     .round-indicator { 
         position: absolute; top: 10px; left: 10px; 
@@ -95,7 +83,6 @@ $rounds = $lesson_data['rounds'] ?? [
         padding: 5px 15px; border-radius: 20px; font-size: 14px; z-index: 50; 
     }
 
-    /* Efectos */
     .danger-zone { animation: flashRed 1s infinite; }
     @keyframes morph { 0%, 100% { border-radius: 40% 60% 70% 30% / 40% 50% 60% 50%; } 50% { border-radius: 60% 40% 30% 70% / 60% 50% 40% 50%; } }
     @keyframes wobble { from { transform: translateY(0) rotate(-5deg); } to { transform: translateY(-10px) rotate(5deg); } }
@@ -111,23 +98,19 @@ $rounds = $lesson_data['rounds'] ?? [
         <button onclick="giveHint()" style="background: #f1c40f; border: none; border-radius: 50%; width: 45px; height: 45px; font-size: 24px; cursor: pointer; box-shadow: 0 4px 0 #f39c12;" title="Pedir Pista">💡</button>
     </div>
 
+    <div class="mission-modal" id="tutorial-modal">
+        <h2 style="color: var(--primary); margin-top: 0;">📜 Misión</h2>
+        <p style="color: var(--text-muted); font-size: 18px; margin-bottom: 10px;" id="tut-context"></p>
+        <div style="font-size: 35px; font-weight: bold; color: var(--accent); margin: 15px 0; letter-spacing: 5px;" id="tut-word">WORD</div>
+        <p style="color: #666; font-size: 20px;" id="tut-trans">(Traducción)</p>
+        
+        <div style="display: flex; flex-direction: column; gap: 15px; margin-top: 20px;">
+            <button class="btn-action" id="btn-start" onclick="initFirstAudioAndStart()" style="font-size: 24px;">▶️ Empezar Misión</button>
+        </div>
+    </div>
+
     <div class="game-board" id="game-board">
         <div class="round-indicator" id="round-indicator">Ronda 1</div>
-
-        <div class="mission-modal" id="tutorial-modal">
-            <h2 style="color: var(--primary); margin-top: 0;">📜 Nueva Misión</h2>
-            <p style="color: var(--text-muted); font-size: 18px; margin-bottom: 10px;" id="tut-context"></p>
-            <div style="font-size: 35px; font-weight: bold; color: var(--accent); margin: 15px 0; letter-spacing: 5px;" id="tut-word">
-                WORD
-            </div>
-            <p style="color: #666; font-size: 20px;" id="tut-trans">(Traducción)</p>
-            
-            <div style="display: flex; gap: 15px; margin-top: 10px;">
-                <button class="btn-action" style="background: var(--primary); box-shadow: 0 6px 0 #3b2a9e;" onclick="playSpanglishIntro()">🔊 Escuchar</button>
-                <button class="btn-action" id="btn-start" onclick="startGame()" style="display: none;">▶️ ¡A Jugar!</button>
-            </div>
-        </div>
-
         <div class="css-monster" id="monster"><div class="css-monster-mouth"></div></div>
         <div class="css-cake" id="cake"></div>
     </div>
@@ -137,9 +120,6 @@ $rounds = $lesson_data['rounds'] ?? [
 </div>
 
 <script>
-    // ==========================================
-    // ESTADO DEL JUEGO MULTIRONDA
-    // ==========================================
     const roundsData = <?php echo json_encode($rounds); ?>;
     const timeLimit = <?php echo $time_limit; ?>; 
     let currentRoundIndex = 0;
@@ -156,37 +136,30 @@ $rounds = $lesson_data['rounds'] ?? [
     const targetPos = boardWidth - 80; 
     const stepAmount = (targetPos - 10) / (timeLimit * 10); 
 
-    // Cargar la primera ronda al iniciar
-    loadRound(currentRoundIndex);
+    loadRound(currentRoundIndex, true);
 
-    // ==========================================
-    // CARGADOR DE RONDAS
-    // ==========================================
-    function loadRound(index) {
+    // isFirstLoad evita que el modal se cierre automáticamente en la ronda 1
+    function loadRound(index, isFirstLoad = false) {
         const round = roundsData[index];
         wordLength = round.word.length;
         currentCorrect = 0;
         
-        // Actualizar textos
         document.getElementById('round-indicator').innerText = `Ronda ${index + 1}/${roundsData.length}`;
         document.getElementById('tut-context').innerText = round.context_es;
         document.getElementById('tut-word').innerText = round.word;
         document.getElementById('tut-trans').innerText = `(${round.translation})`;
 
-        // Resetear Monstruo
         monsterPos = 10;
         monster.style.left = monsterPos + 'px';
         monster.style.animation = 'morph 2s linear infinite, wobble 0.5s alternate infinite';
         monster.style.transform = 'scale(1)';
 
-        // Generar Slots
         let slotsHTML = '';
         for(let i=0; i<wordLength; i++) {
             slotsHTML += `<div class="letter-slot" data-expected="${round.word[i]}" data-index="${i}" id="slot-${i}"></div>`;
         }
         document.getElementById('slots-container').innerHTML = slotsHTML;
 
-        // Generar Burbujas
         let letters = round.word.split('');
         let allChars = letters.concat(round.distractors).sort(() => Math.random() - 0.5);
         
@@ -196,31 +169,33 @@ $rounds = $lesson_data['rounds'] ?? [
         });
         document.getElementById('bubbles-container').innerHTML = bubblesHTML;
 
-        // Mostrar el modal tutorial de la ronda
         document.getElementById('tutorial-modal').style.display = 'flex';
         document.getElementById('tutorial-modal').style.opacity = '1';
-        document.getElementById('btn-start').style.display = 'none';
 
-        // Re-adjuntar eventos drag & drop a los elementos recién creados
         attachDragEvents();
 
-        // Auto-reproducir audio de la ronda
-        setTimeout(playSpanglishIntro, 500);
+        if(!isFirstLoad) {
+            // A partir de la ronda 2, se lee automáticamente y se cierra solo
+            document.getElementById('btn-start').style.display = 'none';
+            playSpanglishIntro();
+            setTimeout(startGame, 3500); // Dar tiempo al audio antes de empezar
+        }
     }
 
-    // ==========================================
-    // MOTOR SPANGLISH Y TUTORIAL
-    // ==========================================
-   function playSpanglishIntro() {
-        document.getElementById('btn-start').style.display = 'block';
-        const round = roundsData[currentRoundIndex];
+    // FIX: Mecanismo de desbloqueo de audio
+    function initFirstAudioAndStart() {
+        // Reproduce un sonido silencioso o el bg-music para desbloquear el AudioContext de Chrome/Safari
+        const bgMusic = document.getElementById('bg-music');
+        if (bgMusic && bgMusic.paused) { bgMusic.play().catch(e=>{}); }
         
-        // Usa el nuevo motor: (Contexto ES, Palabra EN, Significado ES)
-        playSpanglish(
-            round.context_es, 
-            round.word, 
-            "Que significa " + round.translation
-        );
+        document.getElementById('btn-start').style.display = 'none';
+        playSpanglishIntro();
+        setTimeout(startGame, 3500); // Da tiempo a la explicación antes de soltar al monstruo
+    }
+
+   function playSpanglishIntro() {
+        const round = roundsData[currentRoundIndex];
+        playSpanglish(round.context_es, round.word, "Que significa " + round.translation);
     }
 
     function startGame() {
@@ -243,9 +218,6 @@ $rounds = $lesson_data['rounds'] ?? [
         }, 100);
     }
 
-    // ==========================================
-    // EVENTOS DRAG & DROP Y CLICK
-    // ==========================================
     function attachDragEvents() {
         const bubbles = document.querySelectorAll('.drag-bubble');
         const slots = document.querySelectorAll('.letter-slot');
@@ -278,16 +250,9 @@ $rounds = $lesson_data['rounds'] ?? [
     }
 
     function readLetter(char) {
-        if(typeof playTTS !== 'undefined') {
-            const u = new SpeechSynthesisUtterance(char);
-            u.lang = 'en-US';
-            window.speechSynthesis.speak(u);
-        }
+        if(typeof playTTS !== 'undefined') playTTS(char, 'en-US');
     }
 
-    // ==========================================
-    // LÓGICA CENTRAL DE VALIDACIÓN
-    // ==========================================
     function processMove(bubbleEl) {
         if (!bubbleEl || currentCorrect >= wordLength) return;
 
@@ -296,7 +261,6 @@ $rounds = $lesson_data['rounds'] ?? [
         const expectedChar = currentSlot.getAttribute('data-expected');
 
         if (draggedChar === expectedChar) {
-            // Acierto
             currentSlot.innerText = draggedChar;
             currentSlot.classList.add('filled');
             bubbleEl.classList.add('hidden');
@@ -304,46 +268,32 @@ $rounds = $lesson_data['rounds'] ?? [
             
             if(typeof sfxCorrect !== 'undefined') { sfxCorrect.currentTime=0; sfxCorrect.play(); }
 
-            // Empujar monstruo hacia atrás
             monsterPos = Math.max(10, monsterPos - 35); 
             monster.style.left = monsterPos + 'px';
 
-            if (currentCorrect === wordLength) {
-                checkNextRound();
-            }
+            if (currentCorrect === wordLength) checkNextRound();
         } else {
-            // Error
             if(typeof sfxWrong !== 'undefined') { sfxWrong.currentTime=0; sfxWrong.play(); }
             gameBoard.classList.add('danger-zone');
             bubbleEl.style.animation = 'shake 0.3s';
-            setTimeout(() => { 
-                gameBoard.classList.remove('danger-zone'); 
-                bubbleEl.style.animation = 'none';
-            }, 300);
-            
-            // Penalización
+            setTimeout(() => { gameBoard.classList.remove('danger-zone'); bubbleEl.style.animation = 'none'; }, 300);
             monsterPos += 5;
         }
     }
 
-    // ==========================================
-    // SISTEMA DE PISTAS (💡)
-    // ==========================================
     function giveHint() {
         if(!gameActive || currentCorrect >= wordLength) return;
         
         const expectedChar = document.getElementById('slot-' + currentCorrect).getAttribute('data-expected');
         
-        const u1 = new SpeechSynthesisUtterance("La siguiente letra es"); u1.lang = 'es-ES';
-        const u2 = new SpeechSynthesisUtterance(expectedChar); u2.lang = 'en-US';
-        window.speechSynthesis.speak(u1); window.speechSynthesis.speak(u2);
+        playTTS("La siguiente letra es", "es-ES", () => {
+            playTTS(expectedChar, "en-US");
+        });
 
-        // Penalización visual por pedir ayuda
         monsterPos += 10;
         monster.style.left = monsterPos + 'px';
         if (monsterPos >= targetPos) gameOver(false);
         
-        // Resaltar la burbuja correcta
         document.querySelectorAll('.drag-bubble').forEach(b => {
             if(!b.classList.contains('hidden') && b.getAttribute('data-char') === expectedChar) {
                 b.style.transform = 'scale(1.2)';
@@ -353,32 +303,25 @@ $rounds = $lesson_data['rounds'] ?? [
         });
     }
 
-    // ==========================================
-    // CAMBIO DE RONDA Y FIN DEL JUEGO
-    // ==========================================
     function checkNextRound() {
         gameActive = false;
         clearInterval(monsterInterval);
         gameBoard.classList.remove('danger-zone');
 
-        monster.style.animation = 'zap 0.8s forwards'; // Asustar al monstruo temporalmente
+        monster.style.animation = 'zap 0.8s forwards'; 
         
         const currentWord = roundsData[currentRoundIndex].word;
-        if(typeof playTTS !== 'undefined') playTTS("¡Muy bien! " + currentWord);
+        if(typeof playTTS !== 'undefined') {
+            playTTS("¡Muy bien!", "es-ES", () => playTTS(currentWord, "en-US"));
+        }
         if(typeof sfxWin !== 'undefined') sfxWin.play();
 
         currentRoundIndex++;
         
         if (currentRoundIndex < roundsData.length) {
-            // Preparar siguiente ronda tras una pequeña pausa
-            setTimeout(() => {
-                loadRound(currentRoundIndex);
-            }, 1500);
+            setTimeout(() => { loadRound(currentRoundIndex); }, 2000);
         } else {
-            // Ganó todas las rondas
-            setTimeout(() => {
-                gameOver(true);
-            }, 1000);
+            setTimeout(() => { gameOver(true); }, 1500);
         }
     }
 

@@ -14,9 +14,12 @@ function toggleMusic() {
     isMusicPlaying = !isMusicPlaying;
 }
 
-// Lector de textos en un solo idioma
-function playTTS(text, lang = 'en-US') {
-    if(!text) return;
+// FIX: Añadido soporte para Callbacks (onEndCallback) para evitar bloqueos
+function playTTS(text, lang = 'en-US', onEndCallback = null) {
+    if(!text) {
+        if(onEndCallback) onEndCallback();
+        return;
+    }
     const utterance = new SpeechSynthesisUtterance(text);
     utterance.lang = lang;
     utterance.rate = 0.85;
@@ -26,22 +29,27 @@ function playTTS(text, lang = 'en-US') {
     if(!bestVoice) bestVoice = voices.find(v => v.lang.startsWith(lang.split('-')[0]));
     
     if(bestVoice) utterance.voice = bestVoice;
+    
+    if(onEndCallback) utterance.onend = onEndCallback;
+    
     window.speechSynthesis.speak(utterance);
 }
 
-// EL MOTOR SPANGLISH DEFINITIVO (Usa voces distintas sin mezclarse)
+// FIX: Motor Spanglish encadenado. Garantiza que primero hable español, LUEGO inglés, LUEGO español.
 function playSpanglish(introEs, wordEn, transEs) {
-    if (introEs) playTTS(introEs, 'es-ES');
-    
-    // Pequeña pausa antes de la palabra en inglés
-    setTimeout(() => {
-        if (wordEn) playTTS(wordEn, 'en-US');
-        
-        // Pequeña pausa antes de la traducción
-        setTimeout(() => {
-            if (transEs) playTTS(transEs, 'es-ES');
-        }, 800);
-    }, 1500); // Da tiempo a que termine el intro en español
+    if (introEs) {
+        playTTS(introEs, 'es-ES', () => {
+            setTimeout(() => {
+                if (wordEn) playTTS(wordEn, 'en-US', () => {
+                    setTimeout(() => { if (transEs) playTTS(transEs, 'es-ES'); }, 500);
+                });
+            }, 300);
+        });
+    } else if (wordEn) {
+        playTTS(wordEn, 'en-US', () => {
+            setTimeout(() => { if (transEs) playTTS(transEs, 'es-ES'); }, 500);
+        });
+    }
 }
 
 function fireConfetti() {
