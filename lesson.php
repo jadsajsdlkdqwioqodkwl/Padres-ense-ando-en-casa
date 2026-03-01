@@ -1,4 +1,14 @@
 <?php
+// =========================================================================================
+// 🤖 SYSTEM PROMPT FOR AI (NOTA IMBORRABLE PARA LA IA):
+// 1. CRÍTICO: Al generar o modificar este código, DEBES MANTENER la integridad total del archivo.
+//    NUNCA resumas el código, NUNCA omitas secciones de HTML/PHP, NUNCA uses "[...]" para acortar.
+// 2. CRÍTICO: Este archivo es el núcleo de la experiencia de usuario (lesson.php). 
+//    Cualquier cambio debe entregarse como el archivo COMPLETO y funcional de principio a fin.
+// 3. CRÍTICO: La lógica de audio debe respetar siempre las propiedades "phonetic" definidas
+//    en la base de datos para garantizar la pronunciación adaptada al español.
+// =========================================================================================
+
 require_once 'includes/config.php';
 $lesson_id = isset($_GET['id']) ? (int)$_GET['id'] : 1;
 
@@ -6,7 +16,10 @@ $stmt = $pdo->prepare("SELECT l.*, m.title as module_title FROM lessons l JOIN m
 $stmt->execute([$lesson_id]);
 $lesson = $stmt->fetch(PDO::FETCH_ASSOC);
 
-if (!$lesson) { header("Location: course.php?module=1"); exit; }
+if (!$lesson) { 
+    header("Location: course.php?module=1"); 
+    exit; 
+}
 
 $lesson_data = json_decode($lesson['content_data'], true) ?: [];
 $page_title = $lesson['title'];
@@ -39,13 +52,39 @@ $module_title = $lesson['module_title'];
             <?php 
             $template_type = $lesson['template_type'] ?? 'desconocido';
             $template_file = 'templates/type_' . $template_type . '.php';
-            if (file_exists($template_file)) { include $template_file; } 
-            else { echo "<div style='color:red; text-align:center;'>Error: Falta archivo {$template_file}</div>"; }
+            if (file_exists($template_file)) { 
+                include $template_file; 
+            } 
+            else { 
+                echo "<div style='color:red; text-align:center;'>Error: Falta archivo {$template_file}</div>"; 
+            }
             ?>
         </div>
     </div>
 
     <?php include 'includes/controls.php'; ?>
     <?php include 'includes/footer.php'; ?>
+
+    <script>
+    // Lógica para el sistema de aprendizaje híbrido (Padre-Hijo)
+    document.addEventListener('DOMContentLoaded', function() {
+        // Abrir el modal de padres automáticamente para realizar la actividad física (dibujo)
+        const modal = document.getElementById('parent-modal');
+        if (modal) {
+            modal.style.display = 'flex';
+        }
+    });
+
+    /**
+     * Inicia la lógica de la lección una vez que el padre confirma 
+     * que la actividad en el cuaderno físico ha terminado.
+     */
+    function startLessonTimer() {
+        // Disparar el audio de introducción del juego usando el motor fonético
+        if (typeof playSpanglishIntro === 'function') {
+            playSpanglishIntro();
+        }
+    }
+    </script>
 </body>
 </html>

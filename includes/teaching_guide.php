@@ -1,33 +1,47 @@
 <?php
-$guide = $lesson_data['guide'] ?? ['intro' => '¡Hola! Antes de empezar, repasen estas palabras juntos.', 'steps' => []];
+// includes/teaching_guide.php
+$guide = $lesson_data['guide'] ?? ['intro' => '¡Es hora de preparar la misión en el mundo real!', 'steps' => []];
+
+// Si el juego es de vocabulario simple, extraemos las palabras de las rondas para la lista de dibujo
+$draw_list = [];
+if (isset($lesson_data['rounds'])) {
+    foreach ($lesson_data['rounds'] as $r) {
+        if (isset($r['word'])) $draw_list[] = ['en' => $r['word'], 'es' => $r['translation'], 'ph' => $r['phonetic']];
+        else if (isset($r['target_word'])) $draw_list[] = ['en' => $r['target_word'], 'es' => $r['translation'], 'ph' => $r['phonetic']];
+        else if (isset($r['color_name'])) $draw_list[] = ['en' => $r['color_name'], 'es' => $r['translation'], 'ph' => $r['phonetic']];
+    }
+}
 ?>
-<div id="parent-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 2000; justify-content: center; align-items: center; backdrop-filter: blur(3px);">
-    <div style="background: white; padding: 30px; border-radius: 20px; max-width: 500px; width: 90%; position: relative; box-shadow: 0 20px 40px rgba(0,0,0,0.2);">
+
+<div id="parent-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 2000; justify-content: center; align-items: center; backdrop-filter: blur(5px);">
+    <div style="background: white; padding: 30px; border-radius: 25px; max-width: 550px; width: 92%; position: relative; box-shadow: 0 20px 50px rgba(0,0,0,0.3); border: 5px solid var(--primary);">
         
-        <button onclick="document.getElementById('parent-modal').style.display='none'" style="position: absolute; top: 15px; right: 15px; font-size: 24px; background: #eee; border: none; cursor: pointer; border-radius: 50%; width: 40px; height: 40px;">❌</button>
+        <h2 style="color: var(--primary); margin-top: 0; text-align: center; font-size: 24px;">👨‍🏫 Misión para Papá y Mamá</h2>
         
-        <h3 style="color: var(--primary); margin-top: 0; display: flex; align-items: center; gap: 10px;">👨‍🏫 Guía para Padres</h3>
-        <p style="color: #555;"><?php echo htmlspecialchars($guide['intro']); ?></p>
-        
-        <?php if (!empty($guide['steps'])): ?>
-        <div style="max-height: 50vh; overflow-y: auto; padding-right: 10px;">
-            <?php foreach($guide['steps'] as $step): ?>
-                <?php $phonetic_word = $step['ph'] ?? $step['en']; ?>
-                <div style="background: #f8f9fa; padding: 15px; margin-bottom: 12px; border-radius: 12px; border-left: 5px solid var(--accent); display: flex; justify-content: space-between; align-items: center;">
-                    <div>
-                        <div style="font-size: 18px;"><strong>"<?php echo htmlspecialchars($step['en']); ?>"</strong> <span style="color: #d9534f; font-family: monospace;"><?php echo htmlspecialchars($step['ph'] ?? ''); ?></span></div>
-                        <div style="font-size: 14px; color: #666;">Significa: <?php echo htmlspecialchars($step['es']); ?></div>
-                    </div>
-                    <button style="background: var(--accent); color: white; border: none; padding: 10px 15px; border-radius: 20px; cursor: pointer; font-weight: bold;" onclick="playTTS('<?php echo addslashes($phonetic_word); ?>')">🔊</button>
-                </div>
-            <?php endforeach; ?>
+        <div style="background: #fff3cd; color: #856404; padding: 15px; border-radius: 15px; margin-bottom: 20px; border: 1px solid #ffeeba;">
+            <p style="margin: 0; font-weight: bold; font-size: 16px;">📝 Actividad en el Cuaderno:</p>
+            <p style="margin: 5px 0 0 0; font-size: 14px;">Antes de jugar, pide a tu hijo que dibuje estos objetos en su cuaderno y escriba su nombre en Inglés y Español al lado.</p>
         </div>
-        <?php else: ?>
-            <div style="background: #fff3cd; color: #856404; padding: 15px; border-radius: 10px; text-align: center; margin-bottom: 15px;">
-                <strong>⭐ Acompaña a tu hijo a descubrir la misión.</strong>
-            </div>
-        <?php endif; ?>
-        
-        <button onclick="document.getElementById('parent-modal').style.display='none'" style="width: 100%; padding: 15px; background: var(--success); color: white; font-size: 18px; font-weight: bold; border: none; border-radius: 30px; margin-top: 20px; cursor: pointer;">¡Entendido!</button>
+
+        <div style="max-height: 45vh; overflow-y: auto; padding-right: 10px; margin-bottom: 20px;">
+            <?php if (!empty($draw_list)): ?>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                    <?php foreach ($draw_list as $item): ?>
+                        <div style="background: #f8f9fa; padding: 12px; border-radius: 12px; border: 2px solid #eee; text-align: center;">
+                            <div style="font-size: 20px; font-weight: bold; color: var(--accent);">"<?php echo $item['en']; ?>"</div>
+                            <div style="font-size: 13px; color: #666;"><?php echo $item['es']; ?></div>
+                            <button onclick="playTTS('<?php echo $item['ph']; ?>')" style="margin-top: 8px; background: white; border: 1px solid #ddd; border-radius: 50%; width: 35px; height: 35px; cursor: pointer;">🔊</button>
+                        </div>
+                    <?php endforeach; ?>
+                </div>
+            <?php else: ?>
+                <p style="text-align: center; color: #666;">Repasen juntos la lección de hoy.</p>
+            <?php endif; ?>
+        </div>
+
+        <div style="text-align: center;">
+            <p style="font-size: 13px; color: #999; margin-bottom: 10px;">¿Ya terminaron los dibujos en el cuaderno?</p>
+            <button onclick="document.getElementById('parent-modal').style.display='none'; startLessonTimer();" style="width: 100%; padding: 18px; background: var(--success); color: white; font-size: 20px; font-weight: bold; border: none; border-radius: 35px; cursor: pointer; box-shadow: 0 6px 0 #27ae60;">¡Sí, a jugar! 🚀</button>
+        </div>
     </div>
 </div>
