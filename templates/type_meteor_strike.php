@@ -1,6 +1,6 @@
 <?php
 // ==========================================
-// CONFIGURACIÓN ESCALABLE: METEOR STRIKE PRO (MULTIRONDA)
+// CONFIGURACIÓN ESCALABLE: METEOR STRIKE PRO (MULTIRONDA Y MULTILLUVIA)
 // ==========================================
 $reward_stars = $lesson['reward_stars'] ?? 10;
 
@@ -8,7 +8,7 @@ $reward_stars = $lesson['reward_stars'] ?? 10;
 $rounds = $lesson_data['rounds'] ?? [
     [
         'target_word' => $lesson_data['target_word'] ?? 'APPLE',
-        'phonetic' => $lesson_data['phonetic'] ?? 'ápol',
+        'phonetic' => $lesson_data['phonetic'] ?? 'épol',
         'translation' => $lesson_data['translation'] ?? 'Manzana',
         'speed' => $lesson_data['speed'] ?? 7,
         'context_es' => $lesson_data['context_es'] ?? "¡Alerta! Una lluvia de meteoritos amenaza al dinosaurio. Toca solo el meteorito que tenga...",
@@ -35,7 +35,7 @@ $rounds = $lesson_data['rounds'] ?? [
     .css-dino.dead { transform: translateX(-50%) scaleY(0.2); background: #333; bottom: 45px;}
 
     /* ==========================================
-       METEORITOS
+       METEORITOS (TAMAÑO PERFECTO PARA EMOJIS)
     ========================================== */
     .meteor { position: absolute; top: -100px; width: 75px; height: 75px; background: var(--accent); border-radius: 50%; cursor: pointer; z-index: 8; display: flex; justify-content: center; align-items: center; font-size: 45px; box-shadow: 0 0 20px #d35400, inset -5px -5px 0 rgba(0,0,0,0.3); transition: transform 0.1s; user-select: none; }
     .meteor::before { content: ''; position: absolute; top: -40px; left: 15px; width: 45px; height: 60px; background: linear-gradient(to top, #f39c12, transparent); border-radius: 50%; z-index: -1; opacity: 0.8; animation: flicker 0.2s infinite alternate; }
@@ -107,19 +107,15 @@ $rounds = $lesson_data['rounds'] ?? [
     
     let lives = 3;
     let gameActive = false;
-    let currentItemIndex = 0;
-    let activeMeteor = null;
-    let fallInterval = null;
-    let meteorY = -100;
-    let currentIsCorrect = false;
+    let spawnInterval = null;
+    let activeMeteors = [];
 
     loadRound(currentRoundIndex);
 
     function loadRound(index) {
         const round = roundsData[index];
-        roundItems = [...round.items].sort(() => Math.random() - 0.5); 
+        roundItems = [...round.items]; 
         currentSpeed = round.speed || 7;
-        currentItemIndex = 0;
 
         document.getElementById('round-indicator').innerText = `Stage ${index + 1}/${roundsData.length}`;
         document.getElementById('tut-context').innerText = round.context_es || "Toca solo el meteorito que tenga...";
@@ -140,9 +136,8 @@ $rounds = $lesson_data['rounds'] ?? [
    function playSpanglishIntro() {
         document.getElementById('btn-start').style.display = 'block';
         const round = roundsData[currentRoundIndex];
-        // Fonética
         const phoneticToRead = round.phonetic || round.target_word;
-        playSpanglish('', phoneticToRead, '');
+        if(typeof playTTS !== 'undefined') playTTS(phoneticToRead);
     }
 
     function startGame() {
@@ -150,101 +145,111 @@ $rounds = $lesson_data['rounds'] ?? [
         document.getElementById('hud').style.display = 'flex';
         setTimeout(() => document.getElementById('tutorial-modal').style.display = 'none', 500);
         gameActive = true;
-        setTimeout(spawnMeteor, 500);
+        
+        // Limpiamos los arrays por si es reinicio
+        activeMeteors.forEach(m => { clearInterval(m.int); m.el.remove(); });
+        activeMeteors = [];
+        
+        // Aquí ajustamos qué tan rápido salen nuevos meteoros. Mientras más bajo, más caos.
+        spawnInterval = setInterval(spawnMeteor, 1000); 
     }
 
     function spawnMeteor() {
         if (!gameActive) return;
         
-        if (currentItemIndex >= roundItems.length) {
-            currentItemIndex = 0;
-            roundItems.sort(() => Math.random() - 0.5);
+        // Probabilidad: 40% de que caiga el correcto, 60% que caiga uno falso
+        let data;
+        if(Math.random() < 0.4) {
+            data = roundItems.find(i => i.is_correct);
+        } else {
+            const wrongs = roundItems.filter(i => !i.is_correct);
+            data = wrongs[Math.floor(Math.random() * wrongs.length)];
         }
+        
+        if(!data) data = roundItems[Math.floor(Math.random() * roundItems.length)];
 
-        const data = roundItems[currentItemIndex];
-        currentItemIndex++;
-        currentIsCorrect = data.is_correct;
-
-        activeMeteor = document.createElement('div');
-        activeMeteor.className = 'meteor';
-        activeMeteor.innerHTML = data.content; 
+        const meteor = document.createElement('div');
+        meteor.className = 'meteor';
+        meteor.innerHTML = data.content; 
         
         const randomX = Math.floor(Math.random() * (board.offsetWidth - 85)) + 10;
-        activeMeteor.style.left = randomX + 'px';
-        meteorY = -100;
-        activeMeteor.style.top = meteorY + 'px';
+        meteor.style.left = randomX + 'px';
+        let mY = -100;
+        meteor.style.top = mY + 'px';
 
-        board.appendChild(activeMeteor);
+        board.appendChild(meteor);
 
-        activeMeteor.addEventListener('mousedown', () => checkHit(data.is_correct));
-        activeMeteor.addEventListener('touchstart', (e) => { e.preventDefault(); checkHit(data.is_correct); });
+        const checkFn = (e) => { 
+            if(e) e.preventDefault(); 
+            checkHit(meteor, data.is_correct); 
+        };
+        meteor.addEventListener('mousedown', checkFn);
+        meteor.addEventListener('touchstart', checkFn, {passive: false});
 
         const boardHeight = board.offsetHeight;
         const groundLevel = boardHeight - 80; 
-        const step = groundLevel / (currentSpeed * 20); 
+        
+        // Física de caída: Usamos el currentSpeed para hacerlo caer a toda velocidad
+        const step = groundLevel / ((12 - currentSpeed) * 10); 
 
-        clearInterval(fallInterval);
-        fallInterval = setInterval(() => {
-            if (!gameActive) return;
+        const fallInt = setInterval(() => {
+            if (!gameActive) {
+                clearInterval(fallInt);
+                return;
+            }
             
-            meteorY += step;
-            activeMeteor.style.top = meteorY + 'px';
+            mY += step;
+            meteor.style.top = mY + 'px';
 
-            if (meteorY > groundLevel * 0.6) dino.classList.add('panic');
-            else dino.classList.remove('panic');
+            if (mY > groundLevel * 0.6 && data.is_correct) {
+                dino.classList.add('panic');
+            }
 
-            if (meteorY >= groundLevel) {
-                clearInterval(fallInterval);
+            if (mY >= groundLevel) {
+                clearInterval(fallInt);
                 if (data.is_correct) {
                     takeDamage("¡Dejaste caer el correcto!");
-                } else {
-                    activeMeteor.remove();
-                    spawnMeteor();
                 }
+                meteor.remove();
             }
         }, 50);
+
+        activeMeteors.push({el: meteor, int: fallInt, correct: data.is_correct});
     }
 
-    function checkHit(isCorrect) {
-        if (!gameActive || !activeMeteor) return;
+    function checkHit(meteorEl, isCorrect) {
+        if (!gameActive) return;
 
-        clearInterval(fallInterval);
-        activeMeteor.classList.add('destroyed');
+        meteorEl.classList.add('destroyed');
+        
+        const mObj = activeMeteors.find(m => m.el === meteorEl);
+        if (mObj) clearInterval(mObj.int);
 
         if (isCorrect) {
             if(typeof sfxCorrect !== 'undefined') sfxCorrect.play();
-            setTimeout(() => checkNextRound(), 400); 
+            checkNextRound(); 
         } else {
             if(typeof sfxWrong !== 'undefined') sfxWrong.play();
             takeDamage("¡Ese no era el correcto!");
-            
-            setTimeout(() => {
-                if (activeMeteor) activeMeteor.remove();
-                if(gameActive) spawnMeteor();
-            }, 500);
+            setTimeout(() => { meteorEl.remove(); }, 500);
         }
     }
 
     function useRadar() {
-        if(!gameActive || !activeMeteor) return;
+        if(!gameActive) return;
         
         document.getElementById('btn-radar').style.animation = 'radarScan 1s';
         setTimeout(() => document.getElementById('btn-radar').style.animation = 'none', 1000);
 
         const targetPhonetic = roundsData[currentRoundIndex].phonetic || roundsData[currentRoundIndex].target_word;
-        if(typeof playTTS !== 'undefined') {
-            playTTS(targetPhonetic);
-        }
+        if(typeof playTTS !== 'undefined') playTTS(targetPhonetic);
 
-        if(currentIsCorrect) {
-            activeMeteor.classList.add('radar-glow');
-            setTimeout(() => activeMeteor.classList.remove('radar-glow'), 1500);
-        }
-
-        meteorY += 60;
-        activeMeteor.style.top = meteorY + 'px';
-        activeMeteor.style.transition = 'top 0.2s';
-        setTimeout(() => activeMeteor.style.transition = 'none', 200);
+        activeMeteors.forEach(m => {
+            if(m.correct) {
+                m.el.classList.add('radar-glow');
+                setTimeout(() => m.el.classList.remove('radar-glow'), 1500);
+            }
+        });
     }
 
     function takeDamage(msg) {
@@ -261,6 +266,9 @@ $rounds = $lesson_data['rounds'] ?? [
 
     function checkNextRound() {
         gameActive = false;
+        clearInterval(spawnInterval);
+        activeMeteors.forEach(m => clearInterval(m.int));
+        
         dino.classList.remove('panic');
         
         const currentPhonetic = roundsData[currentRoundIndex].phonetic || roundsData[currentRoundIndex].target_word;
@@ -271,13 +279,11 @@ $rounds = $lesson_data['rounds'] ?? [
 
         if (currentRoundIndex < roundsData.length) {
             setTimeout(() => {
-                if (activeMeteor) activeMeteor.remove();
+                activeMeteors.forEach(m => m.el.remove());
                 loadRound(currentRoundIndex);
-            }, 1000);
+            }, 1500);
         } else {
-            setTimeout(() => {
-                executeWin();
-            }, 800);
+            setTimeout(() => { executeWin(); }, 1500);
         }
     }
 
@@ -288,7 +294,8 @@ $rounds = $lesson_data['rounds'] ?? [
 
     function executeLoss(msg) {
         gameActive = false;
-        clearInterval(fallInterval);
+        clearInterval(spawnInterval);
+        activeMeteors.forEach(m => clearInterval(m.int));
         dino.classList.add('dead');
         if(typeof sfxWrong !== 'undefined') sfxWrong.play();
         

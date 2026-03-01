@@ -12,155 +12,92 @@ SET NAMES utf8mb4;
 SET CHARACTER SET utf8mb4;
 SET FOREIGN_KEY_CHECKS = 0;
 
-DELETE FROM progress WHERE lesson_id IN (SELECT id FROM lessons WHERE module_id = 2);
-DELETE FROM lessons WHERE module_id = 2;
-DELETE FROM modules WHERE id = 2;
+DELETE FROM progress WHERE lesson_id IN (SELECT id FROM lessons WHERE module_id = 1);
+DELETE FROM lessons WHERE module_id = 1;
+DELETE FROM modules WHERE id = 1;
 
 INSERT IGNORE INTO modules (id, title, color_theme, order_num) 
-VALUES (2, 'Mundo 2: My School', '#00b894', 2);
+VALUES (1, 'Mundo 1: The Farm', '#2B3A67', 1);
 
--- ==========================================
--- STAGE 1: Vocabulario Visual (Color Rescue)
--- ==========================================
+-- STAGE 1: Color Rescue (3 Rondas)
 INSERT INTO lessons (module_id, title, template_type, order_num, reward_stars, content_data) 
-VALUES (2, 'Colores del Salón', 'color_rescue', 1, 15, '
+VALUES (1, 'Rescata el Color', 'color_rescue', 1, 10, '
 {
-  "time_limit": 18,
+  "time_limit": 20,
   "rounds": [
-    { 
-      "color_name": "Yellow", "phonetic": "iélou", "color_hex": "#f1c40f", "item": "✏️", "translation": "Amarillo", 
-      "context_es": "¡Salva el lápiz amarillo!", "distractors": [{"name": "Blue", "hex": "#3742fa"}, {"name": "Red", "hex": "#ff4757"}] 
-    },
-    { 
-      "color_name": "Blue", "phonetic": "blú", "color_hex": "#3742fa", "item": "🖊️", "translation": "Azul", 
-      "context_es": "¡El OVNI quiere el lapicero azul! Píntalo.", "distractors": [{"name": "Green", "hex": "#2ed573"}, {"name": "Yellow", "hex": "#f1c40f"}] 
-    },
-    { 
-      "color_name": "Red", "phonetic": "red", "color_hex": "#ff4757", "item": "📕", "translation": "Rojo", 
-      "context_es": "¡Protege el libro rojo!", "distractors": [{"name": "Black", "hex": "#2f3640"}, {"name": "Blue", "hex": "#3742fa"}] 
-    },
-    { 
-      "color_name": "Green", "phonetic": "grin", "color_hex": "#2ed573", "item": "🍏", "translation": "Verde", 
-      "context_es": "¡Salva la manzana verde del profesor!", "distractors": [{"name": "Red", "hex": "#ff4757"}, {"name": "Yellow", "hex": "#f1c40f"}] 
-    }
+    { "color_name": "Red", "phonetic": "red", "color_hex": "#ff4757", "item": "🍎", "translation": "Rojo", "context_es": "¡Atento! Encuentra el color de la manzana.", "distractors": [{"name": "Blue", "hex": "#3742fa"}, {"name": "Green", "hex": "#2ed573"}] },
+    { "color_name": "Green", "phonetic": "grin", "color_hex": "#2ed573", "item": "🌳", "translation": "Verde", "context_es": "¡Ahora busca el color de las hojas del árbol!", "distractors": [{"name": "Yellow", "hex": "#f1c40f"}, {"name": "Red", "hex": "#ff4757"}] },
+    { "color_name": "Yellow", "phonetic": "iélou", "color_hex": "#f1c40f", "item": "🐥", "translation": "Amarillo", "context_es": "¡Salva al patito amarillo!", "distractors": [{"name": "Blue", "hex": "#3742fa"}, {"name": "Red", "hex": "#ff4757"}] }
   ]
 }');
 
--- ==========================================
--- STAGE 2: Escucha Activa (Meteor Strike)
--- ==========================================
+-- STAGE 2: Meteor Strike (3 Rondas con Emojis para la granja)
 INSERT INTO lessons (module_id, title, template_type, order_num, reward_stars, content_data) 
-VALUES (2, 'Lluvia de Útiles', 'meteor_strike', 2, 20, '
+VALUES (1, 'Lluvia de Animales', 'meteor_strike', 2, 10, '
 {
   "rounds": [
-    { 
-      "target_word": "BOOK", "phonetic": "buk", "translation": "Libro", "speed": 6, 
-      "context_es": "¡Destruye el meteorito que diga Libro!", 
-      "items": [ {"id": 1, "content": "BOOK", "is_correct": true}, {"id": 2, "content": "PEN", "is_correct": false}, {"id": 3, "content": "DESK", "is_correct": false} ] 
-    },
-    { 
-      "target_word": "PEN", "phonetic": "pen", "translation": "Lapicero", "speed": 7, 
-      "context_es": "¡Rápido! Ahora busca el Lapicero.", 
-      "items": [ {"id": 1, "content": "PEN", "is_correct": true}, {"id": 2, "content": "BOOK", "is_correct": false}, {"id": 3, "content": "RULER", "is_correct": false} ] 
-    },
-    { 
-      "target_word": "DESK", "phonetic": "desk", "translation": "Escritorio", "speed": 8, 
-      "context_es": "¡Atento! Toca el Escritorio.", 
-      "items": [ {"id": 1, "content": "DESK", "is_correct": true}, {"id": 2, "content": "PAPER", "is_correct": false}, {"id": 3, "content": "PEN", "is_correct": false} ] 
-    },
-    { 
-      "target_word": "ERASER", "phonetic": "iréiser", "translation": "Borrador", "speed": 8, 
-      "context_es": "¡Último! Encuentra el Borrador.", 
-      "items": [ {"id": 1, "content": "ERASER", "is_correct": true}, {"id": 2, "content": "RULER", "is_correct": false}, {"id": 3, "content": "BOOK", "is_correct": false} ] 
-    }
+    { "target_word": "DOG", "phonetic": "dog", "translation": "Perro", "speed": 8, "context_es": "¡Toca el meteorito que sea un Perro!", "items": [ {"id": 1, "content": "🐶", "is_correct": true}, {"id": 2, "content": "🐱", "is_correct": false}, {"id": 3, "content": "🐷", "is_correct": false} ] },
+    { "target_word": "CAT", "phonetic": "kat", "translation": "Gato", "speed": 8, "context_es": "¡Rápido! Ahora salva al Gato.", "items": [ {"id": 1, "content": "🐱", "is_correct": true}, {"id": 2, "content": "🐮", "is_correct": false}, {"id": 3, "content": "🐶", "is_correct": false} ] },
+    { "target_word": "BIRD", "phonetic": "berd", "translation": "Pájaro", "speed": 9, "context_es": "¡Busca al Pájaro!", "items": [ {"id": 1, "content": "🐦", "is_correct": true}, {"id": 2, "content": "🦆", "is_correct": false}, {"id": 3, "content": "🐱", "is_correct": false} ] }
   ]
 }');
 
--- ==========================================
--- STAGE 3: Identificar Gramática (The Detective)
--- ==========================================
+-- STAGE 3: Defender (3 Rondas)
 INSERT INTO lessons (module_id, title, template_type, order_num, reward_stars, content_data) 
-VALUES (2, 'El Detective de Acciones', 'detective', 3, 25, '
+VALUES (1, 'Defensor de la Granja', 'defender', 3, 10, '
 {
+  "time_limit": 25,
   "rounds": [
-    {
-      "sentence": ["THE", "BOY", "READS"],
-      "phonetics": ["da", "bói", "rids"],
-      "target_word": "READS",
-      "target_type": "Verbo (Acción)",
-      "translation": "El niño lee",
-      "scene_emoji": "👦📖",
-      "context_es": "¡Encuentra el Verbo para encender la luz!"
-    },
-    {
-      "sentence": ["THE", "GIRL", "WRITES"],
-      "phonetics": ["da", "guerl", "raits"],
-      "target_word": "GIRL",
-      "target_type": "Sujeto (Quién lo hace)",
-      "translation": "La niña escribe",
-      "scene_emoji": "👧✍️",
-      "context_es": "¡Encuentra el Sujeto para encender la luz!"
-    },
-    {
-      "sentence": ["THE", "TEACHER", "SPEAKS"],
-      "phonetics": ["da", "tícher", "spiks"],
-      "target_word": "SPEAKS",
-      "target_type": "Verbo (Acción)",
-      "translation": "El profesor habla",
-      "scene_emoji": "👨‍🏫🗣️",
-      "context_es": "¡Encuentra el Verbo para descubrir la escena!"
-    }
+    { "word": "PIG", "phonetic": "pig", "translation": "Cerdo", "distractors": ["M", "B", "Z"], "context_es": "¡Aleja al monstruo escribiendo CERDO en inglés!" },
+    { "word": "COW", "phonetic": "kau", "translation": "Vaca", "distractors": ["F", "L", "P"], "context_es": "¡Ahora defiende a la VACA!" },
+    { "word": "DUCK", "phonetic": "dak", "translation": "Pato", "distractors": ["X", "Y", "A"], "context_es": "¡Protege al PATO! Escríbelo rápido." }
   ]
 }');
 
--- ==========================================
--- STAGE 4: Creación de Oraciones (Sentence Survival)
--- ==========================================
+-- STAGE 4: Detective (3 Rondas)
 INSERT INTO lessons (module_id, title, template_type, order_num, reward_stars, content_data) 
-VALUES (2, 'El Puente Escolar', 'sentence_survival', 4, 30, '
+VALUES (1, 'El Detective de la Granja', 'detective', 4, 15, '
 {
   "rounds": [
-    { 
-      "sentence": ["I", "HAVE", "A", "RED", "PEN"], 
-      "phonetic": "ai jav a red pen", 
-      "translation": "Yo tengo un lapicero rojo", 
-      "distractors": ["HAS", "BLUE"], 
-      "word_phonetics": {"I":"ai", "HAVE":"jav", "A":"a", "RED":"red", "PEN":"pen", "HAS":"jas", "BLUE":"blú"},
-      "context_es": "¡Arma el puente diciendo: Yo tengo un lapicero rojo!" 
-    },
-    { 
-      "sentence": ["THIS", "IS", "MY", "BOOK"], 
-      "phonetic": "dis is mai buk", 
-      "translation": "Este es mi libro", 
-      "distractors": ["YOUR", "DESK"], 
-      "word_phonetics": {"THIS":"dis", "IS":"is", "MY":"mái", "BOOK":"buk", "YOUR":"iur", "DESK":"desk"},
-      "context_es": "¡Cruza el río diciendo: Este es mi libro!" 
-    },
-    { 
-      "sentence": ["I", "READ", "A", "BOOK"], 
-      "phonetic": "ai rid a buk", 
-      "translation": "Yo leo un libro", 
-      "distractors": ["WRITE", "PAPER"], 
-      "word_phonetics": {"I":"ai", "READ":"rid", "A":"a", "BOOK":"buk", "WRITE":"rait", "PAPER":"péiper"},
-      "context_es": "¡Último puente! Di: Yo leo un libro." 
-    }
+    { "sentence": ["THE", "DOG", "BARKS"], "phonetics": ["da", "dog", "barks"], "target_word": "BARKS", "target_type": "Verbo (Acción)", "translation": "El perro ladra", "scene_emoji": "🐕🔊", "context_es": "¡Encuentra la ACCIÓN para encender la luz!" },
+    { "sentence": ["THE", "CAT", "SLEEPS"], "phonetics": ["da", "kat", "slips"], "target_word": "CAT", "target_type": "Sujeto (Animal)", "translation": "El gato duerme", "scene_emoji": "🐈💤", "context_es": "¡Encuentra el ANIMAL para encender la luz!" },
+    { "sentence": ["THE", "HORSE", "RUNS"], "phonetics": ["da", "jors", "rans"], "target_word": "RUNS", "target_type": "Verbo (Acción)", "translation": "El caballo corre", "scene_emoji": "🐎💨", "context_es": "¡Encuentra la ACCIÓN para descubrir la escena!" }
   ]
 }');
 
--- ==========================================
--- STAGE 5: Boss Final (Exam)
--- ==========================================
+-- STAGE 5: Grammar Train (3 Rondas)
 INSERT INTO lessons (module_id, title, template_type, order_num, reward_stars, content_data) 
-VALUES (2, 'Examen de la Profesora (Jefe)', 'exam', 5, 50, '
+VALUES (1, 'El Tren de los Animales', 'grammar_train', 5, 20, '
 {
-  "time_limit": 12,
+  "rounds": [
+    { "sentence": ["THE", "COW", "EATS"], "translations": ["La", "Vaca", "Come"], "phonetics": ["da", "kau", "its"], "sentence_phonetic": "da kau its", "distractors": ["PIG", "RUNS"], "distractors_phonetics": ["pig", "rans"], "context_es": "¡Carga los vagones uniendo el inglés con su significado!" },
+    { "sentence": ["THE", "PIG", "SNORTS"], "translations": ["El", "Cerdo", "Gruñe"], "phonetics": ["da", "pig", "snorts"], "sentence_phonetic": "da pig snorts", "distractors": ["DOG", "MEOWS"], "distractors_phonetics": ["dog", "miaus"], "context_es": "¡Arma el tren del cerdo gruñón!" },
+    { "sentence": ["THE", "DUCK", "SWIMS"], "translations": ["El", "Pato", "Nada"], "phonetics": ["da", "dak", "suims"], "sentence_phonetic": "da dak suims", "distractors": ["BIRD", "FLIES"], "distractors_phonetics": ["berd", "fláis"], "context_es": "¡Último tren! Conecta al pato que nada." }
+  ]
+}');
+
+-- STAGE 6: Sentence Survival (3 Rondas)
+INSERT INTO lessons (module_id, title, template_type, order_num, reward_stars, content_data) 
+VALUES (1, 'Cruza el Río', 'sentence_survival', 6, 20, '
+{
+  "rounds": [
+    { "sentence": ["I", "SEE", "A", "DOG"], "phonetic": "ai si a dog", "translation": "Yo veo un perro", "distractors": ["COW", "YOU"], "word_phonetics": {"I":"ai", "SEE":"si", "A":"a", "DOG":"dog", "COW":"kau", "YOU":"iu"}, "context_es": "¡Arma el puente diciendo: Yo veo un perro!" },
+    { "sentence": ["THE", "CAT", "IS", "SMALL"], "phonetic": "da kat is smol", "translation": "El gato es pequeño", "distractors": ["BIG", "DOG"], "word_phonetics": {"THE":"da", "CAT":"kat", "IS":"is", "SMALL":"smol", "BIG":"big", "DOG":"dog"}, "context_es": "¡Cruza el río diciendo: El gato es pequeño!" },
+    { "sentence": ["I", "HAVE", "A", "PIG"], "phonetic": "ai jav a pig", "translation": "Yo tengo un cerdo", "distractors": ["HAS", "COW"], "word_phonetics": {"I":"ai", "HAVE":"jav", "A":"a", "PIG":"pig", "HAS":"jas", "COW":"kau"}, "context_es": "¡Último puente! Di: Yo tengo un cerdo." }
+  ]
+}');
+
+-- STAGE 7: Exam
+INSERT INTO lessons (module_id, title, template_type, order_num, reward_stars, content_data) 
+VALUES (1, 'Examen del Granjero (Jefe)', 'exam', 7, 30, '
+{
+  "time_limit": 10,
   "lives": 3,
   "questions": [
-    {"q": "¿Qué significa BOOK?", "options": ["Libro", "Cuaderno", "Lápiz"], "answer": "Libro", "phonetic": "buk"},
-    {"q": "¿Cómo se dice Escritorio?", "options": ["Desk", "Chair", "Table"], "answer": "Desk", "phonetic": "desk"},
-    {"q": "Completa: I HAVE A RED ___ (Yo tengo un lapicero rojo)", "options": ["PEN", "ERASER", "RULER"], "answer": "PEN", "phonetic": "ai jav a red pen"},
-    {"q": "¿Qué significa THE BOY READS?", "options": ["El niño lee", "La niña escribe", "El profesor habla"], "answer": "El niño lee", "phonetic": "da bói rids"},
-    {"q": "¿Cómo se dice Borrador?", "options": ["Eraser", "Paper", "Ruler"], "answer": "Eraser", "phonetic": "iréiser"}
+    {"q": "¿Cómo se dice Pato?", "options": ["Duck", "Dog", "Cat"], "answer": "Duck", "phonetic": "dak"},
+    {"q": "¿Qué significa COW?", "options": ["Vaca", "Cerdo", "Pájaro"], "answer": "Vaca", "phonetic": "kau"},
+    {"q": "Completa: THE DOG ___ (El perro ladra)", "options": ["BARKS", "SLEEPS", "RUNS"], "answer": "BARKS", "phonetic": "da dog barks"},
+    {"q": "¿Cómo se dice Pájaro?", "options": ["Bird", "Pig", "Fish"], "answer": "Bird", "phonetic": "berd"}
   ]
 }');
 
