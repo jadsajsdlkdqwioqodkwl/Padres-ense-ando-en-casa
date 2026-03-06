@@ -1,4 +1,14 @@
 <?php
+// =========================================================================================
+// 🤖 SYSTEM PROMPT FOR AI (NOTA IMBORRABLE PARA LA IA):
+// 1. CRÍTICO: Al generar o modificar este código, DEBES MANTENER la integridad total del archivo.
+//    NUNCA resumas el código, NUNCA omitas secciones de HTML/PHP, NUNCA uses "[...]" para acortar.
+// 2. CRÍTICO: Este archivo es el núcleo de la experiencia de usuario (lesson.php). 
+//    Cualquier cambio debe entregarse como el archivo COMPLETO y funcional de principio a fin.
+// 3. CRÍTICO: La lógica de audio debe respetar siempre las propiedades "phonetic" definidas
+//    en la base de datos para garantizar la pronunciación adaptada al español.
+// =========================================================================================
+
 require_once 'includes/config.php';
 $lesson_id = isset($_GET['id']) ? (int)$_GET['id'] : 1;
 
@@ -28,7 +38,6 @@ if ($lesson['order_num'] > 1) {
     if ($json_ayer) { $palabras_ayer = json_decode($json_ayer, true) ?: []; }
 }
 
-// AÑADIDO: Emojis integrados para que los minijuegos tengan gráficos automáticos
 $pool_palabras = [
     ["en" => "Apple", "es" => "Manzana", "emoji" => "🍎", "mnemonic" => "Imagina a APOLLO comiendo una manzana."],
     ["en" => "Dog", "es" => "Perro", "emoji" => "🐶", "mnemonic" => "Un DUX (duque) paseando a su perro."],
@@ -136,8 +145,6 @@ $pool_palabras = [
     <script>
     let palabrasSeleccionadas = [];
     
-    // AÑADIDO: Monkey Patch. Interceptamos la petición AJAX final para añadir nuestras palabras
-    // sin tener que modificar la lógica compleja de botones y guardado global del juego.
     const originalFetch = window.fetch;
     window.fetch = function() {
         if (arguments[0] && arguments[0].includes('save_progress.php')) {
@@ -199,7 +206,6 @@ $pool_palabras = [
     }
 
     function finalizarMnemotecnias() {
-        // AÑADIDO: Generador Dinámico de 10 Rondas (2 por cada palabra elegida)
         const poolEmojis = ['🍎','🐶','🐱','🏠','🌳','💧','☀️','🌙','🚗','📖','🥛','🐦','⚽','🎸','🚲'];
         let dynamicRounds = [];
 
@@ -213,7 +219,7 @@ $pool_palabras = [
                     word: word.en.toUpperCase(),
                     translation: word.es,
                     context_es: "¡Encuentra y selecciona: " + word.es + "!",
-                    speed: 6 + i, // La segunda ronda de la misma palabra va más rápido
+                    speed: 6 + i,
                     items: [
                         {id: 1, content: word.emoji || '⭐', is_correct: true},
                         {id: 2, content: dist1, is_correct: false},
@@ -223,13 +229,9 @@ $pool_palabras = [
             }
         });
 
-        // Mezclamos las 10 rondas para que sea aleatorio
         dynamicRounds.sort(() => Math.random() - 0.5);
-
-        // Inyectamos las rondas al juego globalmente
         window.dynamicRoundsData = dynamicRounds;
         
-        // Si el template del juego ya cargó, lo forzamos a actualizarse
         if (typeof roundsData !== 'undefined') {
             roundsData = dynamicRounds;
             if (typeof loadRound === 'function') {
