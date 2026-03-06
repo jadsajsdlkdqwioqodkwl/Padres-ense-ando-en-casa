@@ -308,8 +308,10 @@ if ($step > 0 && $step <= 5) {
         document.getElementById('diploma-modal').style.display = 'none';
         document.getElementById('pool-modal').style.display = 'flex';
     }
-    <?php endif; ?>
+<?php endif; ?>
     <?php endif; ?>
     </script>
+    
+    <script src="assets/js/engine.js"></script>
 </body>
 </html>

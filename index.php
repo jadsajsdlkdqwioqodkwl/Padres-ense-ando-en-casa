@@ -1,153 +1,272 @@
 <?php
-require_once 'includes/config.php';
-
-// Protección de ruta. Si no hay sesión, al login.
-if (!isset($_SESSION['user_id'])) {
-    header("Location: login.php");
-    exit;
+// Seguro para evitar choques de sesión
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
 }
 
-$user_id = $_SESSION['user_id'];
-
-// Consultamos al usuario incluyendo su fecha de suscripción
-$stmtUser = $pdo->prepare("SELECT child_name, total_stars, subscription_expires_at FROM users WHERE id = ?");
-$stmtUser->execute([$user_id]);
-$user_info = $stmtUser->fetch();
-
-// Obtener los módulos (Semanas) disponibles
-$stmt = $pdo->query("SELECT * FROM modules ORDER BY order_num ASC");
-$modules = $stmt->fetchAll();
-
-$page_title = "Inicio - Mi Mundo";
-
-// Lógica de Bloqueo por Suscripción Vencida (31 días)
-$is_expired = false;
-$days_left = 0;
-if (empty($user_info['subscription_expires_at'])) {
-    $is_expired = true; // Si por error no tiene fecha, lo bloqueamos
-} else {
-    $expire_timestamp = strtotime($user_info['subscription_expires_at']);
-    $current_timestamp = time();
-    if ($current_timestamp > $expire_timestamp) {
-        $is_expired = true;
-    } else {
-        $days_left = ceil(($expire_timestamp - $current_timestamp) / 86400);
-    }
+// Si el usuario ya pagó y está logueado, lo mandamos directo a su zona de estudio.
+if (isset($_SESSION['user_id'])) {
+    header("Location: course.php?module=1");
+    exit;
 }
 ?>
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <?php include 'includes/head.php'; ?>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My World - Plataforma Educativa</title>
     <style>
-        .dashboard-header {
-            background: var(--primary); color: white; border-radius: 20px; padding: 30px;
-            margin-bottom: 30px; display: flex; justify-content: space-between; align-items: center;
-            box-shadow: 0 10px 20px rgba(108, 92, 237, 0.2); flex-wrap: wrap; gap: 20px;
-        }
-        .user-stats { display: flex; flex-direction: column; gap: 10px; align-items: flex-end; }
-        .stat-badge {
-            background: rgba(255,255,255,0.2); padding: 10px 20px; border-radius: 15px;
-            font-size: 20px; font-weight: bold; backdrop-filter: blur(5px); display: flex; align-items: center; gap: 10px;
-        }
-        .subscription-badge { font-size: 14px; background: rgba(0,0,0,0.3); padding: 5px 15px; border-radius: 10px; }
+        :root { --primary: #6c5ced; --secondary: #ff9f43; --dark: #2d3436; --light: #f8f9fa; --success: #2ed573; --disabled: #b2bec3; }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background: var(--light); color: var(--dark); line-height: 1.6; }
         
-        .module-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px; }
-        .module-card {
-            background: white; border-radius: 25px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.08);
-            transition: 0.3s; text-decoration: none; color: inherit; display: block; border: 4px solid transparent;
-        }
-        .module-card:hover { transform: translateY(-10px); box-shadow: 0 20px 40px rgba(0,0,0,0.12); }
-        .module-img { height: 180px; width: 100%; object-fit: cover; display: flex; align-items: center; justify-content: center; font-size: 80px; }
-        .module-content { padding: 25px; }
-        .btn-play {
-            display: inline-block; background: var(--success); color: white; padding: 12px 25px;
-            border-radius: 30px; font-weight: bold; margin-top: 15px; box-shadow: 0 4px 0 #218c74;
-        }
-        
-        .btn-logout {
-            background: rgba(255,255,255,0.2); color: white; border: none; padding: 10px 20px;
-            border-radius: 15px; cursor: pointer; font-weight: bold; text-decoration: none; transition: 0.2s;
-        }
-        .btn-logout:hover { background: rgba(255,255,255,0.4); }
+        /* Navegación */
+        .landing-nav { background: white; padding: 15px 5%; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 10px rgba(0,0,0,0.05); position: sticky; top: 0; z-index: 100; }
+        .logo { font-size: 24px; font-weight: bold; color: var(--primary); text-decoration: none; }
+        .login-btn { background: transparent; border: 2px solid var(--primary); color: var(--primary); padding: 8px 20px; border-radius: 20px; text-decoration: none; font-weight: bold; transition: 0.3s; }
+        .login-btn:hover { background: var(--primary); color: white; }
 
-        .lock-overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(255,255,255,0.95); z-index: 9999; display: flex;
-            flex-direction: column; align-items: center; justify-content: center;
-            backdrop-filter: blur(10px); text-align: center; padding: 20px;
-        }
-        .lock-box {
-            background: white; border-radius: 20px; padding: 40px; max-width: 500px;
-            box-shadow: 0 20px 50px rgba(0,0,0,0.15); border: 3px solid #ff4757;
-        }
-        .btn-renew {
-            display: inline-block; background: #ff4757; color: white; padding: 15px 30px;
-            border-radius: 30px; font-size: 20px; font-weight: bold; text-decoration: none;
-            margin-top: 20px; box-shadow: 0 6px 0 #c0392b; transition: 0.2s;
-        }
-        .btn-renew:active { transform: translateY(4px); box-shadow: 0 2px 0 #c0392b; }
+        /* Hero */
+        .hero { text-align: center; padding: 60px 5%; background: linear-gradient(135deg, #fdfbfb 0%, #ebedee 100%); }
+        .hero h1 { font-size: 2.8rem; color: var(--primary); margin-bottom: 15px; }
         
-        @media (max-width: 600px) {
-            .dashboard-header { flex-direction: column; text-align: center; }
-            .user-stats { align-items: center; width: 100%; justify-content: center; margin-top: 15px; }
-        }
+        /* Grid de 5 Productos */
+        .products-section { padding: 50px 5%; text-align: center; }
+        .grid-products { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 30px; margin-top: 30px; }
+        .product-card { background: white; border-radius: 15px; overflow: hidden; box-shadow: 0 10px 20px rgba(0,0,0,0.05); text-align: left; transition: transform 0.3s; border: 1px solid #eee; }
+        .product-card:hover { transform: translateY(-5px); box-shadow: 0 15px 30px rgba(0,0,0,0.1); }
+        .product-img { width: 100%; height: 200px; display: flex; justify-content: center; align-items: center; font-size: 80px; }
+        .product-info { padding: 20px; }
+        .product-price { font-size: 1.5rem; font-weight: bold; color: var(--secondary); margin: 10px 0; }
+        
+        /* Botones de producto */
+        .btn-cart { display: block; width: 100%; text-align: center; background: var(--success); color: white; padding: 12px; border-radius: 8px; text-decoration: none; font-weight: bold; cursor: pointer; border: none; font-size: 16px; }
+        .btn-cart:hover { background: #26b964; }
+        .btn-disabled { display: block; width: 100%; text-align: center; background: var(--disabled); color: white; padding: 12px; border-radius: 8px; font-weight: bold; border: none; cursor: not-allowed; }
+        .badge-soon { background: #ff4757; color: white; padding: 4px 8px; border-radius: 4px; font-size: 12px; vertical-align: middle; margin-left: 10px; }
+
+        /* Footer y Legal */
+        .footer { background: var(--dark); color: white; padding: 50px 5%; display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 30px; }
+        .footer h3 { color: var(--secondary); margin-bottom: 15px; }
+        .footer p, .footer a { color: #ccc; text-decoration: none; margin-bottom: 10px; display: block; }
+        .footer a:hover { color: white; }
+        
+        /* Modales */
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 1000; display: none; justify-content: center; align-items: center; padding: 20px; }
+        .modal-box { background: white; padding: 30px; border-radius: 15px; max-width: 500px; width: 100%; max-height: 90vh; overflow-y: auto; position: relative; }
+        .close-modal { position: absolute; top: 15px; right: 15px; font-size: 24px; cursor: pointer; color: #555; background: none; border: none; }
+        
+        .form-control { width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid #ccc; border-radius: 8px; font-size: 16px; }
     </style>
 </head>
 <body>
-    
-    <?php if($is_expired): ?>
-    <div class="lock-overlay">
-        <div class="lock-box">
-            <h1 style="font-size: 60px; margin: 0;">⏳</h1>
-            <h2 style="color: #ff4757; margin: 10px 0;">¡Tu mes de aprendizaje ha concluido!</h2>
-            <p style="color: #555; font-size: 18px;">Han pasado los 31 días de tu suscripción. Para que <?php echo htmlspecialchars($user_info['child_name']); ?> siga aprendiendo nuevas palabras y desbloqueando trofeos, renueva el acceso.</p>
-            <a href="renovar.php" class="btn-renew">Renovar Suscripción (S/ 39.00)</a>
-            <br><br>
-            <a href="logout.php" style="color: #888; text-decoration: underline;">Cerrar Sesión</a>
-        </div>
-    </div>
-    <?php endif; ?>
 
-    <div class="container" style="<?php echo $is_expired ? 'filter: blur(5px); pointer-events: none;' : ''; ?>">
-        <?php include 'includes/navbar.php'; ?>
+    <nav class="landing-nav">
+        <a href="#" class="logo">🚀 My World</a>
+        <a href="login.php" class="login-btn">Acceso Alumnos</a>
+    </nav>
 
-        <div class="dashboard-header">
-            <div>
-                <h1 style="margin: 0; font-size: 2.5rem;">¡Hola, <?php echo htmlspecialchars($user_info['child_name']); ?>! 🖐️</h1>
-                <p style="margin: 5px 0 0 0; opacity: 0.9; font-size: 1.2rem;">¿Listo para aprender nuevas palabras hoy?</p>
-            </div>
-            <div class="user-stats">
-                <div class="stat-badge">⭐ <?php echo $user_info['total_stars']; ?> Estrellas</div>
-                <?php if(!$is_expired): ?>
-                    <div class="subscription-badge">⏳ Te quedan <?php echo $days_left; ?> días</div>
-                <?php endif; ?>
-                <a href="logout.php" class="btn-logout" title="Cerrar Sesión">🚪 Salir</a>
-            </div>
-        </div>
-
-        <h2 style="color: var(--dark); margin-bottom: 20px; font-size: 2rem;">Tus Semanas de Aprendizaje</h2>
+    <div class="hero">
+        <h1>Educación Interactiva para tus Hijos</h1>
+        <p>Aprende jugando con nuestros cursos especializados. ¡Selecciona un curso y comienza la aventura!</p>
         
-        <div class="module-grid">
-            <?php foreach ($modules as $module): ?>
-                <a href="course.php?module=<?php echo $module['id']; ?>" class="module-card" style="border-color: <?php echo htmlspecialchars($module['color_theme']); ?>;">
-                    <div class="module-img" style="background: <?php echo htmlspecialchars($module['color_theme']); ?>20; color: <?php echo htmlspecialchars($module['color_theme']); ?>;">
-                        <?php 
-                        if(strpos(strtolower($module['title']), 'entorno') !== false) echo '🏡';
-                        elseif(strpos(strtolower($module['title']), 'naturaleza') !== false) echo '🌲';
-                        else echo '🚀'; 
-                        ?>
-                    </div>
-                    <div class="module-content">
-                        <h3 style="margin: 0 0 10px 0; color: var(--dark); font-size: 1.5rem;"><?php echo htmlspecialchars($module['title']); ?></h3>
-                        <p style="color: var(--text-muted); margin-bottom: 15px;">Completa tus 5 palabras diarias y genera tu diploma.</p>
-                        <div class="btn-play">Entrar a la Semana ▶</div>
-                    </div>
-                </a>
-            <?php endforeach; ?>
+        <div style="background: #fff3cd; color: #856404; padding: 15px; border-radius: 10px; display: inline-block; margin-top: 20px; border: 1px solid #ffeeba;">
+            <strong>Datos de prueba para pasarela de pagos (Culqi):</strong><br>
+            Puedes probar el flujo de alumnos en "Acceso Alumnos" -> Número: <strong>+51999888777</strong>
         </div>
     </div>
-    
-    <?php include 'includes/footer.php'; ?>
+
+    <section class="products-section">
+        <h2 style="font-size: 2rem; color: var(--dark);">Catálogo de Cursos</h2>
+        <div class="grid-products">
+            
+            <div class="product-card" style="border: 2px solid var(--success);">
+                <div class="product-img" style="background: #e0e7ff;">🇬🇧</div>
+                <div class="product-info">
+                    <h3>Inglés: My World</h3>
+                    <p>Aprende 5 palabras al día con juegos interactivos, audios nativos y mnemotecnias.</p>
+                    <div class="product-price">S/ 39.00 <span style="font-size: 14px; color: #888;">/mes</span></div>
+                    <button class="btn-cart" onclick="openCheckout('Inglés: My World')">🛒 Comprar Curso</button>
+                </div>
+            </div>
+
+            <div class="product-card">
+                <div class="product-img" style="background: #ffeaa7;">🔢</div>
+                <div class="product-info">
+                    <h3>Matemáticas Lúdicas <span class="badge-soon">Próximamente</span></h3>
+                    <p>Sumas y restas divertidas salvando a los alienígenas en el espacio.</p>
+                    <div class="product-price">S/ 29.00 <span style="font-size: 14px; color: #888;">/mes</span></div>
+                    <button class="btn-disabled" disabled>No Disponible Aún</button>
+                </div>
+            </div>
+
+            <div class="product-card">
+                <div class="product-img" style="background: #dff9fb;">🔬</div>
+                <div class="product-info">
+                    <h3>Ciencias: Pequeño Genio <span class="badge-soon">Próximamente</span></h3>
+                    <p>Experimentos virtuales y el descubrimiento del cuerpo humano.</p>
+                    <div class="product-price">S/ 45.00 <span style="font-size: 14px; color: #888;">/mes</span></div>
+                    <button class="btn-disabled" disabled>No Disponible Aún</button>
+                </div>
+            </div>
+
+            <div class="product-card">
+                <div class="product-img" style="background: #ffda79;">🎨</div>
+                <div class="product-info">
+                    <h3>Arte y Creatividad <span class="badge-soon">Próximamente</span></h3>
+                    <p>Desarrolla habilidades motoras finas coloreando en nuestra pizarra digital.</p>
+                    <div class="product-price">S/ 25.00 <span style="font-size: 14px; color: #888;">/mes</span></div>
+                    <button class="btn-disabled" disabled>No Disponible Aún</button>
+                </div>
+            </div>
+
+            <div class="product-card">
+                <div class="product-img" style="background: #f8a5c2;">🧠</div>
+                <div class="product-info">
+                    <h3>Lógica y Memoria <span class="badge-soon">Próximamente</span></h3>
+                    <p>Juegos de cartas y secuencias lógicas para ejercitar el cerebro a temprana edad.</p>
+                    <div class="product-price">S/ 35.00 <span style="font-size: 14px; color: #888;">/mes</span></div>
+                    <button class="btn-disabled" disabled>No Disponible Aún</button>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <footer class="footer">
+        <div>
+            <h3>Datos de Contacto</h3>
+            <p>📍 Dirección: Calle Falsa 123, Lima, Perú</p>
+            <p>📞 Teléfono / WhatsApp: +51 928 529 656</p>
+            <p>✉️ Correo: soporte@myworldingles.simpledomai123n.online</p>
+        </div>
+        <div>
+            <h3>Información Legal</h3>
+            <a href="#" onclick="openModal('modal-terminos')">Términos y Condiciones</a>
+            <a href="#" onclick="openModal('modal-devoluciones')">Políticas de Devoluciones</a>
+        </div>
+        <div>
+            <h3>Atención al Cliente</h3>
+            <a href="#" onclick="openModal('modal-reclamaciones')" style="display: inline-block; padding: 10px; border: 2px solid white; border-radius: 8px; margin-top: 10px;">📖 Libro de Reclamaciones</a>
+        </div>
+    </footer>
+
+    <div id="modal-checkout" class="modal-overlay">
+        <div class="modal-box">
+            <button class="close-modal" onclick="closeModal('modal-checkout')">&times;</button>
+            <h3 style="margin-bottom: 20px; color: var(--primary);" id="checkout-title">Comprar Curso</h3>
+            <p style="margin-bottom: 15px; font-size: 14px; color: #666;">Crea la cuenta de tu hijo/a para acceder a la plataforma.</p>
+            
+            <form id="checkout-form">
+                <input type="text" id="child_name" class="form-control" placeholder="Nombre de tu hijo/a" required>
+                <input type="tel" id="parent_phone" class="form-control" placeholder="Tu número de WhatsApp (Ej: 999888777)" required>
+                
+                <button type="submit" class="btn-cart" id="btn-comprar">Pagar S/ 39.00 (Simulador)</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="modal-reclamaciones" class="modal-overlay">
+        <div class="modal-box">
+            <button class="close-modal" onclick="closeModal('modal-reclamaciones')">&times;</button>
+            <h3 style="margin-bottom: 15px;">Libro de Reclamaciones</h3>
+            <p style="font-size: 12px; color: #666; margin-bottom: 15px;">Conforme al Código de Protección y Defensa del Consumidor de INDECOPI.</p>
+            <input type="text" class="form-control" placeholder="Nombre y Apellidos completos">
+            <input type="email" class="form-control" placeholder="Correo electrónico">
+            <input type="text" class="form-control" placeholder="DNI / CE">
+            <textarea class="form-control" rows="4" placeholder="Detalle su reclamo o queja aquí..."></textarea>
+            <button class="btn-cart" onclick="alert('Reclamo registrado correctamente en nuestro sistema interno. Recibirá una copia en su correo en las próximas 24 horas.'); closeModal('modal-reclamaciones');">Enviar Reclamo</button>
+        </div>
+    </div>
+
+    <div id="modal-terminos" class="modal-overlay">
+        <div class="modal-box">
+            <button class="close-modal" onclick="closeModal('modal-terminos')">&times;</button>
+            <h3 style="margin-bottom: 15px;">Términos y Condiciones</h3>
+            <div style="font-size: 14px; color: #555; max-height: 300px; overflow-y: auto; padding-right: 10px;">
+                <p>1. <strong>Aceptación:</strong> Al adquirir nuestros servicios, el usuario acepta estos términos.</p>
+                <p>2. <strong>Acceso:</strong> El acceso a la plataforma es personal e intransferible. Está prohibido compartir credenciales.</p>
+                <p>3. <strong>Suscripción:</strong> El servicio se brinda bajo una modalidad de suscripción recurrente mensual.</p>
+                <p>4. <strong>Responsabilidad:</strong> No garantizamos el aprendizaje fluido del idioma sin la supervisión constante y el involucramiento activo del padre o apoderado en el uso de la herramienta.</p>
+            </div>
+        </div>
+    </div>
+
+    <div id="modal-devoluciones" class="modal-overlay">
+        <div class="modal-box">
+            <button class="close-modal" onclick="closeModal('modal-devoluciones')">&times;</button>
+            <h3 style="margin-bottom: 15px;">Política de Cambios y Devoluciones</h3>
+            <div style="font-size: 14px; color: #555;">
+                <p>Ofrecemos una <strong>Garantía de Satisfacción de 7 días</strong>.</p>
+                <br>
+                <p>Si durante los primeros 7 días calendario desde la fecha de compra inicial el usuario no está satisfecho con la plataforma, puede solicitar el reembolso íntegro de su dinero enviando un correo electrónico detallando el motivo a soporte@myworldingles.simpledomai123n.online.</p>
+                <br>
+                <p>Pasado este plazo de 7 días, no se emitirán reembolsos parciales ni totales bajo ninguna circunstancia. No se realizan cambios de un curso a otro una vez activada la licencia.</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Funciones de control de modales
+        function openCheckout(curso) {
+            document.getElementById('checkout-title').innerText = "Comprar " + curso;
+            document.getElementById('modal-checkout').style.display = 'flex';
+        }
+        function openModal(id) { document.getElementById(id).style.display = 'flex'; }
+        function closeModal(id) { document.getElementById(id).style.display = 'none'; }
+
+        // Cerrar modal al hacer click afuera
+        window.onclick = function(event) {
+            if (event.target.classList.contains('modal-overlay')) {
+                event.target.style.display = "none";
+            }
+        }
+
+        // Simulación de conexión con tu backend de pagos
+        document.getElementById('checkout-form').addEventListener('submit', function (e) {
+            e.preventDefault();
+            const childName = document.getElementById('child_name').value.trim();
+            const parentPhone = document.getElementById('parent_phone').value.trim();
+
+            const btn = document.getElementById('btn-comprar');
+            btn.innerText = "Procesando pago..."; 
+            btn.disabled = true;
+            btn.style.background = "#555";
+
+            // Llamada real al script que ya arreglaste en Docker
+            fetch('app/process_payment.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ 
+                    token: "simulacion_aprobada", 
+                    child_name: childName, 
+                    parent_phone: parentPhone 
+                })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if(data.success) {
+                    alert("¡Pago exitoso! Cuenta creada. Redirigiendo a tus cursos..."); 
+                    // Como el pago simulado fue exitoso e inició sesión en el backend, recargar nos enviará a course.php
+                    window.location.reload(); 
+                } else {
+                    alert("Error en el pago: " + data.message);
+                    resetBtn(btn);
+                }
+            })
+            .catch(err => {
+                console.error(err);
+                alert("Hubo un error de conexión con el servidor.");
+                resetBtn(btn);
+            });
+        });
+
+        function resetBtn(btn) {
+            btn.innerText = "Pagar S/ 39.00 (Simulador)"; 
+            btn.disabled = false;
+            btn.style.background = "var(--success)";
+        }
+    </script>
 </body>
 </html>
