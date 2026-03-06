@@ -98,7 +98,13 @@ if ($step > 0 && $step <= 5) {
     <?php include 'includes/head.php'; ?>
     <style>
         .overlay-fullscreen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; color: white; overflow-y: auto; padding: 20px; }
-        .modal-box { background: white; color: #333; border-radius: 20px; padding: 30px; max-width: 800px; width: 100%; box-shadow: 0 10px 30px rgba(0,0,0,0.5); text-align: center; margin: auto; }
+        .modal-box { 
+    background: white; color: #333; border-radius: 20px; padding: 30px; 
+    max-width: 800px; width: 100%; box-shadow: 0 10px 30px rgba(0,0,0,0.5); 
+    text-align: center; margin: auto; 
+    max-height: 85vh; /* AÑADIDO: Límite de altura */
+    overflow-y: auto; /* AÑADIDO: Scroll interno */
+}
         .word-pool-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 15px; margin: 20px 0; }
         .pool-word { background: #f0f0f0; border: 3px solid #ccc; border-radius: 10px; padding: 15px; cursor: pointer; transition: 0.2s; font-weight: bold; font-size: 18px; }
         .pool-word.selected { background: #d4edda; border-color: #28a745; color: #155724; transform: scale(1.05); box-shadow: 0 4px 10px rgba(40,167,69,0.3); }
@@ -156,7 +162,16 @@ if ($step > 0 && $step <= 5) {
                 <button class="btn-large" onclick="finalizarMnemotecnias()">¡Ya las copié, a jugar!</button>
             </div>
         </div>
-
+<div id="mnemotecnia-modal" class="overlay-fullscreen" style="display: none;">
+            <div class="modal-box">
+                <h2 style="color: #28a745;">🧠 Aprende con Mnemotecnias</h2>
+                <p style="font-size: 18px; color: #555;">Copia estas palabras y sus trucos en tu cuaderno.</p>
+                <div id="mnemotecnias-container"></div>
+                <button class="btn-large" onclick="finalizarMnemotecnias()">¡Ya las copié, a jugar!</button>
+            </div>
+        </div>
+        
+        <script src="assets/js/engine.js"></script>
     <?php else: ?>
         <script> window.dynamicRoundsData = <?php echo json_encode($dynamic_rounds); ?>; </script>
         

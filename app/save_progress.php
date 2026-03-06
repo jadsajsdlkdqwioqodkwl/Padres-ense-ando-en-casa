@@ -4,8 +4,11 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-require_once '../includes/config.php';
-require_once 'whatsapp_webhook.php'; 
+if (file_exists('whatsapp_webhook.php')) {
+    require_once 'whatsapp_webhook.php'; 
+} elseif (file_exists('whatsapp_webhook (deprecado).php')) {
+    require_once 'whatsapp_webhook (deprecado).php'; 
+}
 
 $data = json_decode(file_get_contents("php://input"), true);
 
