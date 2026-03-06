@@ -16,46 +16,28 @@ $rounds = $lesson_data['rounds'] ?? [
 ?>
 
 <style>
-    /* ==========================================
-       ENTORNO Y VARIABLES
-    ========================================== */
     .color-board { position: relative; width: 100%; height: 450px; background: var(--dark); border-radius: 20px; overflow: hidden; border: 4px solid var(--primary); margin-bottom: 20px; box-shadow: inset 0 0 40px rgba(0,0,0,0.8); display: flex; flex-direction: column; justify-content: flex-end; }
     .round-indicator { position: absolute; top: 15px; left: 15px; color: white; font-weight: bold; font-size: 16px; z-index: 50; background: var(--primary); padding: 5px 15px; border-radius: 20px; }
-
-    /* ==========================================
-       MODAL TUTORIAL
-    ========================================== */
     .tutorial-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.95); z-index: 100; display: flex; flex-direction: column; justify-content: center; align-items: center; border-radius: 15px; transition: opacity 0.5s; text-align: center; padding: 20px; }
     .tutorial-icon { font-size: 80px; margin-bottom: 10px; animation: bounce 2s infinite; }
     .tutorial-word { font-size: 40px; font-weight: bold; margin-bottom: 5px; text-transform: uppercase; letter-spacing: 2px;}
     .btn-action { margin-top: 20px; padding: 15px 40px; font-size: 20px; font-weight: bold; background: var(--success); color: white; border: none; border-radius: 30px; cursor: pointer; box-shadow: 0 6px 0 #27ae60; transition: 0.2s; }
     .btn-action:active { transform: translateY(6px); box-shadow: 0 0 0 #27ae60; }
-
-    /* ==========================================
-       EL OVNI Y EL DIBUJO
-    ========================================== */
     .css-ufo { position: absolute; top: -80px; left: 50%; transform: translateX(-50%); width: 120px; height: 50px; z-index: 20; transition: top linear; }
     .ufo-dome { position: absolute; top: 0; left: 30px; width: 60px; height: 35px; background: rgba(129, 236, 236, 0.6); border-radius: 30px 30px 0 0; border: 2px solid #00cec9; z-index: 2; }
     .ufo-base { position: absolute; bottom: 0; width: 100%; height: 25px; background: #b2bec3; border-radius: 20px; border: 3px solid #2d3436; box-shadow: inset 0 -5px 0 rgba(0,0,0,0.2); z-index: 3; }
     .ufo-lights { position: absolute; bottom: 5px; left: 15px; width: 90px; display: flex; justify-content: space-between; z-index: 4; }
     .ufo-light { width: 8px; height: 8px; background: #ffeaa7; border-radius: 50%; animation: blink 0.5s infinite alternate; }
-    
     .tractor-beam { position: absolute; top: 40px; left: 50%; transform: translateX(-50%); width: 80px; height: 0px; background: linear-gradient(to bottom, rgba(0, 206, 201, 0.8), rgba(0, 206, 201, 0.1)); clip-path: polygon(20% 0, 80% 0, 100% 100%, 0 100%); z-index: 1; transition: height linear; }
-
     .target-canvas { position: absolute; bottom: 120px; left: 50%; transform: translateX(-50%); font-size: 100px; z-index: 10; filter: grayscale(100%) brightness(1.5); transition: filter 1s, transform 0.3s; }
     .target-canvas.colored { filter: grayscale(0%) brightness(1); animation: celebrate 1s; }
     .target-canvas.abducted { bottom: 100%; opacity: 0; transition: bottom 1s, opacity 1s; }
-
-    /* ==========================================
-       ESTACIÓN DE PINTURA DINÁMICA
-    ========================================== */
     .paint-station { width: 100%; height: 100px; background: #2f3640; border-top: 5px solid #353b48; display: flex; justify-content: center; align-items: center; gap: 20px; z-index: 30; }
     .paint-bucket { position: relative; width: 60px; height: 60px; background: #f1f2f6; border: 4px solid #747d8c; border-radius: 10px 10px 15px 15px; cursor: pointer; display: flex; align-items: flex-start; justify-content: center; box-shadow: 0 10px 0 rgba(0,0,0,0.2); transition: 0.1s; }
     .paint-bucket:active { transform: translateY(8px); box-shadow: 0 2px 0 rgba(0,0,0,0.2); }
     .paint-fill { width: 100%; height: 80%; border-radius: 5px 5px 10px 10px; border-bottom: 5px solid rgba(0,0,0,0.2); }
     .splat { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0); width: 150px; height: 150px; background: currentColor; clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%); border-radius: 30%; z-index: 40; opacity: 0; pointer-events: none; }
     .splat-anim { animation: splatPop 0.6s forwards; }
-
     @keyframes blink { 0% { background: #ffeaa7; } 100% { background: #ff7675; } }
     @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-15px); } }
     @keyframes celebrate { 0% { transform: translateX(-50%) scale(1); } 50% { transform: translateX(-50%) scale(1.3) rotate(10deg); } 100% { transform: translateX(-50%) scale(1) rotate(0); } }
@@ -98,7 +80,27 @@ $rounds = $lesson_data['rounds'] ?? [
 </div>
 
 <script>
-    const roundsData = <?php echo json_encode($rounds); ?>;
+    // AÑADIDO: Adaptador Dinámico para Color Rescue
+    let roundsData = window.dynamicRoundsData || <?php echo json_encode($rounds); ?>;
+    
+    if (window.dynamicRoundsData) {
+        roundsData = roundsData.map(r => {
+            const randomColorHex = '#' + Math.floor(Math.random()*16777215).toString(16).padStart(6, '0');
+            return {
+                color_name: r.target_word || r.word,
+                phonetic: r.target_word || r.word,
+                color_hex: randomColorHex,
+                item: r.items ? r.items[0].content : '⭐',
+                translation: r.translation,
+                context_es: "¡Pinta la palabra antes de que se la lleven!",
+                distractors: [
+                    { name: 'X', hex: '#333333' },
+                    { name: 'Y', hex: '#777777' }
+                ]
+            };
+        });
+    }
+
     const timeLimit = <?php echo $time_limit; ?>;
     let currentRoundIndex = 0;
     
@@ -118,6 +120,7 @@ $rounds = $lesson_data['rounds'] ?? [
     loadRound(currentRoundIndex);
 
     function loadRound(index) {
+        if (!roundsData || !roundsData[index]) return;
         const round = roundsData[index];
         document.getElementById('round-indicator').innerText = `Ronda ${index + 1}/${roundsData.length}`;
         
@@ -150,7 +153,6 @@ $rounds = $lesson_data['rounds'] ?? [
 
         allColors.forEach(c => {
             const isCorrect = c.correct ? '1' : '0';
-            // Si el JSON tiene el fonético lo usa, si no, usa el nombre normal
             const phoneticToRead = c.phonetic || c.name; 
             station.innerHTML += `
                 <div class="paint-bucket" data-correct="${isCorrect}" onclick="shootColor(this, '${c.hex}', '${phoneticToRead}')">
@@ -169,10 +171,8 @@ $rounds = $lesson_data['rounds'] ?? [
    function playLessonAudio() {
         document.getElementById('btn-start').style.display = 'block';
         const round = roundsData[currentRoundIndex];
-        
-        // Pasamos el valor fonético si existe, si no, la palabra normal
         const textToRead = round.phonetic || round.color_name;
-        playTTS(textToRead);
+        if(typeof playTTS !== 'undefined') playTTS(textToRead, false);
     }
 
     function startActionPhase() {
@@ -192,11 +192,7 @@ $rounds = $lesson_data['rounds'] ?? [
     function shootColor(bucketEl, hexColor, colorPhonetic) {
         if (!gameActive) return;
 
-        // Mandamos a leer la palabra/fonética con el motor de audio unificado
-        if(typeof playTTS !== 'undefined') {
-            playTTS(colorPhonetic);
-        }
-
+        if(typeof playTTS !== 'undefined') playTTS(colorPhonetic, false);
         const isCorrect = bucketEl.getAttribute('data-correct') === '1';
 
         if (isCorrect) {
@@ -222,7 +218,7 @@ $rounds = $lesson_data['rounds'] ?? [
             if(typeof sfxWrong !== 'undefined') sfxWrong.play();
             board.style.animation = 'shakeScreen 0.4s';
             bucketEl.style.opacity = '0.3'; 
-            ufoY += 30; // Castigo
+            ufoY += 30; 
             setTimeout(() => { board.style.animation = 'none'; }, 400);
         }
     }
@@ -237,9 +233,7 @@ $rounds = $lesson_data['rounds'] ?? [
     }
 
     function executeWin() {
-        if(typeof playTTS !== 'undefined') {
-            playTTS("¡Excelente!");
-        }
+        if(typeof playTTS !== 'undefined') playTTS("Excellent!", false);
         if(typeof sfxWin !== 'undefined') sfxWin.play();
         if(typeof fireConfetti !== 'undefined') fireConfetti();
         if(typeof unlockNextButton !== 'undefined') unlockNextButton(<?php echo $lesson['id']; ?>, <?php echo $reward_stars; ?>, <?php echo $lesson['module_id']; ?>);
@@ -249,7 +243,6 @@ $rounds = $lesson_data['rounds'] ?? [
         gameActive = false;
         clearInterval(ufoInterval);
         if(typeof sfxWrong !== 'undefined') sfxWrong.play();
-
         beam.style.background = 'linear-gradient(to bottom, rgba(231, 76, 60, 0.8), rgba(231, 76, 60, 0.1))'; 
         canvasItem.classList.add('abducted');
 

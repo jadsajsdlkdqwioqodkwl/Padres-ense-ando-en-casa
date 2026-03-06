@@ -70,7 +70,18 @@ $rounds = $lesson_data['rounds'] ?? [
 </div>
 
 <script>
-    const roundsData = <?php echo json_encode($rounds); ?>;
+    // AÑADIDO: Adaptador Dinámico para Word Defender
+    let roundsData = window.dynamicRoundsData || <?php echo json_encode($rounds); ?>;
+    if (window.dynamicRoundsData) {
+        roundsData = roundsData.map(r => ({
+            word: r.target_word || r.word,
+            phonetic: r.target_word || r.word,
+            translation: r.translation,
+            distractors: ['X', 'Z', 'M', 'Q'],
+            context_es: "¡Defiende el pastel escribiendo la palabra!"
+        }));
+    }
+
     const timeLimit = <?php echo $time_limit; ?>; 
     let currentRoundIndex = 0;
     let currentCorrect = 0;
@@ -89,6 +100,7 @@ $rounds = $lesson_data['rounds'] ?? [
     loadRound(currentRoundIndex);
 
     function loadRound(index) {
+        if (!roundsData || !roundsData[index]) return;
         const round = roundsData[index];
         wordLength = round.word.length;
         currentCorrect = 0;
@@ -128,9 +140,8 @@ $rounds = $lesson_data['rounds'] ?? [
    function playSpanglishIntro() {
         document.getElementById('btn-start').style.display = 'block';
         const round = roundsData[currentRoundIndex];
-        // Usamos la fonética si existe, si no, la palabra normal
         const phoneticToRead = round.phonetic || round.word;
-        playSpanglish('', phoneticToRead, '');
+        if(typeof playTTS !== 'undefined') playTTS(phoneticToRead, false);
     }
 
     function startGame() {
@@ -183,7 +194,7 @@ $rounds = $lesson_data['rounds'] ?? [
     }
 
     function readLetter(char) {
-        if(typeof playTTS !== 'undefined') playTTS(char);
+        if(typeof playTTS !== 'undefined') playTTS(char, false);
     }
 
     function processMove(bubbleEl) {
@@ -241,9 +252,8 @@ $rounds = $lesson_data['rounds'] ?? [
         
         if(typeof sfxWin !== 'undefined') sfxWin.play();
 
-        // Leemos la palabra al completarla usando la fonética
         const phoneticToRead = roundsData[currentRoundIndex].phonetic || roundsData[currentRoundIndex].word;
-        if(typeof playTTS !== 'undefined') playTTS(phoneticToRead);
+        if(typeof playTTS !== 'undefined') playTTS(phoneticToRead, false);
 
         currentRoundIndex++;
         

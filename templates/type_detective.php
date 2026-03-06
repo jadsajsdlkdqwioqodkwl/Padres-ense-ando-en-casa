@@ -1,10 +1,10 @@
 <?php
 // ==========================================
-// CONFIGURACIÓN: THE DETECTIVE (GRAMÁTICA VISUAL)
+// CONFIGURACIÓN: THE DETECTIVE (AHORA ADAPTADO A VOCABULARIO)
 // ==========================================
 $reward_stars = $lesson['reward_stars'] ?? 20;
 
-// Estructura Multironda
+// Estructura Multironda Original (Mantenida por compatibilidad)
 $rounds = $lesson_data['rounds'] ?? [
     [
         'sentence' => ['THE', 'DOG', 'JUMPS'],
@@ -14,23 +14,11 @@ $rounds = $lesson_data['rounds'] ?? [
         'translation' => 'El perro salta',
         'scene_emoji' => '🐕💨',
         'context_es' => '¡Encuentra el Verbo para encender la luz!'
-    ],
-    [
-        'sentence' => ['THE', 'CAT', 'SLEEPS'],
-        'phonetics' => ['da', 'cat", "slips'],
-        'target_word' => 'CAT',
-        'target_type' => 'Sujeto (Quién lo hace)',
-        'translation' => 'El gato duerme',
-        'scene_emoji' => '🐈💤',
-        'context_es' => '¡Encuentra el Sujeto para encender la luz!'
     ]
 ];
 ?>
 
 <style>
-    /* ==========================================
-       HABITACIÓN OSCURA Y LINTERNA
-    ========================================== */
     .detective-board {
         position: relative; width: 100%; height: 420px; 
         background: radial-gradient(circle 80px at 50% 50%, rgba(255,255,255,0.15) 0%, #111 100%);
@@ -44,7 +32,6 @@ $rounds = $lesson_data['rounds'] ?? [
         box-shadow: inset 0 0 30px rgba(255,255,255,0.8);
         transition: background 0.5s ease-in, border-color 0.5s;
     }
-
     .round-indicator { 
         position: absolute; top: 15px; left: 15px; color: white; 
         font-weight: bold; font-size: 14px; z-index: 50; 
@@ -52,10 +39,6 @@ $rounds = $lesson_data['rounds'] ?? [
         border: 1px solid rgba(255,255,255,0.2);
     }
     .lights-on .round-indicator { background: var(--primary); border: none; }
-
-    /* ==========================================
-       INSTRUCCIONES Y ESCENA (Centro)
-    ========================================== */
     .target-instruction {
         position: absolute; top: 20%; left: 50%; transform: translateX(-50%);
         width: 80%; text-align: center; pointer-events: none; z-index: 20;
@@ -66,17 +49,12 @@ $rounds = $lesson_data['rounds'] ?? [
         background: rgba(0,0,0,0.5); padding: 5px 20px; border-radius: 30px; display: inline-block;
     }
     .lights-on .target-type { color: var(--primary); text-shadow: none; background: white; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
-
     .scene-container {
         position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0.5);
         font-size: 120px; opacity: 0; pointer-events: none; z-index: 10;
         filter: drop-shadow(0 10px 20px rgba(0,0,0,0.5)); transition: 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     }
     .lights-on .scene-container { opacity: 1; transform: translate(-50%, -40%) scale(1); animation: floatEmoji 2s infinite alternate; }
-
-    /* ==========================================
-       PANEL DE PALABRAS (Abajo)
-    ========================================== */
     .words-panel {
         position: absolute; bottom: 20px; width: 100%;
         display: flex; justify-content: center; gap: 10px; z-index: 30;
@@ -89,13 +67,8 @@ $rounds = $lesson_data['rounds'] ?? [
     }
     .word-btn:hover { background: rgba(255,255,255,0.2); color: white; border-color: rgba(255,255,255,0.5); transform: translateY(-5px); }
     .word-btn.wrong { animation: errorShake 0.4s; background: rgba(231, 76, 60, 0.5); border-color: #e74c3c; color: white; }
-    
     .lights-on .word-btn { background: white; color: var(--text-muted); border-color: #ddd; box-shadow: 0 5px 0 #ccc; pointer-events: none; }
     .lights-on .word-btn.correct { background: var(--success); color: white; border-color: #27ae60; box-shadow: 0 5px 0 #218c74; transform: scale(1.1) translateY(-10px); z-index: 40; }
-
-    /* ==========================================
-       MODAL TUTORIAL Y ANIMACIONES
-    ========================================== */
     .mission-modal {
         position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.95); z-index: 100;
         display: flex; flex-direction: column; justify-content: center; align-items: center;
@@ -134,7 +107,7 @@ $rounds = $lesson_data['rounds'] ?? [
         </div>
 
         <div class="target-instruction">
-            <div style="color: rgba(255,255,255,0.7); font-size: 16px; margin-bottom: 5px; text-transform: uppercase;" id="instruction-title">Busca el...</div>
+            <div style="color: rgba(255,255,255,0.7); font-size: 16px; margin-bottom: 5px; text-transform: uppercase;" id="instruction-title">Busca en inglés:</div>
             <div class="target-type" id="target-display">OBJETIVO</div>
         </div>
 
@@ -144,7 +117,29 @@ $rounds = $lesson_data['rounds'] ?? [
 </div>
 
 <script>
-    const roundsData = <?php echo json_encode($rounds); ?>;
+    // AÑADIDO: Adaptador Dinámico para convertir el juego de Gramática en Vocabulario
+    let roundsData = window.dynamicRoundsData || <?php echo json_encode($rounds); ?>;
+    
+    if (window.dynamicRoundsData) {
+        roundsData = roundsData.map(r => {
+            const targetWord = r.target_word || r.word;
+            // Generamos distractores rápidos
+            const allDistractors = ["APPLE", "DOG", "CAT", "SUN", "MOON", "CAR", "BOOK"];
+            let distractors = allDistractors.filter(d => d !== targetWord).slice(0, 2);
+            let sentenceArr = [targetWord, ...distractors].sort(() => Math.random() - 0.5);
+
+            return {
+                sentence: sentenceArr,
+                phonetics: sentenceArr,
+                target_word: targetWord,
+                target_type: r.translation, // Mostramos la traducción en español como pista
+                translation: r.translation,
+                scene_emoji: r.items ? r.items[0].content : '🔎',
+                context_es: "¡Usa la linterna para encontrar la palabra en inglés!"
+            };
+        });
+    }
+
     let currentRoundIndex = 0;
     let currentSentence = [];
     let currentPhoneticsMap = {}; 
@@ -153,21 +148,18 @@ $rounds = $lesson_data['rounds'] ?? [
     
     const board = document.getElementById('game-board');
     
-    // ==========================================
-    // EFECTO LINTERNA (Sigue al mouse/dedo)
-    // ==========================================
     function moveFlashlight(x, y) {
         if (isLightOn || !gameActive) return;
         const rect = board.getBoundingClientRect();
         const relX = x - rect.left;
         const relY = y - rect.top;
-        board.style.background = `radial-gradient(circle 120px at ${relX}px ${relY}px, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0.05) 40%, #111 100%)`;
+        board.style.background = `radial-gradient(circle 120px at ${relX}px ${relY}px, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0.05) 100%)`;
     }
 
     board.addEventListener('mousemove', (e) => moveFlashlight(e.clientX, e.clientY));
     board.addEventListener('touchmove', (e) => {
         if(e.touches.length > 0) {
-            e.preventDefault(); // Evita scroll
+            e.preventDefault(); 
             moveFlashlight(e.touches[0].clientX, e.touches[0].clientY);
         }
     }, {passive: false});
@@ -176,12 +168,10 @@ $rounds = $lesson_data['rounds'] ?? [
         if(!isLightOn) board.style.background = 'radial-gradient(circle 80px at 50% 50%, rgba(255,255,255,0.15) 0%, #111 100%)';
     });
 
-    // ==========================================
-    // INICIAR RONDA
-    // ==========================================
     loadRound(currentRoundIndex);
 
     function loadRound(index) {
+        if (!roundsData || !roundsData[index]) return;
         const round = roundsData[index];
         currentSentence = round.sentence;
         isLightOn = false;
@@ -194,13 +184,11 @@ $rounds = $lesson_data['rounds'] ?? [
         document.getElementById('target-display').innerText = round.target_type;
         document.getElementById('scene-emoji').innerText = round.scene_emoji;
 
-        // Diccionario Fonético Inteligente
         currentPhoneticsMap = {};
         if (round.phonetics && round.phonetics.length === round.sentence.length) {
             round.sentence.forEach((w, i) => { currentPhoneticsMap[w.toUpperCase()] = round.phonetics[i]; });
         }
 
-        // Generar Botones de Palabras
         let wordsHTML = '';
         currentSentence.forEach((word, idx) => {
             wordsHTML += `<button class="word-btn" id="word-${idx}" data-word="${word}" onclick="handleWordClick(this)">${word}</button>`;
@@ -215,10 +203,8 @@ $rounds = $lesson_data['rounds'] ?? [
     function playSpanglishIntro() {
         document.getElementById('btn-start').style.display = 'block';
         const round = roundsData[currentRoundIndex];
-        // Leer el tipo de objetivo en español y luego la oración en inglés
         if(typeof playTTS !== 'undefined') {
-            const sentenceAudio = round.phonetics ? round.phonetics.join(' ') : round.sentence.join(' ');
-            playTTS(sentenceAudio); // Directo al inglés para no alargar
+            playTTS(round.target_word, false);
         }
     }
 
@@ -228,50 +214,39 @@ $rounds = $lesson_data['rounds'] ?? [
         gameActive = true;
     }
 
-    // ==========================================
-    // LÓGICA DE DETECCIÓN
-    // ==========================================
     function handleWordClick(btnEl) {
         if (!gameActive || isLightOn) return;
 
         const selectedWord = btnEl.getAttribute('data-word');
         const expectedWord = roundsData[currentRoundIndex].target_word;
 
-        // Lee la palabra individual al tocarla
         if(typeof playTTS !== 'undefined') {
             const wordUpper = selectedWord.toUpperCase();
             const phoneticToRead = currentPhoneticsMap[wordUpper] || wordUpper;
-            playTTS(phoneticToRead);
+            playTTS(phoneticToRead, false); // Forzamos inglés nativo
         }
 
         if (selectedWord === expectedWord) {
-            // ¡ACIERTO! Encender luces
             isLightOn = true;
             gameActive = false;
             btnEl.classList.add('correct');
             
-            // Efecto Flash
             const flash = document.getElementById('flash-overlay');
             flash.style.animation = 'none';
-            void flash.offsetWidth; // trigger reflow
+            void flash.offsetWidth; 
             flash.style.animation = 'zapFlash 0.5s';
             
             board.classList.add('lights-on');
-            document.getElementById('instruction-title').innerText = "¡Encontraste el...";
+            document.getElementById('instruction-title').innerText = "¡Encontraste la palabra!";
 
             if(typeof sfxCorrect !== 'undefined') { sfxCorrect.currentTime=0; sfxCorrect.play(); }
 
-            // Leer oración completa al resolver
             setTimeout(() => {
-                const round = roundsData[currentRoundIndex];
-                const fullAudio = round.phonetics ? round.phonetics.join(' ') : currentSentence.join(' ');
-                if(typeof playTTS !== 'undefined') playTTS(fullAudio);
-                
-                setTimeout(checkNextRound, 2500);
+                if(typeof playTTS !== 'undefined') playTTS(expectedWord, false);
+                setTimeout(checkNextRound, 2000);
             }, 800);
 
         } else {
-            // ERROR
             if(typeof sfxWrong !== 'undefined') { sfxWrong.currentTime=0; sfxWrong.play(); }
             btnEl.classList.add('wrong');
             setTimeout(() => btnEl.classList.remove('wrong'), 400);

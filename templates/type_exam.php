@@ -9,13 +9,9 @@ $questions = $lesson_data['questions'] ?? [
 $time_per_question = $lesson_data['time_limit'] ?? 10; 
 $player_lives = $lesson_data['lives'] ?? 3;
 $reward_stars = $lesson['reward_stars'] ?? 15;
-$total_questions = count($questions);
 ?>
 
 <style>
-    /* ==========================================
-       ESCENARIO Y BARRAS DE VIDA
-    ========================================== */
     .battle-arena {
         position: relative; width: 100%; height: 280px;
         background: var(--dark);
@@ -24,13 +20,11 @@ $total_questions = count($questions);
         box-shadow: inset 0 0 40px rgba(0,0,0,0.8);
         transition: background 1s ease;
     }
-
     .boss-stage-indicator {
         position: absolute; top: 15px; left: 50%; transform: translateX(-50%);
         color: white; font-weight: bold; font-size: 14px; background: rgba(0,0,0,0.5);
         padding: 5px 15px; border-radius: 20px; z-index: 20; letter-spacing: 1px;
     }
-
     .health-bar-container {
         position: absolute; top: 15px; width: 35%; height: 20px;
         background: rgba(0,0,0,0.5); border-radius: 10px; border: 2px solid white; z-index: 20;
@@ -38,15 +32,10 @@ $total_questions = count($questions);
     .health-bar-container.player { left: 15px; }
     .health-bar-container.boss { right: 15px; }
     
-    .health-fill {
-        height: 100%; border-radius: 8px; transition: width 0.3s ease-out;
-    }
+    .health-fill { height: 100%; border-radius: 8px; transition: width 0.3s ease-out; }
     .health-fill.player { background: var(--success); width: 100%; }
     .health-fill.boss { background: #e74c3c; width: 100%; float: right; }
 
-    /* ==========================================
-       PERSONAJES CSS (JUGADOR Y JEFE)
-    ========================================== */
     .css-hero {
         position: absolute; bottom: 30px; left: 40px; width: 60px; height: 60px;
         background: var(--accent); border-radius: 50%; box-shadow: inset -5px -5px 0 rgba(0,0,0,0.2);
@@ -56,7 +45,6 @@ $total_questions = count($questions);
         content: ''; position: absolute; top: 15px; right: 15px; width: 15px; height: 15px;
         background: white; border-radius: 50%; border: 3px solid var(--dark);
     }
-
     .css-boss {
         position: absolute; bottom: 30px; right: 40px; width: 100px; height: 120px;
         background: var(--primary); border-radius: 20px 20px 10px 10px;
@@ -75,28 +63,18 @@ $total_questions = count($questions);
         background: var(--dark); border-radius: 10px; transition: height 0.3s;
     }
 
-    /* Animaciones de Daño y Ataque */
     .hero-attack { animation: dashRight 0.3s forwards; }
     .boss-attack { animation: dashLeft 0.3s forwards; }
     .take-damage { animation: flashHit 0.4s; filter: brightness(2) drop-shadow(0 0 10px red); }
     .boss-defeated { animation: sinkDown 1.5s forwards; }
 
-    /* ==========================================
-       INTERFAZ DE PREGUNTAS Y TIEMPO
-    ========================================== */
     .question-panel {
         background: white; border-radius: 20px; padding: 25px;
         box-shadow: 0 10px 25px rgba(0,0,0,0.05); text-align: center;
         border: 2px solid var(--border-color);
     }
-    
-    .timer-container {
-        width: 100%; height: 10px; background: var(--light); border-radius: 5px; margin-bottom: 20px; overflow: hidden;
-    }
-    .timer-bar {
-        height: 100%; background: var(--accent); width: 100%; transition: width linear;
-    }
-
+    .timer-container { width: 100%; height: 10px; background: var(--light); border-radius: 5px; margin-bottom: 20px; overflow: hidden; }
+    .timer-bar { height: 100%; background: var(--accent); width: 100%; transition: width linear; }
     .question-text { font-size: 24px; color: var(--primary); margin-bottom: 20px; font-weight: bold; }
     
     .options-grid { display: grid; grid-template-columns: 1fr; gap: 15px; }
@@ -142,13 +120,40 @@ $total_questions = count($questions);
 </div>
 
 <script>
-    // ==========================================
-    // LÓGICA DE STAGES Y PREGUNTAS
-    // ==========================================
-    const questions = <?php echo json_encode($questions); ?>;
+    // AÑADIDO: Adaptador Dinámico para el Examen del Jefe
+    let questions = <?php echo json_encode($questions); ?>;
+    
+    if (window.dynamicRoundsData) {
+        // Extraemos las 5 palabras únicas seleccionadas
+        const uniqueWordsMap = new Map();
+        window.dynamicRoundsData.forEach(r => {
+            const word = r.target_word || r.word;
+            if (!uniqueWordsMap.has(word)) {
+                uniqueWordsMap.set(word, r.translation);
+            }
+        });
+        
+        // Creamos las preguntas dinámicamente
+        questions = Array.from(uniqueWordsMap.entries()).map(([word, translation]) => {
+            const allDistractors = ["Manzana", "Perro", "Gato", "Casa", "Árbol", "Agua", "Sol", "Luna", "Auto", "Libro"];
+            let distractors = allDistractors.filter(d => d.toLowerCase() !== translation.toLowerCase());
+            distractors.sort(() => Math.random() - 0.5); // Mezclar distractores
+            
+            let options = [translation, distractors[0], distractors[1]];
+            options.sort(() => Math.random() - 0.5); // Mezclar opciones
+            
+            return {
+                q: `¿Qué significa "${word}"?`,
+                options: options,
+                answer: translation,
+                phonetic: word // Usamos la palabra en inglés para el TTS nativo
+            };
+        });
+    }
+
     const timeLimit = <?php echo $time_per_question; ?>;
     const maxLives = <?php echo $player_lives; ?>;
-    const totalQ = questions.length;
+    let totalQ = questions.length;
     
     let currentQ = 0;
     let currentLives = maxLives;
@@ -170,22 +175,21 @@ $total_questions = count($questions);
             winGame(); return;
         }
 
-        updateBossStage(); // Evalúa en qué fase del jefe estamos
+        updateBossStage(); 
 
         isTransitioning = false;
         const q = questions[currentQ];
         
-        // MODIFICACIÓN DE AUDIO: Ahora lee q.phonetic si existe, si no, lee la pregunta normal
+        // AÑADIDO: Lee la palabra en inglés con acento nativo (false)
         if(typeof playTTS !== 'undefined') {
-            const textToRead = q.phonetic || q.q;
-            playTTS(textToRead);
+            const textToRead = q.phonetic || q.answer;
+            playTTS(textToRead, false);
         }
 
         document.getElementById('q-text').innerText = q.q;
         const optionsDiv = document.getElementById('options-container');
         optionsDiv.innerHTML = '';
 
-        // Randomizar opciones
         let shuffledOptions = [...q.options].sort(() => Math.random() - 0.5);
 
         shuffledOptions.forEach(opt => {
@@ -199,23 +203,19 @@ $total_questions = count($questions);
         startTimer();
     }
 
-    // ==========================================
-    // SISTEMA DE FASES DEL JEFE
-    // ==========================================
     function updateBossStage() {
-        // Calculamos el progreso basado en cuántas preguntas faltan
         let progress = currentQ / totalQ;
 
         if (progress >= 0.66) {
             stageIndicator.innerText = "STAGE 3: ¡FURIOSO!";
-            boss.style.background = '#c0392b'; // Rojo oscuro
+            boss.style.background = '#c0392b'; 
             boss.style.boxShadow = 'inset -10px -10px 0 rgba(0,0,0,0.3), 0 0 30px #e74c3c';
-            bossMouth.style.height = '30px'; // Abre la boca
+            bossMouth.style.height = '30px'; 
             arena.style.background = '#2c3e50';
-            boss.style.animationDuration = '1s'; // Se mueve más rápido
+            boss.style.animationDuration = '1s'; 
         } else if (progress >= 0.33) {
             stageIndicator.innerText = "STAGE 2: ¡ENFADADO!";
-            boss.style.background = '#d35400'; // Naranja
+            boss.style.background = '#d35400'; 
             boss.style.boxShadow = 'inset -10px -10px 0 rgba(0,0,0,0.3), 0 0 25px #e67e22';
             bossMouth.style.height = '20px';
             boss.style.animationDuration = '2s';
@@ -224,9 +224,6 @@ $total_questions = count($questions);
         }
     }
 
-    // ==========================================
-    // TEMPORIZADOR Y RESPUESTAS
-    // ==========================================
     function startTimer() {
         timerBar.style.transition = 'none';
         timerBar.style.width = '100%';
@@ -258,7 +255,6 @@ $total_questions = count($questions);
                 hero.classList.remove('hero-attack');
                 boss.classList.add('take-damage');
                 
-                // Daño calculado equitativamente para derrotarlo en la última pregunta
                 bossHpPercentage -= (100 / totalQ);
                 hpBoss.style.width = Math.max(0, bossHpPercentage) + '%';
                 
@@ -271,7 +267,6 @@ $total_questions = count($questions);
             if(btn) btn.classList.add('wrong');
             if(typeof sfxWrong !== 'undefined') { sfxWrong.currentTime=0; sfxWrong.play(); }
             
-            // Mostrar respuesta correcta
             const q = questions[currentQ];
             document.querySelectorAll('.opt-btn').forEach(b => {
                 if(b.innerText === q.answer) b.classList.add('correct');
@@ -290,16 +285,12 @@ $total_questions = count($questions);
                 if (currentLives <= 0) {
                     setTimeout(loseGame, 500);
                 } else {
-                    // Penaltí visual, pero pasamos a la siguiente pregunta para que no se tranque
                     setTimeout(() => { currentQ++; loadQuestion(); }, 1500);
                 }
             }, 150);
         }
     }
 
-    // ==========================================
-    // VICTORIA Y DERROTA
-    // ==========================================
     function winGame() {
         document.getElementById('quiz-panel').style.display = 'none';
         document.getElementById('success-msg').style.display = 'block';
@@ -321,6 +312,5 @@ $total_questions = count($questions);
         `;
     }
 
-    // Iniciar combate
     loadQuestion();
 </script>

@@ -14,31 +14,38 @@ function toggleMusic() {
     isMusicPlaying = !isMusicPlaying;
 }
 
-function playTTS(text) {
+function playTTS(text, forceSpanish = false) {
     if(!text) return;
     
-    // ¡LA MAGIA!: Cancela cualquier audio que esté sonando o en cola para evitar retrasos.
+    // Cancela cualquier audio que esté sonando
     window.speechSynthesis.cancel();
 
     const utterance = new SpeechSynthesisUtterance(text);
     
-    // Forzamos SIEMPRE el español para tu estrategia fonética ("ápol", "iélou")
-    utterance.lang = 'es-ES'; 
-    utterance.rate = 0.85;
+    // Si forceSpanish es true (ej. para instrucciones), usa español. Si no, usa Inglés nativo.
+    utterance.lang = forceSpanish ? 'es-ES' : 'en-US'; 
+    utterance.rate = 0.9;
 
-    // Buscamos una voz de Google o femenina en español para que suene más amigable
     const voices = window.speechSynthesis.getVoices();
-    let bestVoice = voices.find(v => v.lang.startsWith('es') && (v.name.includes('Google') || v.name.includes('Female')));
-    if(!bestVoice) bestVoice = voices.find(v => v.lang.startsWith('es'));
+    let bestVoice;
+    
+    if (forceSpanish) {
+        bestVoice = voices.find(v => v.lang.startsWith('es'));
+    } else {
+        // Busca una voz nativa en inglés (femenina o de Google preferiblemente)
+        bestVoice = voices.find(v => v.lang.startsWith('en') && (v.name.includes('Google') || v.name.includes('Female')));
+        if(!bestVoice) bestVoice = voices.find(v => v.lang.startsWith('en'));
+    }
     
     if(bestVoice) utterance.voice = bestVoice;
     window.speechSynthesis.speak(utterance);
 }
 
-// Simplificamos Spanglish: Ahora solo lee la palabra principal fonética y ya.
+// Para retrocompatibilidad con los juegos viejos, pero forzando el inglés real
 function playSpanglish(introEs, wordEn, transEs) {
     if (wordEn) {
-        playTTS(wordEn);
+        // Leemos la palabra en INGLÉS REAL, ignorando la fonética antigua
+        playTTS(wordEn, false);
     }
 }
 

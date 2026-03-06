@@ -1,50 +1,84 @@
 <?php
-// login.php
 require_once 'includes/config.php';
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $phone = trim($_POST['parent_phone']);
-    $phone = preg_replace('/[^0-9+]/', '', $phone);
+if (isset($_SESSION['user_id'])) {
+    header("Location: index.php");
+    exit;
+}
 
-    $stmt = $pdo->prepare("SELECT id FROM users WHERE parent_phone = ? LIMIT 1");
-    $stmt->execute([$phone]);
-    $user = $stmt->fetch();
+$error = '';
 
-    if ($user) {
-        $_SESSION['user_id'] = $user['id'];
-        header("Location: index.php");
-        exit;
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    $parent_phone = trim($_POST['parent_phone']);
+    
+    if (empty($parent_phone)) {
+        $error = "Por favor, ingresa tu número de WhatsApp.";
     } else {
-        $error = "Número no encontrado. ¿Estás registrado?";
+        // Buscamos al usuario basado únicamente en su número de teléfono
+        $stmt = $pdo->prepare("SELECT id FROM users WHERE parent_phone = ?");
+        $stmt->execute([$parent_phone]);
+        $user = $stmt->fetch();
+
+        if ($user) {
+            $_SESSION['user_id'] = $user['id'];
+            header("Location: index.php");
+            exit;
+        } else {
+            $error = "Número no encontrado. Verifica tu número o crea una cuenta nueva.";
+        }
     }
 }
 ?>
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <?php include 'includes/head.php'; ?>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Iniciar Sesión - Mi Mundo en Inglés</title>
+    <link rel="stylesheet" href="assets/css/main.css">
     <style>
-        .auth-box { max-width: 400px; margin: 50px auto; text-align: center; }
-        .input-group { margin-bottom: 20px; text-align: left; }
-        .input-group label { display: block; font-weight: bold; margin-bottom: 8px; color: var(--primary); }
-        .input-group input { width: 100%; padding: 12px; border: 2px solid #ddd; border-radius: 10px; font-size: 16px; }
-        .btn-auth { width: 100%; padding: 15px; background: var(--primary); color: white; font-size: 20px; border: none; border-radius: 30px; cursor: pointer; font-weight: bold;}
+        .login-wrapper {
+            display: flex; justify-content: center; align-items: center; min-height: 100vh;
+            background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%); padding: 20px;
+        }
+        .login-card {
+            background: white; border-radius: 20px; padding: 40px; width: 100%; max-width: 400px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1); text-align: center;
+        }
+        .login-input {
+            width: 100%; padding: 15px; border-radius: 10px; border: 2px solid #ddd;
+            font-size: 18px; margin-bottom: 20px; text-align: center; box-sizing: border-box;
+            transition: 0.3s;
+        }
+        .login-input:focus { border-color: var(--primary); outline: none; box-shadow: 0 0 10px rgba(108, 92, 237, 0.2); }
+        .btn-login {
+            background: var(--primary); color: white; border: none; padding: 15px; width: 100%;
+            border-radius: 10px; font-size: 20px; font-weight: bold; cursor: pointer;
+            box-shadow: 0 6px 0 #3b2a9e; transition: 0.2s;
+        }
+        .btn-login:active { transform: translateY(4px); box-shadow: 0 2px 0 #3b2a9e; }
+        .error-msg { background: #ffeaa7; color: #d63031; padding: 10px; border-radius: 8px; margin-bottom: 20px; font-weight: bold; }
     </style>
 </head>
 <body>
-    <div class="container auth-box">
-        <h1>Entrar a jugar 🎮</h1>
-        
-        <?php if(isset($error)) echo "<p style='color:red;'>$error</p>"; ?>
+    <div class="login-wrapper">
+        <div class="login-card">
+            <h1 style="color: var(--primary); margin-bottom: 5px;">🚀 ¡Hola de Nuevo!</h1>
+            <p style="color: #666; margin-bottom: 30px;">Ingresa tu número de WhatsApp para continuar la aventura.</p>
+            
+            <?php if (!empty($error)): ?>
+                <div class="error-msg"><?php echo htmlspecialchars($error); ?></div>
+            <?php endif; ?>
 
-        <form method="POST">
-            <div class="input-group">
-                <label>Tu número de WhatsApp:</label>
-                <input type="text" name="parent_phone" placeholder="Ej: +51999888777" required>
-            </div>
-            <button type="submit" class="btn-auth">Entrar ➡️</button>
-        </form>
-        <p style="margin-top:20px;">¿Primera vez? <a href="register.php">Crear cuenta gratis</a></p>
+            <form action="login.php" method="POST">
+                <input type="tel" name="parent_phone" class="login-input" placeholder="Ej: +51999888777" required>
+                <button type="submit" class="btn-login">Entrar a Jugar</button>
+            </form>
+            
+            <p style="margin-top: 25px; color: #666;">
+                ¿Aún no tienes cuenta? <a href="register.php" style="color: var(--primary); font-weight: bold;">Regístrate aquí</a>
+            </p>
+        </div>
     </div>
 </body>
 </html>

@@ -1,14 +1,8 @@
 <?php
-// ==========================================
-// CONFIGURACIÓN ESCALABLE: METEOR STRIKE PRO (MULTIRONDA Y MULTILLUVIA)
-// ==========================================
 $reward_stars = $lesson['reward_stars'] ?? 10;
-
-// Estructura Multironda dinámica
 $rounds = $lesson_data['rounds'] ?? [
     [
         'target_word' => $lesson_data['target_word'] ?? 'APPLE',
-        'phonetic' => $lesson_data['phonetic'] ?? 'épol',
         'translation' => $lesson_data['translation'] ?? 'Manzana',
         'speed' => $lesson_data['speed'] ?? 7,
         'context_es' => $lesson_data['context_es'] ?? "¡Alerta! Una lluvia de meteoritos amenaza al dinosaurio. Toca solo el meteorito que tenga...",
@@ -22,9 +16,6 @@ $rounds = $lesson_data['rounds'] ?? [
 ?>
 
 <style>
-    /* ==========================================
-       ENTORNO DE JUEGO Y DIBUJOS CSS
-    ========================================== */
     .meteor-board { position: relative; width: 100%; height: 420px; background: linear-gradient(to bottom, var(--dark) 0%, #2c3e50 100%); border-radius: 20px; overflow: hidden; border: 4px solid var(--primary); margin-bottom: 20px; box-shadow: inset 0 0 50px rgba(0,0,0,0.8); }
     .round-indicator { position: absolute; top: 15px; left: 15px; color: white; font-weight: bold; font-size: 14px; z-index: 50; background: var(--primary); padding: 5px 15px; border-radius: 20px; }
     .ground { position: absolute; bottom: 0; width: 100%; height: 50px; background: #4e342e; border-top: 8px solid #5d4037; z-index: 5; }
@@ -34,18 +25,12 @@ $rounds = $lesson_data['rounds'] ?? [
     .css-dino.panic { background: #e74c3c; animation: shake 0.2s infinite; }
     .css-dino.dead { transform: translateX(-50%) scaleY(0.2); background: #333; bottom: 45px;}
 
-    /* ==========================================
-       METEORITOS (TAMAÑO PERFECTO PARA EMOJIS)
-    ========================================== */
     .meteor { position: absolute; top: -100px; width: 75px; height: 75px; background: var(--accent); border-radius: 50%; cursor: pointer; z-index: 8; display: flex; justify-content: center; align-items: center; font-size: 45px; box-shadow: 0 0 20px #d35400, inset -5px -5px 0 rgba(0,0,0,0.3); transition: transform 0.1s; user-select: none; }
     .meteor::before { content: ''; position: absolute; top: -40px; left: 15px; width: 45px; height: 60px; background: linear-gradient(to top, #f39c12, transparent); border-radius: 50%; z-index: -1; opacity: 0.8; animation: flicker 0.2s infinite alternate; }
     .meteor:active { transform: scale(0.9); }
     .meteor.destroyed { pointer-events: none; animation: popExplosion 0.4s forwards; }
     .meteor.radar-glow { box-shadow: 0 0 40px #00d2d3, inset 0 0 20px white; border: 3px solid #00d2d3; }
 
-    /* ==========================================
-       INTERFAZ Y MODAL
-    ========================================== */
     .hud { position: absolute; top: 15px; right: 15px; display: flex; gap: 15px; z-index: 15; align-items: center; }
     .target-box { background: rgba(255,255,255,0.9); padding: 5px 15px; border-radius: 20px; font-size: 18px; font-weight: bold; color: var(--primary); box-shadow: 0 4px 10px rgba(0,0,0,0.3); border: 2px solid var(--accent); }
     .lives-box { font-size: 20px; letter-spacing: 3px; color: #e74c3c; text-shadow: 0 2px 4px rgba(0,0,0,0.5);}
@@ -74,9 +59,7 @@ $rounds = $lesson_data['rounds'] ?? [
         <div class="mission-modal" id="tutorial-modal">
             <h2 style="color: var(--primary); margin-top: 0;">🔭 El Observatorio</h2>
             <p style="color: var(--text-muted); font-size: 18px; margin-bottom: 10px;" id="tut-context">Cargando...</p>
-            <div style="font-size: 35px; font-weight: bold; color: var(--accent); margin: 15px 0; letter-spacing: 2px;" id="tut-word">
-                WORD
-            </div>
+            <div style="font-size: 35px; font-weight: bold; color: var(--accent); margin: 15px 0; letter-spacing: 2px;" id="tut-word">WORD</div>
             <p style="color: #666; font-size: 20px;" id="tut-trans">(Traducción)</p>
             
             <div style="display: flex; gap: 15px; margin-top: 10px;">
@@ -96,7 +79,9 @@ $rounds = $lesson_data['rounds'] ?? [
 </div>
 
 <script>
-    const roundsData = <?php echo json_encode($rounds); ?>;
+    // AÑADIDO: 'let' en vez de 'const' y priorizamos la inyección dinámica desde lesson.php
+    let roundsData = window.dynamicRoundsData || <?php echo json_encode($rounds); ?>;
+    
     const board = document.getElementById('game-board');
     const dino = document.getElementById('dino');
     const livesDisplay = document.getElementById('lives');
@@ -110,14 +95,22 @@ $rounds = $lesson_data['rounds'] ?? [
     let spawnInterval = null;
     let activeMeteors = [];
 
+    // Esta función permite que lesson.php recargue el juego sin tener que refrescar la página web
+    function reloadDynamicRounds() {
+        if (window.dynamicRoundsData) roundsData = window.dynamicRoundsData;
+        currentRoundIndex = 0;
+        loadRound(0);
+    }
+
     loadRound(currentRoundIndex);
 
     function loadRound(index) {
+        if (!roundsData || !roundsData[index]) return;
         const round = roundsData[index];
         roundItems = [...round.items]; 
         currentSpeed = round.speed || 7;
 
-        document.getElementById('round-indicator').innerText = `Stage ${index + 1}/${roundsData.length}`;
+        document.getElementById('round-indicator').innerText = `Ronda ${index + 1}/${roundsData.length}`;
         document.getElementById('tut-context').innerText = round.context_es || "Toca solo el meteorito que tenga...";
         document.getElementById('tut-word').innerText = round.target_word;
         document.getElementById('tut-trans').innerText = `(${round.translation})`;
@@ -136,8 +129,8 @@ $rounds = $lesson_data['rounds'] ?? [
    function playSpanglishIntro() {
         document.getElementById('btn-start').style.display = 'block';
         const round = roundsData[currentRoundIndex];
-        const phoneticToRead = round.phonetic || round.target_word;
-        if(typeof playTTS !== 'undefined') playTTS(phoneticToRead);
+        // AÑADIDO: Forzamos la lectura en inglés nativo (false)
+        if(typeof playTTS !== 'undefined') playTTS(round.target_word, false);
     }
 
     function startGame() {
@@ -146,18 +139,15 @@ $rounds = $lesson_data['rounds'] ?? [
         setTimeout(() => document.getElementById('tutorial-modal').style.display = 'none', 500);
         gameActive = true;
         
-        // Limpiamos los arrays por si es reinicio
         activeMeteors.forEach(m => { clearInterval(m.int); m.el.remove(); });
         activeMeteors = [];
         
-        // Aquí ajustamos qué tan rápido salen nuevos meteoros. Mientras más bajo, más caos.
         spawnInterval = setInterval(spawnMeteor, 1000); 
     }
 
     function spawnMeteor() {
         if (!gameActive) return;
         
-        // Probabilidad: 40% de que caiga el correcto, 60% que caiga uno falso
         let data;
         if(Math.random() < 0.4) {
             data = roundItems.find(i => i.is_correct);
@@ -189,7 +179,6 @@ $rounds = $lesson_data['rounds'] ?? [
         const boardHeight = board.offsetHeight;
         const groundLevel = boardHeight - 80; 
         
-        // Física de caída: Usamos el currentSpeed para hacerlo caer a toda velocidad
         const step = groundLevel / ((12 - currentSpeed) * 10); 
 
         const fallInt = setInterval(() => {
@@ -241,8 +230,8 @@ $rounds = $lesson_data['rounds'] ?? [
         document.getElementById('btn-radar').style.animation = 'radarScan 1s';
         setTimeout(() => document.getElementById('btn-radar').style.animation = 'none', 1000);
 
-        const targetPhonetic = roundsData[currentRoundIndex].phonetic || roundsData[currentRoundIndex].target_word;
-        if(typeof playTTS !== 'undefined') playTTS(targetPhonetic);
+        const targetWord = roundsData[currentRoundIndex].target_word;
+        if(typeof playTTS !== 'undefined') playTTS(targetWord, false);
 
         activeMeteors.forEach(m => {
             if(m.correct) {
@@ -271,8 +260,8 @@ $rounds = $lesson_data['rounds'] ?? [
         
         dino.classList.remove('panic');
         
-        const currentPhonetic = roundsData[currentRoundIndex].phonetic || roundsData[currentRoundIndex].target_word;
-        if(typeof playTTS !== 'undefined') playTTS(currentPhonetic);
+        const currentWord = roundsData[currentRoundIndex].target_word;
+        if(typeof playTTS !== 'undefined') playTTS(currentWord, false);
         if(typeof sfxWin !== 'undefined') sfxWin.play();
 
         currentRoundIndex++;
