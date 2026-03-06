@@ -4,10 +4,11 @@ require_once 'includes/config.php';
 $module_id = isset($_GET['module']) ? (int)$_GET['module'] : 1;
 $user_id = $_SESSION['user_id'];
 
-// Obtener título del módulo
+// Obtener título del módulo (Ahora tratado como Semana/Pool temático)
 $stmtMod = $pdo->prepare("SELECT title FROM modules WHERE id = ?");
 $stmtMod->execute([$module_id]);
-$module_title = $stmtMod->fetchColumn() ?: "Mi Curso";
+// EDICIÓN: Cambiamos el fallback para que refleje la nueva estructura de semanas
+$module_title = $stmtMod->fetchColumn() ?: "Semana de Vocabulario";
 
 // Obtener lecciones y progreso
 $stmtLessons = $pdo->prepare("
@@ -62,6 +63,16 @@ $page_title = $module_title;
             display: flex; align-items: center; justify-content: center; 
             font-weight: bold; color: #333; font-size: 13px; text-shadow: 1px 1px 2px white;
         }
+
+        /* NUEVAS CLASES AÑADIDAS PARA LA RENOVACIÓN DE VOCABULARIO */
+        .pool-header {
+            background: #fff3cd; border-left: 5px solid #ffc107; padding: 15px;
+            margin-bottom: 20px; border-radius: 5px; font-size: 14px; text-align: left;
+        }
+        .day-badge {
+            background: #007bff; color: white; padding: 5px 10px; border-radius: 10px;
+            font-size: 12px; position: absolute; top: -10px; right: -10px; box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
     </style>
 </head>
 <body>
@@ -69,13 +80,20 @@ $page_title = $module_title;
         <?php include 'includes/navbar.php'; ?>
         
         <div class="text-center">
-            <h1><?php echo htmlspecialchars($module_title); ?></h1>
-            <p>¡Selecciona una lección para empezar a jugar!</p>
+            <h1>Semana: <?php echo htmlspecialchars($module_title); ?></h1>
+            
+            <div class="pool-header">
+                <strong>🌟 Tu Pool de Vocabulario:</strong> Cada día te ofreceremos 10 palabras nuevas. 
+                Tú eliges las 5 que más te gusten para aprender con mnemotecnias. 
+                ¡Al día siguiente, demostrarás lo aprendido para darle una foto de regalo a papá!
+            </div>
+            
+            <p>¡Selecciona tu día de entrenamiento!</p>
             
             <div class="progress-container">
                 <div class="progress-fill" style="width: <?php echo $progress_percent; ?>%;"></div>
                 <div class="progress-text">
-                    Progreso: <?php echo $progress_percent; ?>% (<?php echo $completed_lessons; ?> de <?php echo $total_lessons; ?> niveles)
+                    Progreso: <?php echo $progress_percent; ?>% (<?php echo $completed_lessons; ?> de <?php echo $total_lessons; ?> días completados)
                 </div>
             </div>
         </div>
@@ -87,11 +105,13 @@ $page_title = $module_title;
                 $stars_display = $is_completed ? "⭐ " . $lesson['stars_earned'] : "🎁 " . $lesson['reward_stars'] . " Estrellas";
                 
                 $completed_class = $is_completed ? 'completed' : '';
-                $icon = $is_completed ? '✅' : '▶️';
+                $icon = $is_completed ? '✅' : '📅'; // AÑADIDO: Cambio de icono a calendario para representar días
             ?>
                 <a href="lesson.php?id=<?php echo $lesson['id']; ?>" class="level-card <?php echo $completed_class; ?>">
+                    <div class="day-badge">Día <?php echo $lesson['order_num']; ?></div>
+                    
                     <div class="level-icon"><?php echo $icon; ?></div>
-                    <h3>Lección <?php echo $lesson['order_num']; ?></h3>
+                    <h3>Día <?php echo $lesson['order_num']; ?></h3>
                     <h2><?php echo htmlspecialchars($lesson['title']); ?></h2>
                     <p style="color: #666; font-weight: bold;"><?php echo $stars_display; ?></p>
                 </a>
