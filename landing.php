@@ -18,6 +18,7 @@
     fbq('track', 'PageView');
     </script>
     <noscript><img height="1" width="1" style="display:none" src="https://www.facebook.com/tr?id=TU_PIXEL_ID&ev=PageView&noscript=1"/></noscript>
+    
     <style>
         :root { --primary: #6c5ced; --secondary: #ff9f43; --dark: #2d3436; --light: #f8f9fa; --success: #2ed573; }
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
@@ -35,14 +36,15 @@
         .hero-text h1 { font-size: 3rem; color: var(--primary); margin-bottom: 20px; line-height: 1.2; }
         .hero-text p { font-size: 1.2rem; color: #555; margin-bottom: 30px; }
         
-        /* Formulario de Checkout (Embebido en el Hero para mayor conversión) */
+        /* Formulario de Checkout */
         .checkout-box { flex: 1; min-width: 300px; background: white; padding: 40px; border-radius: 20px; box-shadow: 0 15px 35px rgba(0,0,0,0.1); }
         .checkout-box h3 { text-align: center; color: var(--dark); margin-bottom: 20px; font-size: 1.5rem; }
         .form-group { margin-bottom: 20px; }
         .form-control { width: 100%; padding: 15px; border: 2px solid #eee; border-radius: 10px; font-size: 16px; transition: 0.3s; }
         .form-control:focus { border-color: var(--primary); outline: none; }
         .btn-pay { width: 100%; background: var(--success); color: white; border: none; padding: 18px; border-radius: 10px; font-size: 20px; font-weight: bold; cursor: pointer; box-shadow: 0 6px 0 #218c74; transition: 0.2s; margin-top: 10px; }
-        .btn-pay:active { transform: translateY(4px); box-shadow: 0 2px 0 #218c74; }
+        .btn-pay:active:not(:disabled) { transform: translateY(4px); box-shadow: 0 2px 0 #218c74; }
+        .btn-pay:disabled { background: #95a5a6; box-shadow: none; cursor: not-allowed; }
         
         .price-tag { text-align: center; font-size: 2rem; font-weight: bold; color: var(--secondary); margin-bottom: 15px; }
         .guarantee { text-align: center; font-size: 0.9rem; color: #888; margin-top: 15px; }
@@ -94,7 +96,7 @@
             </div>
             
             <button id="btn-comprar" class="btn-pay">Pagar y Empezar ▶</button>
-            <div class="guarantee">🔒 Pago 100% seguro procesado por Culqi</div>
+            <div class="guarantee">🔒 Simulador de Pago Activo (Modo Prueba)</div>
         </div>
     </section>
 
@@ -119,96 +121,6 @@
         </div>
     </section>
 
-    <script src="https://checkout.culqi.com/js/v4"></script>
-    <script>
-        // Configura Culqi con tu llave pública
-        Culqi.publicKey = 'TU_LLAVE_PUBLICA_CULQI'; // REEMPLAZA ESTO
-        
-        Culqi.settings({
-            title: 'Mi Mundo en Inglés',
-            currency: 'PEN',
-            amount: 3900, // S/ 39.00 (en céntimos)
-        });
-
-        Culqi.options({
-            lang: 'auto',
-            installments: false, 
-            paymentMethods: {
-                tarjeta: true,
-                yape: true, 
-                bancaMovil: true
-            }
-        });
-
-        document.getElementById('btn-comprar').addEventListener('click', function (e) {
-            const childName = document.getElementById('child_name').value.trim();
-            const parentPhone = document.getElementById('parent_phone').value.trim();
-
-            if(childName === '' || parentPhone === '') {
-                alert("Por favor, ingresa el nombre de tu hijo y tu WhatsApp antes de pagar.");
-                return;
-            }
-
-            // Disparar evento de Meta Pixel (InitiateCheckout)
-            if(typeof fbq === 'function') {
-                fbq('track', 'InitiateCheckout', { value: 39.00, currency: 'PEN' });
-            }
-
-            // Abrir pasarela Culqi
-            Culqi.open();
-            e.preventDefault();
-        });
-
-        // Función que recibe el token de Culqi
-        function culqi() {
-            if (Culqi.token) { 
-                const token = Culqi.token.id;
-                const childName = document.getElementById('child_name').value.trim();
-                const parentPhone = document.getElementById('parent_phone').value.trim();
-                
-                // Mostrar estado de carga en el botón
-                const btn = document.getElementById('btn-comprar');
-                btn.innerText = "Procesando pago...";
-                btn.disabled = true;
-
-                // Enviar el token a nuestro servidor PHP para procesar el pago y crear la cuenta
-                fetch('app/process_payment.php', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ 
-                        token: token, 
-                        child_name: childName, 
-                        parent_phone: parentPhone 
-                    })
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if(data.success) {
-                        // Disparar evento de Compra en Pixel
-                        if(typeof fbq === 'function') fbq('track', 'Purchase', { value: 39.00, currency: 'PEN' });
-                        // Redirigir al dashboard
-                        window.location.href = 'index.php';
-                    } else {
-                        alert("Error en el pago: " + data.message);
-                        btn.innerText = "Pagar y Empezar ▶";
-                        btn.disabled = false;
-                    }
-                })
-                .catch(err => {
-                    console.error(err);
-                    alert("Hubo un problema de conexión.");
-                    btn.innerText = "Pagar y Empezar ▶";
-                    btn.disabled = false;
-                });
-            } else if (Culqi.order) { 
-                // Código si usas Pago Efectivo/Cupones (opcional)
-            } else { 
-                console.log(Culqi.error); 
-            }
-        };
-
-        
-    </script>
     <script>
         document.getElementById('btn-comprar').addEventListener('click', function (e) {
             e.preventDefault();
@@ -225,7 +137,6 @@
             btn.innerText = "Simulando pago...";
             btn.disabled = true;
 
-            // Enviamos un token falso directamente al backend
             fetch('app/process_payment.php', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -235,11 +146,14 @@
                     parent_phone: parentPhone 
                 })
             })
-            .then(response => response.json())
+            .then(response => {
+                if (!response.ok) throw new Error("Error de red");
+                return response.json();
+            })
             .then(data => {
                 if(data.success) {
-                    alert(data.message); // Muestra el mensaje de éxito
-                    window.location.href = 'index.php'; // Redirige al juego con sesión iniciada
+                    alert(data.message); 
+                    window.location.href = 'index.php'; 
                 } else {
                     alert("Error: " + data.message);
                     btn.innerText = "Pagar y Empezar ▶";
@@ -248,7 +162,7 @@
             })
             .catch(err => {
                 console.error(err);
-                alert("Hubo un problema de conexión.");
+                alert("Hubo un problema procesando la respuesta. Revisa la consola.");
                 btn.innerText = "Pagar y Empezar ▶";
                 btn.disabled = false;
             });

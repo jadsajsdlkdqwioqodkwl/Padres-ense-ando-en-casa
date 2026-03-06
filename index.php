@@ -20,7 +20,7 @@ $modules = $stmt->fetchAll();
 
 $page_title = "Inicio - Mi Mundo";
 
-// AÑADIDO: Lógica de Bloqueo por Suscripción Vencida (31 días)
+// Lógica de Bloqueo por Suscripción Vencida (31 días)
 $is_expired = false;
 $days_left = 0;
 if (empty($user_info['subscription_expires_at'])) {
@@ -71,7 +71,6 @@ if (empty($user_info['subscription_expires_at'])) {
         }
         .btn-logout:hover { background: rgba(255,255,255,0.4); }
 
-        /* Estilos del Bloqueo por Pago */
         .lock-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(255,255,255,0.95); z-index: 9999; display: flex;
@@ -88,6 +87,11 @@ if (empty($user_info['subscription_expires_at'])) {
             margin-top: 20px; box-shadow: 0 6px 0 #c0392b; transition: 0.2s;
         }
         .btn-renew:active { transform: translateY(4px); box-shadow: 0 2px 0 #c0392b; }
+        
+        @media (max-width: 600px) {
+            .dashboard-header { flex-direction: column; text-align: center; }
+            .user-stats { align-items: center; width: 100%; justify-content: center; margin-top: 15px; }
+        }
     </style>
 </head>
 <body>
@@ -98,7 +102,7 @@ if (empty($user_info['subscription_expires_at'])) {
             <h1 style="font-size: 60px; margin: 0;">⏳</h1>
             <h2 style="color: #ff4757; margin: 10px 0;">¡Tu mes de aprendizaje ha concluido!</h2>
             <p style="color: #555; font-size: 18px;">Han pasado los 31 días de tu suscripción. Para que <?php echo htmlspecialchars($user_info['child_name']); ?> siga aprendiendo nuevas palabras y desbloqueando trofeos, renueva el acceso.</p>
-            <a href="landing.php" class="btn-renew">Renovar Suscripción (S/ 39.00)</a>
+            <a href="renovar.php" class="btn-renew">Renovar Suscripción (S/ 39.00)</a>
             <br><br>
             <a href="logout.php" style="color: #888; text-decoration: underline;">Cerrar Sesión</a>
         </div>
