@@ -1,6 +1,8 @@
 <?php
 // includes/config.php
-session_start();
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
 
 define('DB_HOST', 'db_kids'); 
 define('DB_USER', 'postgres'); 
