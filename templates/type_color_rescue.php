@@ -80,12 +80,15 @@ $rounds = $lesson_data['rounds'] ?? [
 </div>
 
 <script>
-    // AÑADIDO: Adaptador Dinámico para Color Rescue
+   // AÑADIDO: Adaptador Dinámico con Colores Primarios Vivos
     let roundsData = window.dynamicRoundsData || <?php echo json_encode($rounds); ?>;
     
     if (window.dynamicRoundsData) {
+        // Paleta de colores vivos y primarios garantizados
+        const brightColors = ['#ff4757', '#2ed573', '#1e90ff', '#ffa502', '#9b59b6', '#ff1493', '#00ced1', '#f1c40f'];
+        
         roundsData = roundsData.map(r => {
-            const randomColorHex = '#' + Math.floor(Math.random()*16777215).toString(16).padStart(6, '0');
+            const randomColorHex = brightColors[Math.floor(Math.random() * brightColors.length)];
             return {
                 color_name: r.target_word || r.word,
                 phonetic: r.target_word || r.word,

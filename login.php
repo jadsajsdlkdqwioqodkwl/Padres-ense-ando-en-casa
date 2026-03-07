@@ -9,7 +9,7 @@ if (isset($_SESSION['user_id'])) {
 $error = '';
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    $parent_phone = trim($_POST['parent_phone']);
+    $parent_phone = preg_replace('/[^0-9]/', '', $_POST['parent_phone']);
     
     if (empty($parent_phone)) {
         $error = "Por favor, ingresa tu número de WhatsApp.";

@@ -38,7 +38,7 @@ if ($modo_prueba) {
         }
 
         $child_name = trim($data['child_name']);
-        $parent_phone = trim($data['parent_phone']);
+        $parent_phone = preg_replace('/[^0-9]/', '', $data['parent_phone']);
 
         $stmtCheck = $pdo->prepare("SELECT id FROM users WHERE parent_phone = ?");
         $stmtCheck->execute([$parent_phone]);
