@@ -1,6 +1,9 @@
-document.addEventListener('DOMContentLoaded', () => {
-    window.speechSynthesis.getVoices();
-});
+let speechVoices = [];
+
+// Precargar voces tan pronto como el navegador las tenga listas
+window.speechSynthesis.onvoiceschanged = () => {
+    speechVoices = window.speechSynthesis.getVoices();
+};
 
 let isMusicPlaying = false;
 const bgMusic = document.getElementById('bg-music');
@@ -10,43 +13,43 @@ function toggleMusic() {
     const musicBtn = document.getElementById('music-toggle');
     if (!bgMusic || !musicBtn) return;
     if (isMusicPlaying) { bgMusic.pause(); musicBtn.innerText = '🔇'; } 
-    else { bgMusic.play().catch(e => console.log("Navegador requiere interacción previa")); musicBtn.innerText = '🎵'; }
+    else { bgMusic.play().catch(e => console.log("Requiere interacción")); musicBtn.innerText = '🎵'; }
     isMusicPlaying = !isMusicPlaying;
 }
 
 function playTTS(text, forceSpanish = false) {
     if(!text) return;
     
-    // Cancela cualquier audio que esté sonando
+    // Cancela audios atascados
     window.speechSynthesis.cancel();
 
     const utterance = new SpeechSynthesisUtterance(text);
-    
-    // Si forceSpanish es true (ej. para instrucciones), usa español. Si no, usa Inglés nativo.
     utterance.lang = forceSpanish ? 'es-ES' : 'en-US'; 
-    utterance.rate = 0.9;
+    utterance.rate = 0.85; // Un poco más lento para que los niños entiendan
 
-    const voices = window.speechSynthesis.getVoices();
+    // Si aún no han cargado, forzamos la carga
+    if (speechVoices.length === 0) {
+        speechVoices = window.speechSynthesis.getVoices();
+    }
+    
     let bestVoice;
     
     if (forceSpanish) {
-        bestVoice = voices.find(v => v.lang.startsWith('es'));
+        // Busca español nativo
+        bestVoice = speechVoices.find(v => v.lang.startsWith('es') && (v.name.includes('Google') || v.name.includes('Microsoft')));
+        if(!bestVoice) bestVoice = speechVoices.find(v => v.lang.startsWith('es'));
     } else {
-        // Busca una voz nativa en inglés (femenina o de Google preferiblemente)
-        bestVoice = voices.find(v => v.lang.startsWith('en') && (v.name.includes('Google') || v.name.includes('Female')));
-        if(!bestVoice) bestVoice = voices.find(v => v.lang.startsWith('en'));
+        // Busca INGLÉS NATIVO (Priorizando voces de alta calidad de Google o Microsoft)
+        bestVoice = speechVoices.find(v => v.lang.startsWith('en') && (v.name.includes('Google') || v.name.includes('Microsoft') || v.name.includes('Samantha')));
+        if(!bestVoice) bestVoice = speechVoices.find(v => v.lang.startsWith('en'));
     }
     
     if(bestVoice) utterance.voice = bestVoice;
     window.speechSynthesis.speak(utterance);
 }
 
-// Para retrocompatibilidad con los juegos viejos, pero forzando el inglés real
 function playSpanglish(introEs, wordEn, transEs) {
-    if (wordEn) {
-        // Leemos la palabra en INGLÉS REAL, ignorando la fonética antigua
-        playTTS(wordEn, false);
-    }
+    if (wordEn) { playTTS(wordEn, false); }
 }
 
 function fireConfetti() {
