@@ -153,7 +153,7 @@
             .then(data => {
                 if(data.success) {
                     alert(data.message); 
-                    window.location.href = 'index.php'; 
+                    window.location.href = 'dashboard.php'; 
                 } else {
                     alert("Error: " + data.message);
                     btn.innerText = "Pagar y Empezar ▶";

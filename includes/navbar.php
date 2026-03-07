@@ -15,7 +15,7 @@ $child_name = $user_info ? $user_info['child_name'] : 'Explorador';
     .user-badge { font-weight: bold; color: var(--primary); background: #eef2ff; padding: 5px 15px; border-radius: 20px; }
 </style>
 <div class="top-navbar">
-    <div class="nav-brand"><a href="index.php">🐶 <span>English 15</span></a></div>
+    <div class="nav-brand"><a href="dashboard.php">🐶 <span>English 15</span></a></div>
     <div class="nav-menu">
         <span class="user-badge">👤 <?php echo htmlspecialchars($child_name); ?></span>
         <div class="stars-badge">⭐ <span id="star-count"><?php echo $current_stars; ?></span></div>

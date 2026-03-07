@@ -6,7 +6,7 @@ if (session_status() === PHP_SESSION_NONE) {
 
 // Si el usuario ya pagó y está logueado, lo mandamos directo a su zona de estudio.
 if (isset($_SESSION['user_id'])) {
-    header("Location: course.php?module=1");
+    header("Location: dashboard.php?module=1");
     exit;
 }
 ?>
@@ -71,10 +71,7 @@ if (isset($_SESSION['user_id'])) {
         <h1>Educación Interactiva para tus Hijos</h1>
         <p>Aprende jugando con nuestros cursos especializados. ¡Selecciona un curso y comienza la aventura!</p>
         
-        <div style="background: #fff3cd; color: #856404; padding: 15px; border-radius: 10px; display: inline-block; margin-top: 20px; border: 1px solid #ffeeba;">
-            <strong>Datos de prueba para pasarela de pagos (Culqi):</strong><br>
-            Puedes probar el flujo de alumnos en "Acceso Alumnos" -> Número: <strong>+51999888777</strong>
-        </div>
+
     </div>
 
     <section class="products-section">
@@ -249,7 +246,7 @@ if (isset($_SESSION['user_id'])) {
                 if(data.success) {
                     alert("¡Pago exitoso! Cuenta creada. Redirigiendo a tus cursos..."); 
                     // Como el pago simulado fue exitoso e inició sesión en el backend, recargar nos enviará a course.php
-                    window.location.reload(); 
+                    window.location.href = 'dashboard.php'; 
                 } else {
                     alert("Error en el pago: " + data.message);
                     resetBtn(btn);

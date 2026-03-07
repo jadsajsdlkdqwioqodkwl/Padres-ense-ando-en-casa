@@ -2,7 +2,7 @@
 require_once 'includes/config.php';
 
 if (isset($_SESSION['user_id'])) {
-    header("Location: index.php");
+    header("Location: dashboard.php");
     exit;
 }
 
@@ -21,7 +21,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
         if ($user) {
             $_SESSION['user_id'] = $user['id'];
-            header("Location: index.php");
+            header("Location: dashboard.php");
             exit;
         } else {
             $error = "Número no encontrado. Verifica tu número o crea una cuenta nueva.";
@@ -74,10 +74,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 <input type="tel" name="parent_phone" class="login-input" placeholder="Ej: +51999888777" required>
                 <button type="submit" class="btn-login">Entrar a Jugar</button>
             </form>
-            
-            <p style="margin-top: 25px; color: #666;">
-                ¿Aún no tienes cuenta? <a href="register.php" style="color: var(--primary); font-weight: bold;">Regístrate aquí</a>
-            </p>
+        
         </div>
     </div>
 </body>
