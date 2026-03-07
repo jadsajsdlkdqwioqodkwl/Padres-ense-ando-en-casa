@@ -6,8 +6,8 @@ CREATE TABLE IF NOT EXISTS users (
     id INT AUTO_INCREMENT PRIMARY KEY, 
     child_name VARCHAR(50) NOT NULL, 
     parent_phone VARCHAR(20) UNIQUE, 
-    total_stars INT DEFAULT 0
-    subscription_expires_at DATETIME NULL -- ¡COLUMNA AÑADIDA!
+    total_stars INT DEFAULT 0, -- <== ¡AQUÍ FALTABA ESTA COMA!
+    subscription_expires_at DATETIME NULL 
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS modules (
