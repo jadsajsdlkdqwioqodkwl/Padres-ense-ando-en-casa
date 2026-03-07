@@ -26,7 +26,7 @@ function getUserInfo($pdo, $user_id) {
 // 🛡️ SISTEMA DE PROTECCIÓN (REDIRECCIÓN)
 // ==========================================
 $current_page = basename($_SERVER['PHP_SELF']);
-$public_pages = ['login.php', 'register.php', 'reparar_bd.php'];
+$public_pages = ['login.php', 'register.php', 'reparar_bd.php', 'process_payment.php'];
 
 if (!isset($_SESSION['user_id']) && !in_array($current_page, $public_pages)) {
     header("Location: login.php");
