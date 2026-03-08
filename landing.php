@@ -24,12 +24,15 @@
 
     <style>
         :root {
-            --primary-dark: #2A4858; /* Inspirado en el azul oscuro de Zola */
-            --accent: #00B2B2; /* Botones vibrantes turquesa */
-            --accent-hover: #009595;
-            --bg-light: #F2F7F9; /* Fondo pastel suave */
+            /* Paleta extraída de tu logo My World */
+            --brand-blue: #1C3D6A;   /* Azul oscuro del texto "My" y bordes */
+            --brand-green: #68A93E;  /* Verde de las hojas/libro y la "W" */
+            --brand-orange: #F29C38; /* Naranja del niño y la estrella */
+            --brand-lblue: #5CB2E4;  /* Celeste del globo terráqueo */
+            
+            --bg-light: #F8FAFC;     /* Fondo principal súper claro */
             --text-main: #333333;
-            --text-muted: #666666;
+            --text-muted: #64748B;
             --white: #FFFFFF;
         }
 
@@ -41,67 +44,73 @@
 
         /* Componentes Globales */
         .container { max-width: 1200px; margin: 0 auto; padding: 0 5%; }
-        .btn { display: inline-block; background: var(--accent); color: var(--white); font-weight: 700; padding: 14px 32px; border-radius: 50px; text-align: center; transition: background 0.3s, transform 0.2s; border: none; cursor: pointer; font-size: 1rem; }
-        .btn:hover { background: var(--accent-hover); transform: translateY(-2px); }
+        
+        /* Botón Verde Marca */
+        .btn { display: inline-block; background: var(--brand-green); color: var(--white); font-weight: 700; padding: 14px 32px; border-radius: 50px; text-align: center; transition: background 0.3s, transform 0.2s; border: none; cursor: pointer; font-size: 1rem; box-shadow: 0 4px 14px rgba(104, 169, 62, 0.3); }
+        .btn:hover { background: #579232; transform: translateY(-2px); box-shadow: 0 6px 20px rgba(104, 169, 62, 0.4); }
         .text-center { text-align: center; }
         
-        /* El famoso Subrayado Estilo Zola */
+        /* El Subrayado Zola adaptado a tu marca (Naranja o Celeste) */
         .underline { position: relative; white-space: nowrap; z-index: 1; }
-        .underline::after { content: ''; position: absolute; left: 0; bottom: 10%; width: 100%; height: 35%; background-color: #FFD166; z-index: -1; opacity: 0.8; }
+        .underline::after { content: ''; position: absolute; left: 0; bottom: 8%; width: 100%; height: 35%; background-color: var(--brand-orange); z-index: -1; opacity: 0.6; }
+        .underline-blue::after { background-color: var(--brand-lblue); opacity: 0.5; }
 
         /* Navbar */
-        header { padding: 20px 0; background: var(--white); position: relative; z-index: 10; }
+        header { padding: 15px 0; background: var(--white); position: relative; z-index: 10; box-shadow: 0 1px 10px rgba(0,0,0,0.03); }
         .nav-inner { display: flex; justify-content: space-between; align-items: center; }
-        .logo-svg { height: 40px; width: auto; }
+        
+        /* Control del SVG del logo */
+        .logo img { height: 45px; width: auto; }
+        
         .nav-links { display: flex; align-items: center; gap: 20px; }
-        .login-link { color: var(--text-muted); font-weight: 600; font-size: 0.9rem; }
+        .login-link { color: var(--brand-blue); font-weight: 700; font-size: 0.95rem; }
 
         /* Hero Section */
-        .hero { background: var(--bg-light); padding: 60px 0 80px; overflow: hidden; }
+        .hero { background: var(--bg-light); padding: 70px 0 90px; overflow: hidden; }
         .hero-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; align-items: center; }
-        .hero-text h1 { font-size: clamp(2.5rem, 5vw, 3.5rem); font-weight: 800; line-height: 1.1; color: var(--primary-dark); margin-bottom: 20px; letter-spacing: -1px; }
+        .hero-text h1 { font-size: clamp(2.5rem, 5vw, 3.5rem); font-weight: 800; line-height: 1.1; color: var(--brand-blue); margin-bottom: 20px; letter-spacing: -1px; }
         .hero-text p { font-size: 1.25rem; color: var(--text-muted); margin-bottom: 30px; }
-        .hero-price { font-size: 1.1rem; font-weight: 600; color: var(--primary-dark); margin-top: 15px; display: block; }
+        .hero-price { font-size: 1.1rem; font-weight: 600; color: var(--brand-blue); margin-top: 15px; display: block; }
         .hero-image-wrapper { position: relative; }
-        .hero-image-wrapper img { border-radius: 20px; box-shadow: 0 20px 40px rgba(0,0,0,0.1); transform: rotate(2deg); transition: transform 0.5s; }
+        .hero-image-wrapper img { border-radius: 20px; box-shadow: 0 20px 40px rgba(28, 61, 106, 0.1); transform: rotate(2deg); transition: transform 0.5s; }
         .hero-image-wrapper img:hover { transform: rotate(0deg); }
 
         /* Agitation Section (Pattern Interrupt) */
         .agitation { padding: 80px 0; background: var(--white); }
-        .section-title { font-size: 2.2rem; color: var(--primary-dark); margin-bottom: 50px; font-weight: 800; letter-spacing: -0.5px; }
+        .section-title { font-size: 2.2rem; color: var(--brand-blue); margin-bottom: 50px; font-weight: 800; letter-spacing: -0.5px; }
         .cards-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 30px; }
         .card-simple { padding: 30px; text-align: center; border: 1px solid #E2E8F0; border-radius: 12px; }
         .card-simple h4 { color: #E53E3E; margin-bottom: 15px; font-size: 1.2rem; }
 
-        /* Benefits (Dark Section Zola Style) */
-        .benefits { background: var(--primary-dark); color: var(--white); padding: 80px 0; }
+        /* Benefits (Dark Section Zola Style usando tu Azul) */
+        .benefits { background: var(--brand-blue); color: var(--white); padding: 80px 0; }
         .benefits .section-title { color: var(--white); }
-        .benefits .underline::after { background-color: #FF9F43; } /* Naranja suave para oscuros */
+        .benefits .underline::after { background-color: var(--brand-orange); opacity: 0.8;} 
         .benefits-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 40px; margin-top: 40px; }
         .benefit-item { text-align: center; }
         .benefit-icon { width: 64px; height: 64px; margin: 0 auto 20px; background: rgba(255,255,255,0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; }
-        .benefit-item h3 { font-size: 1.3rem; margin-bottom: 10px; }
-        .benefit-item p { font-size: 0.95rem; color: rgba(255,255,255,0.8); }
+        .benefit-item h3 { font-size: 1.3rem; margin-bottom: 10px; color: var(--brand-lblue); }
+        .benefit-item p { font-size: 0.95rem; color: rgba(255,255,255,0.9); }
 
         /* Zig-Zag Features */
         .features { padding: 80px 0; background: var(--white); }
         .feature-row { display: grid; grid-template-columns: 1fr 1fr; gap: 50px; align-items: center; margin-bottom: 80px; }
         .feature-row:nth-child(even) .feature-text { order: -1; }
-        .feature-text h2 { font-size: 2rem; color: var(--primary-dark); margin-bottom: 20px; }
-        .feature-image img { border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.08); }
+        .feature-text h2 { font-size: 2rem; color: var(--brand-blue); margin-bottom: 20px; }
+        .feature-image img { border-radius: 12px; box-shadow: 0 10px 30px rgba(28, 61, 106, 0.08); }
 
         /* Checkout / Bottom CTA */
         .checkout-section { background: var(--bg-light); padding: 80px 0; text-align: center; }
-        .checkout-script-font { font-family: "Georgia", serif; font-style: italic; font-size: 2.5rem; color: var(--primary-dark); margin-bottom: 30px; }
-        .checkout-box { max-width: 500px; margin: 0 auto; background: var(--white); padding: 40px; border-radius: 16px; box-shadow: 0 15px 35px rgba(0,0,0,0.05); text-align: left; }
-        .price-tag { text-align: center; font-size: 2.5rem; font-weight: 800; color: var(--primary-dark); margin-bottom: 25px; }
+        .checkout-script-font { font-family: "Georgia", serif; font-style: italic; font-size: 2.5rem; color: var(--brand-blue); margin-bottom: 30px; }
+        .checkout-box { max-width: 500px; margin: 0 auto; background: var(--white); padding: 40px; border-radius: 16px; box-shadow: 0 15px 35px rgba(28, 61, 106, 0.05); text-align: left; border-top: 5px solid var(--brand-green); }
+        .price-tag { text-align: center; font-size: 2.5rem; font-weight: 800; color: var(--brand-blue); margin-bottom: 25px; }
         .price-tag span { font-size: 1rem; color: var(--text-muted); font-weight: normal; display: block; }
         .form-group { margin-bottom: 20px; }
-        .form-group label { display: block; font-size: 0.9rem; font-weight: 600; margin-bottom: 8px; color: var(--primary-dark); }
+        .form-group label { display: block; font-size: 0.9rem; font-weight: 600; margin-bottom: 8px; color: var(--brand-blue); }
         .form-control { width: 100%; padding: 14px; border: 2px solid #E2E8F0; border-radius: 8px; font-size: 16px; transition: border-color 0.3s; }
-        .form-control:focus { border-color: var(--accent); outline: none; }
+        .form-control:focus { border-color: var(--brand-lblue); outline: none; box-shadow: 0 0 0 3px rgba(92, 178, 228, 0.2); }
         .btn-pay { width: 100%; font-size: 1.1rem; padding: 16px; margin-top: 10px; }
-        .btn-pay:disabled { background: #CBD5E0; cursor: not-allowed; transform: none; }
+        .btn-pay:disabled { background: #CBD5E0; cursor: not-allowed; transform: none; box-shadow: none; }
         .guarantee { text-align: center; font-size: 0.85rem; color: var(--text-muted); margin-top: 15px; display: flex; justify-content: center; align-items: center; gap: 5px; }
 
         /* Responsive */
@@ -119,10 +128,7 @@
     <header>
         <div class="container nav-inner">
             <a href="#" class="logo" aria-label="Inicio">
-                <svg class="logo-svg" viewBox="0 0 200 50" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <rect width="200" height="50" fill="#E2E8F0" rx="8"/>
-                    <text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" fill="#64748B" font-family="sans-serif" font-weight="bold">LOGO.SVG AQUÍ</text>
-                </svg>
+                <img src="assets/logo-myworld.svg" alt="My World Logo" width="240" height="60">
             </a>
             <div class="nav-links">
                 <a href="login.php" class="login-link">LOG IN</a>
@@ -146,7 +152,7 @@
     </section>
 
     <section class="agitation container">
-        <h2 class="section-title text-center">¿Ya probaste de todo, <span class="underline">verdad</span>?</h2>
+        <h2 class="section-title text-center">¿Ya probaste de todo, <span class="underline underline-blue">verdad</span>?</h2>
         <div class="cards-grid">
             <div class="card-simple">
                 <h4>Apps Populares</h4>
@@ -158,7 +164,7 @@
             </div>
             <div class="card-simple">
                 <h4>Academias Tradicionales</h4>
-                <p>S/200 al mes, libros nuevos cada ciclo y clases por Zoom con otros 30 alumnos donde apenas participan.</p>
+                <p>Mensualidades caras, libros nuevos cada ciclo y clases por Zoom con otros alumnos donde apenas participan.</p>
             </div>
         </div>
     </section>
@@ -169,21 +175,21 @@
             <div class="benefits-grid">
                 <div class="benefit-item">
                     <div class="benefit-icon">
-                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2"><path d="M12 20h9M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="var(--brand-orange)" stroke-width="2"><path d="M12 20h9M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
                     </div>
                     <h3>Escribe Antes de Jugar</h3>
                     <p>El "peaje cognitivo". Tienen que escribir la traducción correcta para desbloquear el minijuego.</p>
                 </div>
                 <div class="benefit-item">
                     <div class="benefit-icon">
-                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="var(--brand-orange)" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
                     </div>
                     <h3>Voz Nativa y Mnemotecnias</h3>
                     <p>Asociamos palabras en inglés con sonidos divertidos en español con pronunciación 100% nativa.</p>
                 </div>
                 <div class="benefit-item">
                     <div class="benefit-icon">
-                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="var(--brand-orange)" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
                     </div>
                     <h3>Cero Mensualidades</h3>
                     <p>Las suscripciones recurrentes son estresantes. Pagas una sola vez y lo usan para siempre.</p>
@@ -198,13 +204,13 @@
                 <img src="assets/dashboard-mockup.webp" loading="lazy" width="500" height="400" alt="Dashboard de progreso para padres">
             </div>
             <div class="feature-text">
-                <h2>Progreso que puedes <span class="underline">ver y medir</span></h2>
+                <h2>Progreso que puedes <span class="underline underline-blue">ver y medir</span></h2>
                 <p>Nuestra plataforma te entrega un diploma digital diario indicándote exactamente qué 5 palabras aprendió tu hijo hoy. Perfecto para preguntárselas en la cena y validar su avance.</p>
             </div>
         </div>
         <div class="feature-row">
             <div class="feature-text">
-                <h2>Juegos adaptados <span class="underline">sin estrés</span></h2>
+                <h2>Juegos adaptados <span class="underline underline-blue">sin estrés</span></h2>
                 <p>Ellos mismos eligen qué categoría de palabras quieren aprender hoy. Los minijuegos de recompensa se adaptan automáticamente a su elección para mantener la motivación al máximo.</p>
             </div>
             <div class="feature-image">
@@ -259,7 +265,6 @@
             btn.innerText = "Procesando...";
             btn.disabled = true;
 
-            // Conservando la conexión exacta con tu backend actual
             fetch('app/process_payment.php', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
