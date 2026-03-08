@@ -103,20 +103,20 @@
         .btn-pay { width: 100%; font-size: 1.1rem; padding: 16px; margin-top: 10px; }
         .guarantee { text-align: center; font-size: 0.85rem; color: var(--text-muted); margin-top: 15px; display: flex; justify-content: center; align-items: center; gap: 5px; }
 
-        /* Modal Styles */
-        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(28, 61, 106, 0.7); z-index: 1000; justify-content: center; align-items: center; padding: 20px; opacity: 0; transition: opacity 0.3s ease; }
-        .modal-overlay.active { display: flex; opacity: 1; }
-        /* AÑADIDO: max-height y overflow-y para que sea scrolleable en móviles pequeños/horizontales */
-        .modal-content { background: var(--white); width: 100%; max-width: 450px; padding: 40px; border-radius: 16px; position: relative; box-shadow: 0 25px 50px rgba(0,0,0,0.25); border-top: 5px solid var(--brand-green); transform: translateY(-20px); transition: transform 0.3s ease; max-height: 90vh; overflow-y: auto; }
-        .modal-overlay.active .modal-content { transform: translateY(0); }
-        .modal-close { position: absolute; top: 15px; right: 20px; font-size: 1.8rem; color: var(--text-muted); cursor: pointer; border: none; background: none; transition: color 0.2s; }
-        .modal-close:hover { color: #E53E3E; }
-        
+        /* Form Elements (Shared) */
         .form-group { margin-bottom: 20px; text-align: left; }
         .form-group label { display: block; font-size: 0.9rem; font-weight: 600; margin-bottom: 8px; color: var(--brand-blue); }
         .form-control { width: 100%; padding: 14px; border: 2px solid #E2E8F0; border-radius: 8px; font-size: 16px; transition: border-color 0.3s; }
         .form-control:focus { border-color: var(--brand-lblue); outline: none; box-shadow: 0 0 0 3px rgba(92, 178, 228, 0.2); }
         .btn-pay:disabled { background: #CBD5E0; cursor: not-allowed; transform: none; box-shadow: none; }
+
+        /* Modal Styles */
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(28, 61, 106, 0.7); z-index: 1000; justify-content: center; align-items: center; padding: 20px; opacity: 0; transition: opacity 0.3s ease; }
+        .modal-overlay.active { display: flex; opacity: 1; }
+        .modal-content { background: var(--white); width: 100%; max-width: 450px; padding: 40px; border-radius: 16px; position: relative; box-shadow: 0 25px 50px rgba(0,0,0,0.25); border-top: 5px solid var(--brand-green); transform: translateY(-20px); transition: transform 0.3s ease; max-height: 90vh; overflow-y: auto; }
+        .modal-overlay.active .modal-content { transform: translateY(0); }
+        .modal-close { position: absolute; top: 15px; right: 20px; font-size: 1.8rem; color: var(--text-muted); cursor: pointer; border: none; background: none; transition: color 0.2s; }
+        .modal-close:hover { color: #E53E3E; }
 
         /* Responsive Global */
         @media (max-width: 768px) {
@@ -127,7 +127,7 @@
             .checkout-box, .modal-content { padding: 25px; }
         }
 
-        /* AÑADIDO: Ajustes específicos para móviles pequeños (Navbar) */
+        /* Responsive Móviles Pequeños */
         @media (max-width: 480px) {
             .nav-inner { flex-direction: column; gap: 15px; }
             .btn { padding: 12px 24px; font-size: 0.95rem; }
@@ -240,12 +240,23 @@
                     S/14.99 <span>Pago único. Acceso de por vida.</span>
                 </div>
                 
-                <button type="button" class="btn btn-pay trigger-modal">Comprar Acceso Seguro</button>
-                
-                <div class="guarantee">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-                    Pago seguro procesado por Culqi
-                </div>
+                <form id="bottom-payment-form">
+                    <div class="form-group">
+                        <label for="bottom_child_name">Nombre de tu hijo/a</label>
+                        <input type="text" id="bottom_child_name" class="form-control" placeholder="Ej: Mateo">
+                    </div>
+                    <div class="form-group">
+                        <label for="bottom_parent_phone">Tu número de WhatsApp</label>
+                        <input type="tel" id="bottom_parent_phone" class="form-control" placeholder="Ej: 999888777">
+                    </div>
+                    
+                    <button type="submit" id="btn-comprar-bottom" class="btn btn-pay">Comprar Acceso Seguro</button>
+                    
+                    <div class="guarantee">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                        Pago seguro procesado por Culqi
+                    </div>
+                </form>
             </div>
         </div>
     </section>
@@ -266,7 +277,7 @@
                     <input type="tel" id="parent_phone" class="form-control" placeholder="Ej: 999888777" required>
                 </div>
                 
-                <button type="submit" id="btn-comprar" class="btn btn-pay">Procesar Pago Seguro</button>
+                <button type="submit" id="btn-comprar-modal" class="btn btn-pay">Procesar Pago Seguro</button>
                 
                 <div class="guarantee">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
@@ -277,7 +288,44 @@
     </div>
 
     <script>
-        // Lógica del Modal
+        // Funciones Globales de Pago
+        function procesarPago(childName, parentPhone, btnElement) {
+            const originalText = btnElement.innerText;
+            btnElement.innerText = "Procesando...";
+            btnElement.disabled = true;
+
+            fetch('app/process_payment.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ 
+                    token: "token_falso_de_prueba", // Aquí irá tu token real de Culqi
+                    child_name: childName, 
+                    parent_phone: parentPhone 
+                })
+            })
+            .then(response => {
+                if (!response.ok) throw new Error("Error de red");
+                return response.json();
+            })
+            .then(data => {
+                if(data.success) {
+                    alert(data.message); 
+                    window.location.href = 'dashboard.php'; 
+                } else {
+                    alert("Error: " + data.message);
+                    btnElement.innerText = originalText;
+                    btnElement.disabled = false;
+                }
+            })
+            .catch(err => {
+                console.error(err);
+                alert("Hubo un problema procesando el pago. Revisa tu conexión.");
+                btnElement.innerText = originalText;
+                btnElement.disabled = false;
+            });
+        }
+
+        // Lógica del Modal (Apertura y Cierre)
         const modal = document.getElementById('checkoutModal');
         const triggers = document.querySelectorAll('.trigger-modal');
         const closeBtn = document.getElementById('closeModal');
@@ -299,10 +347,9 @@
             }
         });
 
-        // Lógica del Formulario
+        // Evento: Formulario Modal
         document.getElementById('payment-form').addEventListener('submit', function (e) {
             e.preventDefault();
-            
             const childName = document.getElementById('child_name').value.trim();
             const parentPhone = document.getElementById('parent_phone').value.trim();
 
@@ -311,39 +358,22 @@
                 return;
             }
 
-            const btn = document.getElementById('btn-comprar');
-            btn.innerText = "Procesando...";
-            btn.disabled = true;
+            procesarPago(childName, parentPhone, document.getElementById('btn-comprar-modal'));
+        });
 
-            fetch('app/process_payment.php', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ 
-                    token: "token_falso_de_prueba", 
-                    child_name: childName, 
-                    parent_phone: parentPhone 
-                })
-            })
-            .then(response => {
-                if (!response.ok) throw new Error("Error de red");
-                return response.json();
-            })
-            .then(data => {
-                if(data.success) {
-                    alert(data.message); 
-                    window.location.href = 'dashboard.php'; 
-                } else {
-                    alert("Error: " + data.message);
-                    btn.innerText = "Procesar Pago Seguro";
-                    btn.disabled = false;
-                }
-            })
-            .catch(err => {
-                console.error(err);
-                alert("Hubo un problema procesando el pago. Revisa tu conexión.");
-                btn.innerText = "Procesar Pago Seguro";
-                btn.disabled = false;
-            });
+        // Evento: Formulario Checkout Inferior (La magia de UX)
+        document.getElementById('bottom-payment-form').addEventListener('submit', function (e) {
+            e.preventDefault();
+            const childName = document.getElementById('bottom_child_name').value.trim();
+            const parentPhone = document.getElementById('bottom_parent_phone').value.trim();
+
+            // Si los campos están vacíos, abrimos el modal
+            if (childName === '' || parentPhone === '') {
+                modal.classList.add('active');
+            } else {
+                // Si ya los llenó, pasamos directo a procesar el pago
+                procesarPago(childName, parentPhone, document.getElementById('btn-comprar-bottom'));
+            }
         });
     </script>
 </body>
