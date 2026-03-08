@@ -19,15 +19,14 @@ DELETE FROM modules WHERE id = 1;
 INSERT IGNORE INTO modules (id, title, color_theme, order_num) 
 VALUES (1, 'Mundo 1: The Farm', '#2B3A67', 1);
 
--- STAGE 1: Color Rescue (3 Rondas)
+-- STAGE 1: Type Jumper (3 Rondas)
 INSERT INTO lessons (module_id, title, template_type, order_num, reward_stars, content_data) 
-VALUES (1, 'Rescata el Color', 'color_rescue', 1, 10, '
+VALUES (1, 'Cruza el Río', 'jumper', 1, 10, '
 {
-  "time_limit": 20,
   "rounds": [
-    { "color_name": "Red", "phonetic": "red", "color_hex": "#ff4757", "item": "🍎", "translation": "Rojo", "context_es": "¡Atento! Encuentra el color de la manzana.", "distractors": [{"name": "Blue", "hex": "#3742fa"}, {"name": "Green", "hex": "#2ed573"}] },
-    { "color_name": "Green", "phonetic": "grin", "color_hex": "#2ed573", "item": "🌳", "translation": "Verde", "context_es": "¡Ahora busca el color de las hojas del árbol!", "distractors": [{"name": "Yellow", "hex": "#f1c40f"}, {"name": "Red", "hex": "#ff4757"}] },
-    { "color_name": "Yellow", "phonetic": "iélou", "color_hex": "#f1c40f", "item": "🐥", "translation": "Amarillo", "context_es": "¡Salva al patito amarillo!", "distractors": [{"name": "Blue", "hex": "#3742fa"}, {"name": "Red", "hex": "#ff4757"}] }
+    { "target_word": "RED", "phonetic": "red", "translation": "Rojo", "context_es": "¡Salta en el color Rojo!", "distractors": ["BLUE", "GREEN"] },
+    { "target_word": "GREEN", "phonetic": "grin", "translation": "Verde", "context_es": "¡Ahora busca el Verde!", "distractors": ["YELLOW", "RED"] },
+    { "target_word": "YELLOW", "phonetic": "iélou", "translation": "Amarillo", "context_es": "¡Último salto! Color Amarillo.", "distractors": ["BLUE", "RED"] }
   ]
 }');
 

@@ -19,17 +19,16 @@ DELETE FROM modules WHERE id = 2;
 INSERT IGNORE INTO modules (id, title, color_theme, order_num) 
 VALUES (2, 'Mundo 2: My School', '#00b894', 2);
 
--- STAGE 1: Color Rescue (5 Rondas)
+-- STAGE 1: Type Jumper (5 Rondas)
 INSERT INTO lessons (module_id, title, template_type, order_num, reward_stars, content_data) 
-VALUES (2, 'Colores del Salón', 'color_rescue', 1, 15, '
+VALUES (2, 'Colores del Salón', 'jumper', 1, 15, '
 {
-  "time_limit": 18,
   "rounds": [
-    { "color_name": "Yellow", "phonetic": "iélou", "color_hex": "#f1c40f", "item": "✏️", "translation": "Amarillo", "context_es": "¡Salva el lápiz amarillo!", "distractors": [{"name": "Blue", "hex": "#3742fa"}, {"name": "Red", "hex": "#ff4757"}] },
-    { "color_name": "Purple", "phonetic": "pérpol", "color_hex": "#9b59b6", "item": "🎒", "translation": "Morado", "context_es": "¡El OVNI quiere la mochila morada! Píntala.", "distractors": [{"name": "Green", "hex": "#2ed573"}, {"name": "Yellow", "hex": "#f1c40f"}] },
-    { "color_name": "Orange", "phonetic": "óranch", "color_hex": "#e67e22", "item": "📙", "translation": "Naranja", "context_es": "¡Protege el libro naranja!", "distractors": [{"name": "Black", "hex": "#2f3640"}, {"name": "Blue", "hex": "#3742fa"}] },
-    { "color_name": "Pink", "phonetic": "pinc", "color_hex": "#fd79a8", "item": "🌸", "translation": "Rosa", "context_es": "¡Salva la flor rosa!", "distractors": [{"name": "Red", "hex": "#ff4757"}, {"name": "Green", "hex": "#2ed573"}] },
-    { "color_name": "Green", "phonetic": "grin", "color_hex": "#2ed573", "item": "🍏", "translation": "Verde", "context_es": "¡Salva la manzana verde del profesor!", "distractors": [{"name": "Red", "hex": "#ff4757"}, {"name": "Yellow", "hex": "#f1c40f"}] }
+    { "target_word": "YELLOW", "phonetic": "iélou", "translation": "Amarillo", "context_es": "¡Salta sobre el color Amarillo!", "distractors": ["BLUE", "RED"] },
+    { "target_word": "PURPLE", "phonetic": "pérpol", "translation": "Morado", "context_es": "¡Cruza saltando en el color Morado!", "distractors": ["GREEN", "YELLOW"] },
+    { "target_word": "ORANGE", "phonetic": "óranch", "translation": "Naranja", "context_es": "¡Busca el color Naranja para avanzar!", "distractors": ["BLACK", "BLUE"] },
+    { "target_word": "PINK", "phonetic": "pinc", "translation": "Rosa", "context_es": "¡Salta sobre el Rosa!", "distractors": ["RED", "GREEN"] },
+    { "target_word": "GREEN", "phonetic": "grin", "translation": "Verde", "context_es": "¡Último salto! Color Verde.", "distractors": ["RED", "YELLOW"] }
   ]
 }');
 
