@@ -134,9 +134,9 @@ if (isset($_SESSION['user_id'])) {
     <footer class="footer">
         <div>
             <h3>Datos de Contacto</h3>
-            <p>📍 Dirección: Calle Falsa 123, Lima, Perú</p>
+            <p>📍 Dirección: Av. Santa Anita Mz D1 Lote 5 Chorrillos, Lima, Perú</p>
             <p>📞 Teléfono / WhatsApp: +51 928 529 656</p>
-            <p>✉️ Correo: soporte@myworldingles.simpledomai123n.online</p>
+            <p>✉️ Correo: moises.olortegui90@gmail.com</p>
         </div>
         <div>
             <h3>Información Legal</h3>
@@ -260,7 +260,7 @@ if (isset($_SESSION['user_id'])) {
         });
 
         function resetBtn(btn) {
-            btn.innerText = "Pagar S/ 39.00 (Simulador)"; 
+            btn.innerText = "Pagar S/ 14.90 (Simulador)"; 
             btn.disabled = false;
             btn.style.background = "var(--success)";
         }

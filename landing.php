@@ -3,8 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Inglés para Niños - Aprende 5 Palabras al Día</title>
+    <title>My World - Inglés para Niños</title>
+    <meta name="description" content="La app donde tu hijo aprende inglés escribiendo y jugando. Un solo pago, acceso de por vida.">
     
+    <link rel="preload" as="image" href="assets/hero-app.webp">
+
     <script>
     !function(f,b,e,v,n,t,s)
     {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
@@ -14,134 +17,254 @@
     t.src=v;s=b.getElementsByTagName(e)[0];
     s.parentNode.insertBefore(t,s)}(window, document,'script',
     'https://connect.facebook.net/en_US/fbevents.js');
-    fbq('init', 'TU_PIXEL_ID'); // REEMPLAZA CON TU PIXEL ID
+    fbq('init', 'TU_PIXEL_ID');
     fbq('track', 'PageView');
     </script>
     <noscript><img height="1" width="1" style="display:none" src="https://www.facebook.com/tr?id=TU_PIXEL_ID&ev=PageView&noscript=1"/></noscript>
-    
+
     <style>
-        :root { --primary: #6c5ced; --secondary: #ff9f43; --dark: #2d3436; --light: #f8f9fa; --success: #2ed573; }
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-        body { background: var(--light); color: var(--dark); line-height: 1.6; }
+        :root {
+            --primary-dark: #2A4858; /* Inspirado en el azul oscuro de Zola */
+            --accent: #00B2B2; /* Botones vibrantes turquesa */
+            --accent-hover: #009595;
+            --bg-light: #F2F7F9; /* Fondo pastel suave */
+            --text-main: #333333;
+            --text-muted: #666666;
+            --white: #FFFFFF;
+        }
+
+        /* Reset & Tipografía de Sistema (Rendimiento 100%) */
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; color: var(--text-main); line-height: 1.6; background-color: var(--white); overflow-x: hidden; }
+        img { max-width: 100%; height: auto; display: block; }
+        a { text-decoration: none; }
+
+        /* Componentes Globales */
+        .container { max-width: 1200px; margin: 0 auto; padding: 0 5%; }
+        .btn { display: inline-block; background: var(--accent); color: var(--white); font-weight: 700; padding: 14px 32px; border-radius: 50px; text-align: center; transition: background 0.3s, transform 0.2s; border: none; cursor: pointer; font-size: 1rem; }
+        .btn:hover { background: var(--accent-hover); transform: translateY(-2px); }
+        .text-center { text-align: center; }
         
-        /* Navbar Landing */
-        .landing-nav { background: white; padding: 15px 5%; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 10px rgba(0,0,0,0.05); position: sticky; top: 0; z-index: 100; }
-        .logo { font-size: 24px; font-weight: bold; color: var(--primary); text-decoration: none; }
-        .login-btn { background: transparent; border: 2px solid var(--primary); color: var(--primary); padding: 8px 20px; border-radius: 20px; text-decoration: none; font-weight: bold; transition: 0.3s; }
-        .login-btn:hover { background: var(--primary); color: white; }
+        /* El famoso Subrayado Estilo Zola */
+        .underline { position: relative; white-space: nowrap; z-index: 1; }
+        .underline::after { content: ''; position: absolute; left: 0; bottom: 10%; width: 100%; height: 35%; background-color: #FFD166; z-index: -1; opacity: 0.8; }
+
+        /* Navbar */
+        header { padding: 20px 0; background: var(--white); position: relative; z-index: 10; }
+        .nav-inner { display: flex; justify-content: space-between; align-items: center; }
+        .logo-svg { height: 40px; width: auto; }
+        .nav-links { display: flex; align-items: center; gap: 20px; }
+        .login-link { color: var(--text-muted); font-weight: 600; font-size: 0.9rem; }
 
         /* Hero Section */
-        .hero { display: flex; flex-wrap: wrap; align-items: center; padding: 50px 5%; min-height: 80vh; background: linear-gradient(135deg, #fdfbfb 0%, #ebedee 100%); }
-        .hero-text { flex: 1; min-width: 300px; padding-right: 20px; }
-        .hero-text h1 { font-size: 3rem; color: var(--primary); margin-bottom: 20px; line-height: 1.2; }
-        .hero-text p { font-size: 1.2rem; color: #555; margin-bottom: 30px; }
-        
-        /* Formulario de Checkout */
-        .checkout-box { flex: 1; min-width: 300px; background: white; padding: 40px; border-radius: 20px; box-shadow: 0 15px 35px rgba(0,0,0,0.1); }
-        .checkout-box h3 { text-align: center; color: var(--dark); margin-bottom: 20px; font-size: 1.5rem; }
-        .form-group { margin-bottom: 20px; }
-        .form-control { width: 100%; padding: 15px; border: 2px solid #eee; border-radius: 10px; font-size: 16px; transition: 0.3s; }
-        .form-control:focus { border-color: var(--primary); outline: none; }
-        .btn-pay { width: 100%; background: var(--success); color: white; border: none; padding: 18px; border-radius: 10px; font-size: 20px; font-weight: bold; cursor: pointer; box-shadow: 0 6px 0 #218c74; transition: 0.2s; margin-top: 10px; }
-        .btn-pay:active:not(:disabled) { transform: translateY(4px); box-shadow: 0 2px 0 #218c74; }
-        .btn-pay:disabled { background: #95a5a6; box-shadow: none; cursor: not-allowed; }
-        
-        .price-tag { text-align: center; font-size: 2rem; font-weight: bold; color: var(--secondary); margin-bottom: 15px; }
-        .guarantee { text-align: center; font-size: 0.9rem; color: #888; margin-top: 15px; }
+        .hero { background: var(--bg-light); padding: 60px 0 80px; overflow: hidden; }
+        .hero-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; align-items: center; }
+        .hero-text h1 { font-size: clamp(2.5rem, 5vw, 3.5rem); font-weight: 800; line-height: 1.1; color: var(--primary-dark); margin-bottom: 20px; letter-spacing: -1px; }
+        .hero-text p { font-size: 1.25rem; color: var(--text-muted); margin-bottom: 30px; }
+        .hero-price { font-size: 1.1rem; font-weight: 600; color: var(--primary-dark); margin-top: 15px; display: block; }
+        .hero-image-wrapper { position: relative; }
+        .hero-image-wrapper img { border-radius: 20px; box-shadow: 0 20px 40px rgba(0,0,0,0.1); transform: rotate(2deg); transition: transform 0.5s; }
+        .hero-image-wrapper img:hover { transform: rotate(0deg); }
 
-        /* Beneficios */
-        .benefits { padding: 60px 5%; text-align: center; background: white; }
-        .benefits h2 { font-size: 2.5rem; margin-bottom: 40px; color: var(--primary); }
-        .grid-3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 30px; }
-        .benefit-card { padding: 30px; background: var(--light); border-radius: 15px; transition: 0.3s; }
-        .benefit-card:hover { transform: translateY(-10px); box-shadow: 0 10px 20px rgba(0,0,0,0.05); }
-        .benefit-icon { font-size: 50px; margin-bottom: 15px; }
+        /* Agitation Section (Pattern Interrupt) */
+        .agitation { padding: 80px 0; background: var(--white); }
+        .section-title { font-size: 2.2rem; color: var(--primary-dark); margin-bottom: 50px; font-weight: 800; letter-spacing: -0.5px; }
+        .cards-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 30px; }
+        .card-simple { padding: 30px; text-align: center; border: 1px solid #E2E8F0; border-radius: 12px; }
+        .card-simple h4 { color: #E53E3E; margin-bottom: 15px; font-size: 1.2rem; }
+
+        /* Benefits (Dark Section Zola Style) */
+        .benefits { background: var(--primary-dark); color: var(--white); padding: 80px 0; }
+        .benefits .section-title { color: var(--white); }
+        .benefits .underline::after { background-color: #FF9F43; } /* Naranja suave para oscuros */
+        .benefits-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 40px; margin-top: 40px; }
+        .benefit-item { text-align: center; }
+        .benefit-icon { width: 64px; height: 64px; margin: 0 auto 20px; background: rgba(255,255,255,0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+        .benefit-item h3 { font-size: 1.3rem; margin-bottom: 10px; }
+        .benefit-item p { font-size: 0.95rem; color: rgba(255,255,255,0.8); }
+
+        /* Zig-Zag Features */
+        .features { padding: 80px 0; background: var(--white); }
+        .feature-row { display: grid; grid-template-columns: 1fr 1fr; gap: 50px; align-items: center; margin-bottom: 80px; }
+        .feature-row:nth-child(even) .feature-text { order: -1; }
+        .feature-text h2 { font-size: 2rem; color: var(--primary-dark); margin-bottom: 20px; }
+        .feature-image img { border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.08); }
+
+        /* Checkout / Bottom CTA */
+        .checkout-section { background: var(--bg-light); padding: 80px 0; text-align: center; }
+        .checkout-script-font { font-family: "Georgia", serif; font-style: italic; font-size: 2.5rem; color: var(--primary-dark); margin-bottom: 30px; }
+        .checkout-box { max-width: 500px; margin: 0 auto; background: var(--white); padding: 40px; border-radius: 16px; box-shadow: 0 15px 35px rgba(0,0,0,0.05); text-align: left; }
+        .price-tag { text-align: center; font-size: 2.5rem; font-weight: 800; color: var(--primary-dark); margin-bottom: 25px; }
+        .price-tag span { font-size: 1rem; color: var(--text-muted); font-weight: normal; display: block; }
+        .form-group { margin-bottom: 20px; }
+        .form-group label { display: block; font-size: 0.9rem; font-weight: 600; margin-bottom: 8px; color: var(--primary-dark); }
+        .form-control { width: 100%; padding: 14px; border: 2px solid #E2E8F0; border-radius: 8px; font-size: 16px; transition: border-color 0.3s; }
+        .form-control:focus { border-color: var(--accent); outline: none; }
+        .btn-pay { width: 100%; font-size: 1.1rem; padding: 16px; margin-top: 10px; }
+        .btn-pay:disabled { background: #CBD5E0; cursor: not-allowed; transform: none; }
+        .guarantee { text-align: center; font-size: 0.85rem; color: var(--text-muted); margin-top: 15px; display: flex; justify-content: center; align-items: center; gap: 5px; }
 
         /* Responsive */
         @media (max-width: 768px) {
-            .hero-text h1 { font-size: 2.2rem; }
-            .hero { flex-direction: column; text-align: center; padding: 30px 5%; }
-            .hero-text { padding-right: 0; margin-bottom: 30px; }
-            .checkout-box { width: 100%; padding: 25px; }
+            .hero-grid, .feature-row { grid-template-columns: 1fr; text-align: center; gap: 30px; }
+            .hero-image-wrapper img { transform: none; }
+            .feature-row:nth-child(even) .feature-text { order: 0; }
+            .checkout-script-font { font-size: 2rem; }
+            .checkout-box { padding: 25px; }
         }
     </style>
 </head>
 <body>
 
-    <nav class="landing-nav">
-        <a href="#" class="logo">🚀 Mi Mundo en Inglés</a>
-        <a href="login.php" class="login-btn">Ya soy alumno</a>
-    </nav>
+    <header>
+        <div class="container nav-inner">
+            <a href="#" class="logo" aria-label="Inicio">
+                <svg class="logo-svg" viewBox="0 0 200 50" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <rect width="200" height="50" fill="#E2E8F0" rx="8"/>
+                    <text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" fill="#64748B" font-family="sans-serif" font-weight="bold">LOGO.SVG AQUÍ</text>
+                </svg>
+            </a>
+            <div class="nav-links">
+                <a href="login.php" class="login-link">LOG IN</a>
+                <a href="#checkout" class="btn">Empezar Ahora</a>
+            </div>
+        </div>
+    </header>
 
     <section class="hero">
-        <div class="hero-text">
-            <h1>Que tu hijo/a aprenda 5 palabras de inglés al día sin aburrirse</h1>
-            <p>Un sistema híbrido: Escucha la pronunciación nativa, anota las mnemotecnias en su cuaderno y juega minijuegos interactivos. ¡Al final del día, te entregará un diploma con lo aprendido!</p>
-            <ul style="list-style: none; margin-bottom: 20px; font-size: 1.1rem; color: #444;">
-                <li style="margin-bottom: 10px;">✅ <strong>Mnemotecnias divertidas</strong> para una memoria rápida.</li>
-                <li style="margin-bottom: 10px;">✅ <strong>Voz Nativa (Screenreader)</strong> para acento perfecto.</li>
-                <li style="margin-bottom: 10px;">✅ <strong>Diplomas diarios</strong> para que le preguntes en la cena.</li>
-            </ul>
+        <div class="container hero-grid">
+            <div class="hero-text">
+                <h1>Aprende inglés jugando, pero aprendiendo de <span class="underline">verdad</span>.</h1>
+                <p>La app donde los niños deben escribir antes de jugar. Olvídate de los pagos mensuales y las suscripciones escondidas.</p>
+                <a href="#checkout" class="btn">Crear cuenta para tu hijo</a>
+                <span class="hero-price">Un solo pago de $14.99 USD. Acceso de por vida.</span>
+            </div>
+            <div class="hero-image-wrapper">
+                <img src="assets/hero-app.webp" width="600" height="450" alt="Niño usando la app de My World" loading="eager">
+            </div>
         </div>
+    </section>
 
-        <div class="checkout-box">
-            <h3>¡Empieza la aventura hoy!</h3>
-            <div class="price-tag">S/ 39.00 <span style="font-size: 1rem; color: #666; font-weight: normal;">/ mes</span></div>
-            
-            <div class="form-group">
-                <input type="text" id="child_name" class="form-control" placeholder="Nombre de tu hijo/a" required>
+    <section class="agitation container">
+        <h2 class="section-title text-center">¿Ya probaste de todo, <span class="underline">verdad</span>?</h2>
+        <div class="cards-grid">
+            <div class="card-simple">
+                <h4>Apps Populares</h4>
+                <p>Solo presionan colores o tocan dibujitos hasta que aciertan por descarte, sin aprender a formar oraciones.</p>
             </div>
-            <div class="form-group">
-                <input type="tel" id="parent_phone" class="form-control" placeholder="Tu número de WhatsApp (Ej: 999888777)" required>
+            <div class="card-simple">
+                <h4>Videos de YouTube</h4>
+                <p>Los mantienen hipnotizados por horas, pero el aprendizaje es 100% pasivo. Entienden, pero no hablan.</p>
             </div>
-            
-            <button id="btn-comprar" class="btn-pay">Pagar y Empezar ▶</button>
-            <div class="guarantee">🔒 Simulador de Pago Activo (Modo Prueba)</div>
+            <div class="card-simple">
+                <h4>Academias Tradicionales</h4>
+                <p>S/200 al mes, libros nuevos cada ciclo y clases por Zoom con otros 30 alumnos donde apenas participan.</p>
+            </div>
         </div>
     </section>
 
     <section class="benefits">
-        <h2>¿Por qué este método funciona?</h2>
-        <div class="grid-3">
-            <div class="benefit-card">
-                <div class="benefit-icon">🧠</div>
-                <h3>Método Mnemotécnico</h3>
-                <p>Asociamos palabras en inglés con sonidos divertidos en español para que nunca las olviden.</p>
+        <div class="container">
+            <h2 class="section-title text-center">Por qué nuestro método <span class="underline">funciona</span></h2>
+            <div class="benefits-grid">
+                <div class="benefit-item">
+                    <div class="benefit-icon">
+                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2"><path d="M12 20h9M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+                    </div>
+                    <h3>Escribe Antes de Jugar</h3>
+                    <p>El "peaje cognitivo". Tienen que escribir la traducción correcta para desbloquear el minijuego.</p>
+                </div>
+                <div class="benefit-item">
+                    <div class="benefit-icon">
+                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                    </div>
+                    <h3>Voz Nativa y Mnemotecnias</h3>
+                    <p>Asociamos palabras en inglés con sonidos divertidos en español con pronunciación 100% nativa.</p>
+                </div>
+                <div class="benefit-item">
+                    <div class="benefit-icon">
+                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                    </div>
+                    <h3>Cero Mensualidades</h3>
+                    <p>Las suscripciones recurrentes son estresantes. Pagas una sola vez y lo usan para siempre.</p>
+                </div>
             </div>
-            <div class="benefit-card">
-                <div class="benefit-icon">🎮</div>
-                <h3>Juegos sin Estrés</h3>
-                <p>Ellos eligen qué 5 palabras quieren aprender. Los juegos se adaptan automáticamente a su elección.</p>
+        </div>
+    </section>
+
+    <section class="features container">
+        <div class="feature-row">
+            <div class="feature-image">
+                <img src="assets/dashboard-mockup.webp" loading="lazy" width="500" height="400" alt="Dashboard de progreso para padres">
             </div>
-            <div class="benefit-card">
-                <div class="benefit-icon">👨‍👩‍👧</div>
-                <h3>Conexión Familiar</h3>
-                <p>El diploma diario te indica exactamente qué palabras debes preguntarle durante la cena.</p>
+            <div class="feature-text">
+                <h2>Progreso que puedes <span class="underline">ver y medir</span></h2>
+                <p>Nuestra plataforma te entrega un diploma digital diario indicándote exactamente qué 5 palabras aprendió tu hijo hoy. Perfecto para preguntárselas en la cena y validar su avance.</p>
+            </div>
+        </div>
+        <div class="feature-row">
+            <div class="feature-text">
+                <h2>Juegos adaptados <span class="underline">sin estrés</span></h2>
+                <p>Ellos mismos eligen qué categoría de palabras quieren aprender hoy. Los minijuegos de recompensa se adaptan automáticamente a su elección para mantener la motivación al máximo.</p>
+            </div>
+            <div class="feature-image">
+                <img src="assets/game-mockup.webp" loading="lazy" width="500" height="400" alt="Minijuegos educativos de recompensa">
+            </div>
+        </div>
+    </section>
+
+    <section id="checkout" class="checkout-section">
+        <div class="container">
+            <h2 class="checkout-script-font">Hagamos esto fácil y divertido.</h2>
+            
+            <div class="checkout-box">
+                <div class="price-tag">
+                    $14.99 <span>Pago único. Acceso de por vida.</span>
+                </div>
+                
+                <form id="payment-form">
+                    <div class="form-group">
+                        <label for="child_name">Nombre de tu hijo/a</label>
+                        <input type="text" id="child_name" class="form-control" placeholder="Ej: Mateo" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="parent_phone">Tu número de WhatsApp</label>
+                        <input type="tel" id="parent_phone" class="form-control" placeholder="Ej: 999888777" required>
+                    </div>
+                    
+                    <button type="submit" id="btn-comprar" class="btn btn-pay">Comprar Acceso Seguro</button>
+                    
+                    <div class="guarantee">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                        Pago seguro procesado por Culqi
+                    </div>
+                </form>
             </div>
         </div>
     </section>
 
     <script>
-        document.getElementById('btn-comprar').addEventListener('click', function (e) {
+        document.getElementById('payment-form').addEventListener('submit', function (e) {
             e.preventDefault();
             
             const childName = document.getElementById('child_name').value.trim();
             const parentPhone = document.getElementById('parent_phone').value.trim();
 
             if(childName === '' || parentPhone === '') {
-                alert("Por favor, ingresa el nombre de tu hijo y tu WhatsApp antes de simular el pago.");
+                alert("Por favor, ingresa el nombre de tu hijo y tu WhatsApp.");
                 return;
             }
 
             const btn = document.getElementById('btn-comprar');
-            btn.innerText = "Simulando pago...";
+            btn.innerText = "Procesando...";
             btn.disabled = true;
 
+            // Conservando la conexión exacta con tu backend actual
             fetch('app/process_payment.php', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ 
-                    token: "token_falso_de_prueba", 
+                    token: "token_falso_de_prueba", // Aquí irá tu token real de Culqi
                     child_name: childName, 
                     parent_phone: parentPhone 
                 })
@@ -156,14 +279,14 @@
                     window.location.href = 'dashboard.php'; 
                 } else {
                     alert("Error: " + data.message);
-                    btn.innerText = "Pagar y Empezar ▶";
+                    btn.innerText = "Comprar Acceso Seguro";
                     btn.disabled = false;
                 }
             })
             .catch(err => {
                 console.error(err);
-                alert("Hubo un problema procesando la respuesta. Revisa la consola.");
-                btn.innerText = "Pagar y Empezar ▶";
+                alert("Hubo un problema procesando el pago. Revisa tu conexión.");
+                btn.innerText = "Comprar Acceso Seguro";
                 btn.disabled = false;
             });
         });
