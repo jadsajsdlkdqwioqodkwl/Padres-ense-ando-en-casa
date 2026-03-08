@@ -24,19 +24,18 @@
 
     <style>
         :root {
-            /* Paleta extraída de tu logo My World */
-            --brand-blue: #1C3D6A;   /* Azul oscuro del texto "My" y bordes */
-            --brand-green: #68A93E;  /* Verde de las hojas/libro y la "W" */
-            --brand-orange: #F29C38; /* Naranja del niño y la estrella */
-            --brand-lblue: #5CB2E4;  /* Celeste del globo terráqueo */
+            --brand-blue: #1C3D6A;   
+            --brand-green: #68A93E;  
+            --brand-orange: #F29C38; 
+            --brand-lblue: #5CB2E4;  
             
-            --bg-light: #F8FAFC;     /* Fondo principal súper claro */
+            --bg-light: #F8FAFC;     
             --text-main: #333333;
             --text-muted: #64748B;
             --white: #FFFFFF;
         }
 
-        /* Reset & Tipografía de Sistema (Rendimiento 100%) */
+        /* Reset & Tipografía de Sistema */
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; color: var(--text-main); line-height: 1.6; background-color: var(--white); overflow-x: hidden; }
         img { max-width: 100%; height: auto; display: block; }
@@ -50,18 +49,14 @@
         .btn:hover { background: #579232; transform: translateY(-2px); box-shadow: 0 6px 20px rgba(104, 169, 62, 0.4); }
         .text-center { text-align: center; }
         
-        /* El Subrayado Zola adaptado a tu marca (Naranja o Celeste) */
+        /* El Subrayado Zola */
         .underline { position: relative; white-space: nowrap; z-index: 1; }
         .underline::after { content: ''; position: absolute; left: 0; bottom: 8%; width: 100%; height: 35%; background-color: var(--brand-orange); z-index: -1; opacity: 0.6; }
-        .underline-blue::after { background-color: var(--brand-lblue); opacity: 0.5; }
 
         /* Navbar */
         header { padding: 15px 0; background: var(--white); position: relative; z-index: 10; box-shadow: 0 1px 10px rgba(0,0,0,0.03); }
         .nav-inner { display: flex; justify-content: space-between; align-items: center; }
-        
-        /* Control del SVG del logo */
         .logo img { height: 45px; width: auto; }
-        
         .nav-links { display: flex; align-items: center; gap: 20px; }
         .login-link { color: var(--brand-blue); font-weight: 700; font-size: 0.95rem; }
 
@@ -75,17 +70,17 @@
         .hero-image-wrapper img { border-radius: 20px; box-shadow: 0 20px 40px rgba(28, 61, 106, 0.1); transform: rotate(2deg); transition: transform 0.5s; }
         .hero-image-wrapper img:hover { transform: rotate(0deg); }
 
-        /* Agitation Section (Pattern Interrupt) */
+        /* Agitation Section */
         .agitation { padding: 80px 0; background: var(--white); }
         .section-title { font-size: 2.2rem; color: var(--brand-blue); margin-bottom: 50px; font-weight: 800; letter-spacing: -0.5px; }
         .cards-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 30px; }
         .card-simple { padding: 30px; text-align: center; border: 1px solid #E2E8F0; border-radius: 12px; }
         .card-simple h4 { color: #E53E3E; margin-bottom: 15px; font-size: 1.2rem; }
 
-        /* Benefits (Dark Section Zola Style usando tu Azul) */
+        /* Benefits */
         .benefits { background: var(--brand-blue); color: var(--white); padding: 80px 0; }
         .benefits .section-title { color: var(--white); }
-        .benefits .underline::after { background-color: var(--brand-orange); opacity: 0.8;} 
+        .benefits .underline::after { opacity: 0.8;} 
         .benefits-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 40px; margin-top: 40px; }
         .benefit-item { text-align: center; }
         .benefit-icon { width: 64px; height: 64px; margin: 0 auto 20px; background: rgba(255,255,255,0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; }
@@ -99,27 +94,44 @@
         .feature-text h2 { font-size: 2rem; color: var(--brand-blue); margin-bottom: 20px; }
         .feature-image img { border-radius: 12px; box-shadow: 0 10px 30px rgba(28, 61, 106, 0.08); }
 
-        /* Checkout / Bottom CTA */
+        /* Checkout Bottom Section */
         .checkout-section { background: var(--bg-light); padding: 80px 0; text-align: center; }
         .checkout-script-font { font-family: "Georgia", serif; font-style: italic; font-size: 2.5rem; color: var(--brand-blue); margin-bottom: 30px; }
-        .checkout-box { max-width: 500px; margin: 0 auto; background: var(--white); padding: 40px; border-radius: 16px; box-shadow: 0 15px 35px rgba(28, 61, 106, 0.05); text-align: left; border-top: 5px solid var(--brand-green); }
+        .checkout-box { max-width: 500px; margin: 0 auto; background: var(--white); padding: 40px; border-radius: 16px; box-shadow: 0 15px 35px rgba(28, 61, 106, 0.05); text-align: center; border-top: 5px solid var(--brand-green); }
         .price-tag { text-align: center; font-size: 2.5rem; font-weight: 800; color: var(--brand-blue); margin-bottom: 25px; }
         .price-tag span { font-size: 1rem; color: var(--text-muted); font-weight: normal; display: block; }
-        .form-group { margin-bottom: 20px; }
+        .btn-pay { width: 100%; font-size: 1.1rem; padding: 16px; margin-top: 10px; }
+        .guarantee { text-align: center; font-size: 0.85rem; color: var(--text-muted); margin-top: 15px; display: flex; justify-content: center; align-items: center; gap: 5px; }
+
+        /* Modal Styles */
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(28, 61, 106, 0.7); z-index: 1000; justify-content: center; align-items: center; padding: 20px; opacity: 0; transition: opacity 0.3s ease; }
+        .modal-overlay.active { display: flex; opacity: 1; }
+        /* AÑADIDO: max-height y overflow-y para que sea scrolleable en móviles pequeños/horizontales */
+        .modal-content { background: var(--white); width: 100%; max-width: 450px; padding: 40px; border-radius: 16px; position: relative; box-shadow: 0 25px 50px rgba(0,0,0,0.25); border-top: 5px solid var(--brand-green); transform: translateY(-20px); transition: transform 0.3s ease; max-height: 90vh; overflow-y: auto; }
+        .modal-overlay.active .modal-content { transform: translateY(0); }
+        .modal-close { position: absolute; top: 15px; right: 20px; font-size: 1.8rem; color: var(--text-muted); cursor: pointer; border: none; background: none; transition: color 0.2s; }
+        .modal-close:hover { color: #E53E3E; }
+        
+        .form-group { margin-bottom: 20px; text-align: left; }
         .form-group label { display: block; font-size: 0.9rem; font-weight: 600; margin-bottom: 8px; color: var(--brand-blue); }
         .form-control { width: 100%; padding: 14px; border: 2px solid #E2E8F0; border-radius: 8px; font-size: 16px; transition: border-color 0.3s; }
         .form-control:focus { border-color: var(--brand-lblue); outline: none; box-shadow: 0 0 0 3px rgba(92, 178, 228, 0.2); }
-        .btn-pay { width: 100%; font-size: 1.1rem; padding: 16px; margin-top: 10px; }
         .btn-pay:disabled { background: #CBD5E0; cursor: not-allowed; transform: none; box-shadow: none; }
-        .guarantee { text-align: center; font-size: 0.85rem; color: var(--text-muted); margin-top: 15px; display: flex; justify-content: center; align-items: center; gap: 5px; }
 
-        /* Responsive */
+        /* Responsive Global */
         @media (max-width: 768px) {
             .hero-grid, .feature-row { grid-template-columns: 1fr; text-align: center; gap: 30px; }
             .hero-image-wrapper img { transform: none; }
             .feature-row:nth-child(even) .feature-text { order: 0; }
             .checkout-script-font { font-size: 2rem; }
-            .checkout-box { padding: 25px; }
+            .checkout-box, .modal-content { padding: 25px; }
+        }
+
+        /* AÑADIDO: Ajustes específicos para móviles pequeños (Navbar) */
+        @media (max-width: 480px) {
+            .nav-inner { flex-direction: column; gap: 15px; }
+            .btn { padding: 12px 24px; font-size: 0.95rem; }
+            .nav-links { width: 100%; justify-content: space-evenly; }
         }
     </style>
 </head>
@@ -132,7 +144,7 @@
             </a>
             <div class="nav-links">
                 <a href="login.php" class="login-link">LOG IN</a>
-                <a href="#checkout" class="btn">Empezar Ahora</a>
+                <a href="#" class="btn trigger-modal">Empezar Ahora</a>
             </div>
         </div>
     </header>
@@ -142,8 +154,8 @@
             <div class="hero-text">
                 <h1>Aprende inglés jugando, pero aprendiendo de <span class="underline">verdad</span>.</h1>
                 <p>La app donde los niños deben escribir antes de jugar. Olvídate de los pagos mensuales y las suscripciones escondidas.</p>
-                <a href="#checkout" class="btn">Crear cuenta para tu hijo</a>
-                <span class="hero-price">Un solo pago de $14.99 USD. Acceso de por vida.</span>
+                <button class="btn trigger-modal">Crear cuenta para tu hijo</button>
+                <span class="hero-price">Un solo pago de S/14.99. Acceso de por vida.</span>
             </div>
             <div class="hero-image-wrapper">
                 <img src="assets/hero-app.webp" width="600" height="450" alt="Niño usando la app de My World" loading="eager">
@@ -152,7 +164,7 @@
     </section>
 
     <section class="agitation container">
-        <h2 class="section-title text-center">¿Ya probaste de todo, <span class="underline underline-blue">verdad</span>?</h2>
+        <h2 class="section-title text-center">¿Ya probaste de todo, <span class="underline">verdad</span>?</h2>
         <div class="cards-grid">
             <div class="card-simple">
                 <h4>Apps Populares</h4>
@@ -204,13 +216,13 @@
                 <img src="assets/dashboard-mockup.webp" loading="lazy" width="500" height="400" alt="Dashboard de progreso para padres">
             </div>
             <div class="feature-text">
-                <h2>Progreso que puedes <span class="underline underline-blue">ver y medir</span></h2>
+                <h2>Progreso que puedes <span class="underline">ver y medir</span></h2>
                 <p>Nuestra plataforma te entrega un diploma digital diario indicándote exactamente qué 5 palabras aprendió tu hijo hoy. Perfecto para preguntárselas en la cena y validar su avance.</p>
             </div>
         </div>
         <div class="feature-row">
             <div class="feature-text">
-                <h2>Juegos adaptados <span class="underline underline-blue">sin estrés</span></h2>
+                <h2>Juegos adaptados <span class="underline">sin estrés</span></h2>
                 <p>Ellos mismos eligen qué categoría de palabras quieren aprender hoy. Los minijuegos de recompensa se adaptan automáticamente a su elección para mantener la motivación al máximo.</p>
             </div>
             <div class="feature-image">
@@ -219,37 +231,75 @@
         </div>
     </section>
 
-    <section id="checkout" class="checkout-section">
+    <section class="checkout-section">
         <div class="container">
-            <h2 class="checkout-script-font">Hagamos esto fácil y divertido.</h2>
+            <h2 class="checkout-script-font">El inglés que tu hijo sí quiere aprender.</h2>
             
             <div class="checkout-box">
                 <div class="price-tag">
-                    $14.99 <span>Pago único. Acceso de por vida.</span>
+                    S/14.99 <span>Pago único. Acceso de por vida.</span>
                 </div>
                 
-                <form id="payment-form">
-                    <div class="form-group">
-                        <label for="child_name">Nombre de tu hijo/a</label>
-                        <input type="text" id="child_name" class="form-control" placeholder="Ej: Mateo" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="parent_phone">Tu número de WhatsApp</label>
-                        <input type="tel" id="parent_phone" class="form-control" placeholder="Ej: 999888777" required>
-                    </div>
-                    
-                    <button type="submit" id="btn-comprar" class="btn btn-pay">Comprar Acceso Seguro</button>
-                    
-                    <div class="guarantee">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-                        Pago seguro procesado por Culqi
-                    </div>
-                </form>
+                <button type="button" class="btn btn-pay trigger-modal">Comprar Acceso Seguro</button>
+                
+                <div class="guarantee">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                    Pago seguro procesado por Culqi
+                </div>
             </div>
         </div>
     </section>
 
+    <div class="modal-overlay" id="checkoutModal">
+        <div class="modal-content">
+            <button class="modal-close" id="closeModal">&times;</button>
+            <div class="price-tag" style="margin-bottom: 20px; font-size: 2rem;">
+                S/14.99 <span>Pago único. Acceso de por vida.</span>
+            </div>
+            <form id="payment-form">
+                <div class="form-group">
+                    <label for="child_name">Nombre de tu hijo/a</label>
+                    <input type="text" id="child_name" class="form-control" placeholder="Ej: Mateo" required>
+                </div>
+                <div class="form-group">
+                    <label for="parent_phone">Tu número de WhatsApp</label>
+                    <input type="tel" id="parent_phone" class="form-control" placeholder="Ej: 999888777" required>
+                </div>
+                
+                <button type="submit" id="btn-comprar" class="btn btn-pay">Procesar Pago Seguro</button>
+                
+                <div class="guarantee">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                    Encriptado y procesado por Culqi
+                </div>
+            </form>
+        </div>
+    </div>
+
     <script>
+        // Lógica del Modal
+        const modal = document.getElementById('checkoutModal');
+        const triggers = document.querySelectorAll('.trigger-modal');
+        const closeBtn = document.getElementById('closeModal');
+
+        triggers.forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.preventDefault();
+                modal.classList.add('active');
+            });
+        });
+
+        closeBtn.addEventListener('click', () => {
+            modal.classList.remove('active');
+        });
+
+        window.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                modal.classList.remove('active');
+            }
+        });
+
+        // Lógica del Formulario
         document.getElementById('payment-form').addEventListener('submit', function (e) {
             e.preventDefault();
             
@@ -269,7 +319,7 @@
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ 
-                    token: "token_falso_de_prueba", // Aquí irá tu token real de Culqi
+                    token: "token_falso_de_prueba", 
                     child_name: childName, 
                     parent_phone: parentPhone 
                 })
@@ -284,14 +334,14 @@
                     window.location.href = 'dashboard.php'; 
                 } else {
                     alert("Error: " + data.message);
-                    btn.innerText = "Comprar Acceso Seguro";
+                    btn.innerText = "Procesar Pago Seguro";
                     btn.disabled = false;
                 }
             })
             .catch(err => {
                 console.error(err);
                 alert("Hubo un problema procesando el pago. Revisa tu conexión.");
-                btn.innerText = "Comprar Acceso Seguro";
+                btn.innerText = "Procesar Pago Seguro";
                 btn.disabled = false;
             });
         });
