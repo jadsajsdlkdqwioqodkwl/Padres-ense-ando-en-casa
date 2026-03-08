@@ -1,296 +1,197 @@
-<?php
-$reward_stars = $lesson['reward_stars'] ?? 10;
-$rounds = $lesson_data['rounds'] ?? [
-    [
-        'target_word' => $lesson_data['target_word'] ?? 'APPLE',
-        'translation' => $lesson_data['translation'] ?? 'Manzana',
-        'speed' => $lesson_data['speed'] ?? 7,
-        'context_es' => $lesson_data['context_es'] ?? "¡Alerta! Una lluvia de meteoritos amenaza al dinosaurio. Toca solo el meteorito que tenga...",
-        'items' => $lesson_data['items'] ?? [
-            ['id' => 1, 'content' => '🍎', 'is_correct' => true],
-            ['id' => 2, 'content' => '🍌', 'is_correct' => false],
-            ['id' => 3, 'content' => '🍇', 'is_correct' => false]
-        ]
-    ]
-];
-?>
-
 <style>
-    .meteor-board { position: relative; width: 100%; height: 420px; background: linear-gradient(to bottom, var(--dark) 0%, #2c3e50 100%); border-radius: 20px; overflow: hidden; border: 4px solid var(--primary); margin-bottom: 20px; box-shadow: inset 0 0 50px rgba(0,0,0,0.8); }
-    .round-indicator { position: absolute; top: 15px; left: 15px; color: white; font-weight: bold; font-size: 14px; z-index: 50; background: var(--primary); padding: 5px 15px; border-radius: 20px; }
-    .ground { position: absolute; bottom: 0; width: 100%; height: 50px; background: #4e342e; border-top: 8px solid #5d4037; z-index: 5; }
-    .css-dino { position: absolute; bottom: 50px; left: 50%; transform: translateX(-50%); width: 60px; height: 70px; background: var(--success); border-radius: 30px 30px 10px 10px; z-index: 10; box-shadow: inset -5px -5px 0 rgba(0,0,0,0.2); animation: dinoIdle 1s infinite alternate; transition: 0.3s; }
-    .css-dino::before { content: ''; position: absolute; top: 15px; right: 15px; width: 10px; height: 10px; background: white; border-radius: 50%; border: 3px solid #333; }
-    .css-dino::after { content: ''; position: absolute; top: 30px; right: 5px; width: 20px; height: 5px; background: #333; border-radius: 5px; }
-    .css-dino.panic { background: #e74c3c; animation: shake 0.2s infinite; }
-    .css-dino.dead { transform: translateX(-50%) scaleY(0.2); background: #333; bottom: 45px;}
-
-    .meteor { position: absolute; top: -100px; width: 75px; height: 75px; background: var(--accent); border-radius: 50%; cursor: pointer; z-index: 8; display: flex; justify-content: center; align-items: center; font-size: 45px; box-shadow: 0 0 20px #d35400, inset -5px -5px 0 rgba(0,0,0,0.3); transition: transform 0.1s; user-select: none; }
-    .meteor::before { content: ''; position: absolute; top: -40px; left: 15px; width: 45px; height: 60px; background: linear-gradient(to top, #f39c12, transparent); border-radius: 50%; z-index: -1; opacity: 0.8; animation: flicker 0.2s infinite alternate; }
-    .meteor:active { transform: scale(0.9); }
-    .meteor.destroyed { pointer-events: none; animation: popExplosion 0.4s forwards; }
-    .meteor.radar-glow { box-shadow: 0 0 40px #00d2d3, inset 0 0 20px white; border: 3px solid #00d2d3; }
-
-    .hud { position: absolute; top: 15px; right: 15px; display: flex; gap: 15px; z-index: 15; align-items: center; }
-    .target-box { background: rgba(255,255,255,0.9); padding: 5px 15px; border-radius: 20px; font-size: 18px; font-weight: bold; color: var(--primary); box-shadow: 0 4px 10px rgba(0,0,0,0.3); border: 2px solid var(--accent); }
-    .lives-box { font-size: 20px; letter-spacing: 3px; color: #e74c3c; text-shadow: 0 2px 4px rgba(0,0,0,0.5);}
-
-    .mission-modal { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.95); z-index: 100; display: flex; flex-direction: column; justify-content: center; align-items: center; border-radius: 15px; transition: opacity 0.5s; padding: 20px; text-align: center; }
-    .btn-action { background: var(--success); color: white; border: none; padding: 15px 30px; font-size: 20px; font-weight: bold; border-radius: 30px; cursor: pointer; box-shadow: 0 6px 0 #27ae60; margin-top: 15px; }
-    .btn-action:active { transform: translateY(4px); box-shadow: 0 2px 0 #27ae60; }
-
-    @keyframes dinoIdle { 0% { transform: translateX(-50%) translateY(0); } 100% { transform: translateX(-50%) translateY(5px); } }
-    @keyframes shake { 0%, 100% { transform: translateX(-50%) rotate(0deg); } 25% { transform: translateX(-55%) rotate(-10deg); } 75% { transform: translateX(-45%) rotate(10deg); } }
-    @keyframes flicker { 0% { height: 60px; opacity: 0.6; } 100% { height: 80px; opacity: 1; } }
-    @keyframes popExplosion { 0% { transform: scale(1); filter: brightness(1); } 50% { transform: scale(1.5); filter: brightness(2); background: white; } 100% { transform: scale(0); opacity: 0; } }
-    @keyframes radarScan { 0% { box-shadow: 0 0 0 rgba(0,210,211,0.5); } 50% { box-shadow: 0 0 50px rgba(0,210,211,0.8); } 100% { box-shadow: 0 0 0 rgba(0,210,211,0); } }
+    .ninja-board { position: relative; width: 100%; height: 450px; background: radial-gradient(circle at center, #1E293B 0%, #0F172A 100%); border-radius: 24px; overflow: hidden; border: 4px solid var(--brand-blue); margin-bottom: 20px; box-shadow: 0 15px 35px rgba(28, 61, 106, 0.15); cursor: crosshair; touch-action: none; }
+    
+    .target-hud { position: absolute; top: 20px; left: 50%; transform: translateX(-50%); background: rgba(255,255,255,0.1); border: 2px solid rgba(255,255,255,0.2); backdrop-filter: blur(10px); padding: 10px 40px; border-radius: 50px; text-align: center; z-index: 10; }
+    
+    .ninja-item { position: absolute; display: flex; flex-direction: column; align-items: center; justify-content: center; user-select: none; z-index: 5; text-shadow: 0 5px 15px rgba(0,0,0,0.5); }
+    .ninja-emoji { font-size: 60px; filter: drop-shadow(0 10px 10px rgba(0,0,0,0.3)); pointer-events: none; }
+    .ninja-word { background: var(--white); color: var(--brand-blue); font-weight: 800; padding: 4px 12px; border-radius: 50px; font-size: 16px; margin-top: -10px; border: 2px solid var(--brand-blue); pointer-events: none; }
+    
+    .slash-effect { position: absolute; background: white; height: 6px; border-radius: 3px; box-shadow: 0 0 15px #38BDF8, 0 0 30px #38BDF8; pointer-events: none; transform-origin: left center; z-index: 100; opacity: 0; transition: opacity 0.3s; }
+    
+    .sliced-left { animation: sliceLeft 0.5s forwards; }
+    .sliced-right { animation: sliceRight 0.5s forwards; }
+    
+    .mission-modal { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.95); backdrop-filter: blur(5px); z-index: 100; display: flex; flex-direction: column; justify-content: center; align-items: center; transition: opacity 0.3s; padding: 20px; text-align: center; }
+    .btn-action { background: var(--brand-orange); color: white; border: none; padding: 16px 35px; font-size: 18px; font-weight: 700; border-radius: 50px; cursor: pointer; box-shadow: 0 4px 14px rgba(242, 156, 56, 0.3); margin-top: 20px; transition: 0.2s; }
+    .btn-action:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(242, 156, 56, 0.4); }
+    
+    @keyframes sliceLeft { to { transform: translate(-50px, 50px) rotate(-20deg); opacity: 0; } }
+    @keyframes sliceRight { to { transform: translate(50px, 50px) rotate(20deg); opacity: 0; } }
 </style>
 
-<div class="game-area text-center" style="border: none; background: transparent; padding-top: 5px;">
-    
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-        <h3 style="margin: 0; color: var(--primary);">☄️ Meteor Strike</h3>
-        <button onclick="useRadar()" id="btn-radar" style="background: #00cec9; border: none; border-radius: 50%; width: 45px; height: 45px; font-size: 20px; cursor: pointer; box-shadow: 0 4px 0 #00b894; color: white;" title="Radar de Emergencia">📡</button>
-    </div>
+<div class="game-area text-center" style="border: none; background: transparent; padding-top: 5px; box-shadow: none;">
+    <h3 style="margin: 0; margin-bottom: 20px; color: var(--brand-blue); font-size: 1.8rem;">⚔️ Word Ninja</h3>
 
-    <div class="meteor-board" id="game-board">
-        <div class="round-indicator" id="round-indicator">Stage 1</div>
-
+    <div class="ninja-board" id="ninja-board">
         <div class="mission-modal" id="tutorial-modal">
-            <h2 style="color: var(--primary); margin-top: 0;">🔭 El Observatorio</h2>
-            <p style="color: var(--text-muted); font-size: 18px; margin-bottom: 10px;" id="tut-context">Cargando...</p>
-            <div style="font-size: 35px; font-weight: bold; color: var(--accent); margin: 15px 0; letter-spacing: 2px;" id="tut-word">WORD</div>
-            <p style="color: #666; font-size: 20px;" id="tut-trans">(Traducción)</p>
+            <h2 style="color: var(--white); margin-top: 0; font-size: 2.2rem;">¡Corta las palabras!</h2>
+            <p style="color: #94A3B8; font-size: 18px; margin-bottom: 15px;">Corta por la mitad a la figura correcta 3 veces:</p>
+            <div style="font-size: 45px; font-weight: 800; color: #38BDF8; letter-spacing: 2px; text-shadow: 0 0 20px rgba(56, 189, 248, 0.5);" id="tut-word">WORD</div>
+            <p style="color: #64748B; font-size: 20px; font-weight: 600; margin-bottom: 10px;" id="tut-trans">(Traducción)</p>
             
-            <div style="display: flex; gap: 15px; margin-top: 10px;">
-                <button class="btn-action" style="background: var(--primary); box-shadow: 0 6px 0 #3b2a9e;" onclick="playSpanglishIntro()">🔊 Escuchar</button>
-                <button class="btn-action" id="btn-start" onclick="startGame()" style="display: none;">▶️ ¡Iniciar Defensa!</button>
+            <div style="display: flex; gap: 15px; justify-content: center;">
+                <button class="btn-action" style="background: var(--brand-blue); box-shadow: 0 4px 14px rgba(28, 61, 106, 0.3);" onclick="playIntroAudio()">🔊 Escuchar</button>
+                <button class="btn-action" id="btn-start" onclick="startGame()" style="display: none;">▶️ ¡Cortar!</button>
             </div>
         </div>
 
-        <div class="hud" id="hud" style="display: none;">
-            <div class="target-box" id="target-box">WORD</div>
-            <div class="lives-box" id="lives">❤️❤️❤️</div>
+        <div class="target-hud">
+            <div style="font-size: 24px; font-weight: 800; color: var(--white);" id="hud-word">WORD</div>
+            <div style="color: #FBBF24; font-size: 20px; font-weight: 800; letter-spacing: 5px;" id="score-display">0/3</div>
         </div>
-
-        <div class="css-dino" id="dino"></div>
-        <div class="ground"></div>
+        
+        <div class="slash-effect" id="slash-fx"></div>
     </div>
 </div>
 
 <script>
-    // AÑADIDO: 'let' en vez de 'const' y priorizamos la inyección dinámica desde lesson.php
-    let roundsData = window.dynamicRoundsData || <?php echo json_encode($rounds); ?>;
-    
-    const board = document.getElementById('game-board');
-    const dino = document.getElementById('dino');
-    const livesDisplay = document.getElementById('lives');
-    
-    let currentRoundIndex = 0;
-    let roundItems = [];
-    let currentSpeed = 7;
-    
-    let lives = 3;
+    let roundData = window.dynamicRoundsData[0];
     let gameActive = false;
-    let spawnInterval = null;
-    let activeMeteors = [];
+    let score = 0;
+    const maxScore = 3;
+    
+    const board = document.getElementById('ninja-board');
+    const slashFx = document.getElementById('slash-fx');
+    
+    let activeItems = [];
+    let lastTime = 0;
+    let spawnTimer = 0;
+    
+    // Configuración Inicial
+    const targetWord = roundData.target_word || roundData.word;
+    const itemsArray = roundData.items || [{content: '🍎', is_correct: true}, {content: '⭐', is_correct: false}]; // Fallback
+    
+    document.getElementById('tut-word').innerText = targetWord;
+    document.getElementById('tut-trans').innerText = `(${roundData.translation})`;
+    document.getElementById('hud-word').innerText = targetWord;
 
-    // Esta función permite que lesson.php recargue el juego sin tener que refrescar la página web
-    function reloadDynamicRounds() {
-        if (window.dynamicRoundsData) roundsData = window.dynamicRoundsData;
-        currentRoundIndex = 0;
-        loadRound(0);
-    }
-
-    loadRound(currentRoundIndex);
-
-    function loadRound(index) {
-        if (!roundsData || !roundsData[index]) return;
-        const round = roundsData[index];
-        roundItems = [...round.items]; 
-        currentSpeed = round.speed || 7;
-
-        document.getElementById('round-indicator').innerText = `Ronda ${index + 1}/${roundsData.length}`;
-        document.getElementById('tut-context').innerText = round.context_es || "Toca solo el meteorito que tenga...";
-        document.getElementById('tut-word').innerText = round.target_word;
-        document.getElementById('tut-trans').innerText = `(${round.translation})`;
-        document.getElementById('target-box').innerText = round.target_word;
-
-        document.getElementById('tutorial-modal').style.display = 'flex';
-        document.getElementById('tutorial-modal').style.opacity = '1';
-        document.getElementById('hud').style.display = 'none';
-        document.getElementById('btn-start').style.display = 'none';
-
-        dino.classList.remove('panic', 'dead');
-        
-        setTimeout(playSpanglishIntro, 500);
-    }
-
-   function playSpanglishIntro() {
+    function playIntroAudio() {
         document.getElementById('btn-start').style.display = 'block';
-        const round = roundsData[currentRoundIndex];
-        // AÑADIDO: Forzamos la lectura en inglés nativo (false)
-        if(typeof playTTS !== 'undefined') playTTS(round.target_word, false);
+        if(typeof playTTS !== 'undefined') playTTS(roundData.phonetic || targetWord, false);
     }
 
     function startGame() {
         document.getElementById('tutorial-modal').style.opacity = '0';
-        document.getElementById('hud').style.display = 'flex';
-        setTimeout(() => document.getElementById('tutorial-modal').style.display = 'none', 500);
+        setTimeout(() => document.getElementById('tutorial-modal').style.display = 'none', 300);
         gameActive = true;
-        
-        activeMeteors.forEach(m => { clearInterval(m.int); m.el.remove(); });
-        activeMeteors = [];
-        
-        spawnInterval = setInterval(spawnMeteor, 1000); 
+        requestAnimationFrame(gameLoop);
     }
 
-    function spawnMeteor() {
-        if (!gameActive) return;
-        
-        let data;
-        if(Math.random() < 0.4) {
-            data = roundItems.find(i => i.is_correct);
-        } else {
-            const wrongs = roundItems.filter(i => !i.is_correct);
-            data = wrongs[Math.floor(Math.random() * wrongs.length)];
-        }
-        
-        if(!data) data = roundItems[Math.floor(Math.random() * roundItems.length)];
-
-        const meteor = document.createElement('div');
-        meteor.className = 'meteor';
-        meteor.innerHTML = data.content; 
-        
-        const randomX = Math.floor(Math.random() * (board.offsetWidth - 85)) + 10;
-        meteor.style.left = randomX + 'px';
-        let mY = -100;
-        meteor.style.top = mY + 'px';
-
-        board.appendChild(meteor);
-
-        const checkFn = (e) => { 
-            if(e) e.preventDefault(); 
-            checkHit(meteor, data.is_correct); 
-        };
-        meteor.addEventListener('mousedown', checkFn);
-        meteor.addEventListener('touchstart', checkFn, {passive: false});
-
-        const boardHeight = board.offsetHeight;
-        const groundLevel = boardHeight - 80; 
-        
-        const step = groundLevel / ((12 - currentSpeed) * 10); 
-
-        const fallInt = setInterval(() => {
-            if (!gameActive) {
-                clearInterval(fallInt);
-                return;
-            }
-            
-            mY += step;
-            meteor.style.top = mY + 'px';
-
-            if (mY > groundLevel * 0.6 && data.is_correct) {
-                dino.classList.add('panic');
-            }
-
-            if (mY >= groundLevel) {
-                clearInterval(fallInt);
-                if (data.is_correct) {
-                    takeDamage("¡Dejaste caer el correcto!");
-                }
-                meteor.remove();
-            }
-        }, 50);
-
-        activeMeteors.push({el: meteor, int: fallInt, correct: data.is_correct});
-    }
-
-    function checkHit(meteorEl, isCorrect) {
-        if (!gameActive) return;
-
-        meteorEl.classList.add('destroyed');
-        
-        const mObj = activeMeteors.find(m => m.el === meteorEl);
-        if (mObj) clearInterval(mObj.int);
-
-        if (isCorrect) {
-            if(typeof sfxCorrect !== 'undefined') sfxCorrect.play();
-            checkNextRound(); 
-        } else {
-            if(typeof sfxWrong !== 'undefined') sfxWrong.play();
-            takeDamage("¡Ese no era el correcto!");
-            setTimeout(() => { meteorEl.remove(); }, 500);
-        }
-    }
-
-    function useRadar() {
+    // FÍSICAS Y SPAWNER
+    function gameLoop(timestamp) {
         if(!gameActive) return;
+        const dt = timestamp - lastTime;
+        lastTime = timestamp;
         
-        document.getElementById('btn-radar').style.animation = 'radarScan 1s';
-        setTimeout(() => document.getElementById('btn-radar').style.animation = 'none', 1000);
-
-        const targetWord = roundsData[currentRoundIndex].target_word;
-        if(typeof playTTS !== 'undefined') playTTS(targetWord, false);
-
-        activeMeteors.forEach(m => {
-            if(m.correct) {
-                m.el.classList.add('radar-glow');
-                setTimeout(() => m.el.classList.remove('radar-glow'), 1500);
-            }
-        });
-    }
-
-    function takeDamage(msg) {
-        lives--;
-        let text = '';
-        for(let i=0; i<lives; i++) text += '❤️';
-        livesDisplay.innerText = text;
-        
-        board.style.boxShadow = "inset 0 0 50px rgba(231,76,60,0.8)";
-        setTimeout(() => board.style.boxShadow = "inset 0 0 50px rgba(0,0,0,0.8)", 300);
-
-        if (lives <= 0) executeLoss("¡El dinosaurio fue aplastado!");
-    }
-
-    function checkNextRound() {
-        gameActive = false;
-        clearInterval(spawnInterval);
-        activeMeteors.forEach(m => clearInterval(m.int));
-        
-        dino.classList.remove('panic');
-        
-        const currentWord = roundsData[currentRoundIndex].target_word;
-        if(typeof playTTS !== 'undefined') playTTS(currentWord, false);
-        if(typeof sfxWin !== 'undefined') sfxWin.play();
-
-        currentRoundIndex++;
-
-        if (currentRoundIndex < roundsData.length) {
-            setTimeout(() => {
-                activeMeteors.forEach(m => m.el.remove());
-                loadRound(currentRoundIndex);
-            }, 1500);
-        } else {
-            setTimeout(() => { executeWin(); }, 1500);
+        spawnTimer += dt;
+        if(spawnTimer > 1500) { // Spawnea cada 1.5s
+            spawnItem();
+            spawnTimer = 0;
         }
+        
+        // Actualizar posiciones (Gravedad)
+        for(let i = activeItems.length - 1; i >= 0; i--) {
+            let item = activeItems[i];
+            item.vy += 0.003 * dt; // Gravedad
+            item.x += item.vx * dt;
+            item.y += item.vy * dt;
+            item.rotation += item.vRot * dt;
+            
+            item.el.style.transform = `translate(${item.x}px, ${item.y}px) rotate(${item.rotation}deg)`;
+            
+            // Si cae debajo del tablero, remover
+            if(item.y > board.offsetHeight + 100) {
+                item.el.remove();
+                activeItems.splice(i, 1);
+            }
+        }
+        
+        requestAnimationFrame(gameLoop);
+    }
+
+    function spawnItem() {
+        // Elegir si es correcto o distractor
+        let isCorrect = Math.random() > 0.4;
+        let pool = itemsArray.filter(i => i.is_correct === isCorrect);
+        if(pool.length === 0) pool = itemsArray; // Safety
+        
+        let itemData = pool[Math.floor(Math.random() * pool.length)];
+        let wordDisplay = isCorrect ? targetWord : (roundData.distractors ? roundData.distractors[Math.floor(Math.random() * roundData.distractors.length)] : 'ERR');
+        
+        let el = document.createElement('div');
+        el.className = 'ninja-item';
+        // Envolvemos el contenido en dos mitades para el efecto de corte
+        el.innerHTML = `
+            <div class="ninja-emoji">${itemData.content}</div>
+            <div class="ninja-word">${wordDisplay}</div>
+        `;
+        
+        // Atributos de física
+        let startX = Math.random() * (board.offsetWidth - 100) + 50;
+        let startY = board.offsetHeight;
+        let velocityY = -(Math.random() * 0.4 + 0.8); // Impulso hacia arriba
+        let velocityX = (board.offsetWidth / 2 - startX) * 0.001; // Curva hacia el centro
+        
+        el.style.transform = `translate(${startX}px, ${startY}px)`;
+        board.appendChild(el);
+        
+        // Eventos de corte (Mouse y Touch)
+        el.addEventListener('pointerdown', (e) => sliceItem(e, el, isCorrect));
+        el.addEventListener('pointerenter', (e) => {
+            if(e.buttons > 0) sliceItem(e, el, isCorrect); // Soporta deslizar el dedo/mouse presionado
+        });
+        
+        activeItems.push({ el: el, x: startX, y: startY, vx: velocityX, vy: velocityY, rotation: 0, vRot: (Math.random() - 0.5) * 0.5 });
+    }
+
+    function sliceItem(e, el, isCorrect) {
+        if(!gameActive || el.classList.contains('sliced')) return;
+        el.classList.add('sliced'); // Evitar doble corte
+        
+        // Dibujar efecto de corte
+        let rect = board.getBoundingClientRect();
+        let x = e.clientX - rect.left;
+        let y = e.clientY - rect.top;
+        slashFx.style.left = (x - 50) + 'px';
+        slashFx.style.top = y + 'px';
+        slashFx.style.width = '100px';
+        slashFx.style.transform = `rotate(${(Math.random() - 0.5) * 90}deg)`;
+        slashFx.style.opacity = '1';
+        setTimeout(() => slashFx.style.opacity = '0', 200);
+
+        // Remover de la física
+        let index = activeItems.findIndex(i => i.el === el);
+        if(index > -1) activeItems.splice(index, 1);
+        
+        // Efecto visual de partición
+        el.innerHTML = `<div class="ninja-emoji sliced-left" style="position:absolute;">${el.innerText.split('\n')[0]}</div>
+                        <div class="ninja-emoji sliced-right" style="position:absolute; clip-path: inset(50% 0 0 0); margin-top:-60px;">${el.innerText.split('\n')[0]}</div>`;
+
+        if(isCorrect) {
+            score++;
+            document.getElementById('score-display').innerText = `${score}/3`;
+            if(typeof sfxCorrect !== 'undefined') { sfxCorrect.currentTime=0; sfxCorrect.play(); }
+            if(typeof playTTS !== 'undefined') playTTS(roundData.phonetic || targetWord, false);
+            
+            if(score >= maxScore) {
+                setTimeout(executeWin, 800);
+            }
+        } else {
+            if(typeof sfxWrong !== 'undefined') { sfxWrong.currentTime=0; sfxWrong.play(); }
+            board.style.boxShadow = "inset 0 0 50px rgba(239, 68, 68, 0.8)";
+            setTimeout(() => board.style.boxShadow = "0 15px 35px rgba(28, 61, 106, 0.15)", 300);
+            score = Math.max(0, score - 1); // Penalización suave
+            document.getElementById('score-display').innerText = `${score}/3`;
+        }
+        
+        setTimeout(() => el.remove(), 500);
     }
 
     function executeWin() {
-        if(typeof fireConfetti !== 'undefined') fireConfetti();
-        if(typeof unlockNextButton !== 'undefined') unlockNextButton(<?php echo $lesson['id']; ?>, <?php echo $reward_stars; ?>, <?php echo $lesson['module_id']; ?>);
-    }
-
-    function executeLoss(msg) {
         gameActive = false;
-        clearInterval(spawnInterval);
-        activeMeteors.forEach(m => clearInterval(m.int));
-        dino.classList.add('dead');
-        if(typeof sfxWrong !== 'undefined') sfxWrong.play();
-        
-        setTimeout(() => {
-            alert(msg + " ¡Inténtalo de nuevo!");
-            location.reload();
-        }, 1200);
+        if(typeof sfxWin !== 'undefined') sfxWin.play();
+        if(typeof fireConfetti !== 'undefined') fireConfetti();
+        if(typeof unlockNextButton !== 'undefined') unlockNextButton(<?php echo $lesson_id; ?>, 10, <?php echo $lesson['module_id']; ?>);
     }
 </script>

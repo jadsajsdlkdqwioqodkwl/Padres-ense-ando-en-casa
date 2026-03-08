@@ -3,12 +3,13 @@
 /* --- Drag & Drop --- */
 .game-area {
     text-align: center;
-    padding: 30px;
-    border: 2px dashed #ccc;
-    border-radius: 12px;
-    background: #fafafa;
+    padding: 40px 30px;
+    border: 2px dashed #E2E8F0;
+    border-radius: 16px;
+    background: var(--white);
     position: relative;
     margin-top: 20px;
+    box-shadow: 0 10px 30px rgba(28, 61, 106, 0.02);
 }
 
 .draggable-items {
@@ -20,27 +21,33 @@
 }
 
 .drag-item {
-    background: var(--accent);
+    background: var(--brand-orange);
     color: white;
-    padding: 10px 25px;
-    font-size: 24px;
-    font-weight: bold;
-    border-radius: 30px;
+    padding: 12px 30px;
+    font-size: 22px;
+    font-weight: 700;
+    border-radius: 50px;
     cursor: grab;
     user-select: none;
-    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-    transition: transform 0.1s;
+    box-shadow: 0 6px 15px rgba(242, 156, 56, 0.3);
+    transition: transform 0.2s, box-shadow 0.2s;
 }
 
-.drag-item.dragging { opacity: 0.5; }
+.drag-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(242, 156, 56, 0.4);
+}
+
+.drag-item.dragging { opacity: 0.5; transform: scale(0.95); }
 
 /* --- Guía para Padres --- */
 .teaching-guide {
-    background-color: #EEF2FF;
-    padding: 20px;
-    border-radius: 8px;
-    border-left: 5px solid var(--primary);
+    background-color: #F0F9FF;
+    padding: 25px;
+    border-radius: 12px;
+    border-left: 6px solid var(--brand-lblue);
     margin-bottom: 30px;
+    color: #475569;
 }
 
-.action-step { display: flex; gap: 10px; margin-bottom: 10px; align-items: baseline; }
+.action-step { display: flex; gap: 12px; margin-bottom: 12px; align-items: baseline; font-size: 16px; }

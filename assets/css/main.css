@@ -1,53 +1,82 @@
 /* assets/css/main.css */
 :root {
-    --primary: #2B3A67; 
-    --accent: #FF7F50; 
-    --bg: #F0F4F8;
-    --card-bg: #FFFFFF;
-    --success: #4CAF50;
-    --border-color: #eee;
-    --text-muted: #666;
+    --brand-blue: #1C3D6A;   
+    --brand-green: #68A93E;  
+    --brand-orange: #F29C38; 
+    --brand-lblue: #5CB2E4;  
+    --bg-light: #F8FAFC;     
+    --text-main: #333333;
+    --text-muted: #64748B;
+    --white: #FFFFFF;
+
+    /* Equivalencias para retrocompatibilidad segura */
+    --primary: var(--brand-blue);
+    --accent: var(--brand-orange);
+    --bg: var(--bg-light);
+    --card-bg: var(--white);
+    --success: var(--brand-green);
+    --border-color: #E2E8F0;
 }
 
 * { box-sizing: border-box; }
 
 body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background-color: var(--bg);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background-color: var(--bg-light);
     margin: 0;
     padding: 20px;
     display: flex;
     flex-direction: column;
     align-items: center;
     gap: 30px;
-    padding-bottom: 100px; /* Espacio para los controles flotantes */
-    color: #333;
+    padding-bottom: 100px;
+    color: var(--text-main);
+    line-height: 1.6;
 }
 
 .container {
     background: var(--card-bg);
     width: 100%;
-    max-width: 800px;
+    max-width: 1000px;
     padding: 40px;
     border-radius: 16px;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+    box-shadow: 0 15px 35px rgba(28, 61, 106, 0.05);
     position: relative;
+    border-top: 5px solid var(--brand-green);
 }
 
-h1, h2, h3 { color: var(--primary); margin-top: 0; }
+h1, h2, h3 { 
+    color: var(--brand-blue); 
+    margin-top: 0; 
+    letter-spacing: -0.5px;
+    font-weight: 800;
+}
+
 .text-center { text-align: center; }
 
-/* Botones genéricos */
+/* Botones genéricos rediseñados (Estilo Landing) */
 .btn {
-    padding: 12px 25px;
-    font-size: 18px;
-    font-weight: bold;
+    display: inline-block;
+    background: var(--brand-green);
+    color: var(--white);
+    font-weight: 700;
+    padding: 14px 32px;
+    border-radius: 50px;
+    text-align: center;
+    transition: background 0.3s, transform 0.2s;
     border: none;
-    border-radius: 30px;
     cursor: pointer;
-    transition: all 0.2s;
+    font-size: 1rem;
+    box-shadow: 0 4px 14px rgba(104, 169, 62, 0.3);
 }
-.btn:active { transform: scale(0.95); }
+
+.btn:hover { 
+    background: #579232; 
+    transform: translateY(-2px); 
+    box-shadow: 0 6px 20px rgba(104, 169, 62, 0.4); 
+}
+
+.btn:active { transform: scale(0.98); }
 
 /* Forzar que los modales de misiones cubran toda la pantalla */
 .mission-modal {

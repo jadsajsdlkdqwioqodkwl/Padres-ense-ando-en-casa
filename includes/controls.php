@@ -1,14 +1,22 @@
 <style>
     .floating-controls {
-        position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
+        position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%);
         display: flex; gap: 15px; z-index: 100; background: rgba(255, 255, 255, 0.95);
-        padding: 10px 20px; border-radius: 40px; box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+        padding: 15px 25px; border-radius: 50px; box-shadow: 0 15px 35px rgba(28, 61, 106, 0.15);
+        border: 1px solid #E2E8F0; backdrop-filter: blur(10px);
     }
-    .btn-bottom { padding: 12px 25px; font-size: 18px; font-weight: bold; border: none; border-radius: 30px; cursor: pointer; transition: all 0.2s; }
-    .btn-restart { background: white; color: var(--primary); border: 2px solid var(--primary); }
-    .btn-next { background: #ccc; color: white; cursor: not-allowed; transition: 0.3s; }
-    .btn-next.active { background: var(--success); cursor: pointer; animation: pulse-green 1.5s infinite; }
-    @keyframes pulse-green { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.05); } }
+    .btn-bottom { padding: 14px 30px; font-size: 16px; font-weight: 700; border: none; border-radius: 50px; cursor: pointer; transition: all 0.3s; display: flex; align-items: center; justify-content: center; gap: 8px; }
+    .btn-restart { background: var(--bg-light); color: var(--brand-blue); border: 2px solid #E2E8F0; box-shadow: 0 4px 10px rgba(0,0,0,0.02); }
+    .btn-restart:hover { background: #E2E8F0; transform: translateY(-2px); }
+    .btn-next { background: #CBD5E1; color: white; cursor: not-allowed; transition: 0.3s; box-shadow: none; }
+    .btn-next.active { background: var(--brand-green); cursor: pointer; animation: pulse-green 2s infinite; box-shadow: 0 4px 14px rgba(104, 169, 62, 0.3); }
+    .btn-next.active:hover { background: #579232; transform: translateY(-2px); box-shadow: 0 6px 20px rgba(104, 169, 62, 0.4); animation: none; }
+    
+    @keyframes pulse-green { 
+        0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(104, 169, 62, 0.4); } 
+        70% { transform: scale(1.05); box-shadow: 0 0 0 10px rgba(104, 169, 62, 0); } 
+        100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(104, 169, 62, 0); } 
+    }
 </style>
 
 <div class="floating-controls">

@@ -16,29 +16,31 @@ $rounds = $lesson_data['rounds'] ?? [
 ?>
 
 <style>
-    .color-board { position: relative; width: 100%; height: 450px; background: var(--dark); border-radius: 20px; overflow: hidden; border: 4px solid var(--primary); margin-bottom: 20px; box-shadow: inset 0 0 40px rgba(0,0,0,0.8); display: flex; flex-direction: column; justify-content: flex-end; }
-    .round-indicator { position: absolute; top: 15px; left: 15px; color: white; font-weight: bold; font-size: 16px; z-index: 50; background: var(--primary); padding: 5px 15px; border-radius: 20px; }
-    .tutorial-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.95); z-index: 100; display: flex; flex-direction: column; justify-content: center; align-items: center; border-radius: 15px; transition: opacity 0.5s; text-align: center; padding: 20px; }
-    .tutorial-icon { font-size: 80px; margin-bottom: 10px; animation: bounce 2s infinite; }
-    .tutorial-word { font-size: 40px; font-weight: bold; margin-bottom: 5px; text-transform: uppercase; letter-spacing: 2px;}
-    .btn-action { margin-top: 20px; padding: 15px 40px; font-size: 20px; font-weight: bold; background: var(--success); color: white; border: none; border-radius: 30px; cursor: pointer; box-shadow: 0 6px 0 #27ae60; transition: 0.2s; }
-    .btn-action:active { transform: translateY(6px); box-shadow: 0 0 0 #27ae60; }
-    .css-ufo { position: absolute; top: -80px; left: 50%; transform: translateX(-50%); width: 120px; height: 50px; z-index: 20; transition: top linear; }
-    .ufo-dome { position: absolute; top: 0; left: 30px; width: 60px; height: 35px; background: rgba(129, 236, 236, 0.6); border-radius: 30px 30px 0 0; border: 2px solid #00cec9; z-index: 2; }
-    .ufo-base { position: absolute; bottom: 0; width: 100%; height: 25px; background: #b2bec3; border-radius: 20px; border: 3px solid #2d3436; box-shadow: inset 0 -5px 0 rgba(0,0,0,0.2); z-index: 3; }
-    .ufo-lights { position: absolute; bottom: 5px; left: 15px; width: 90px; display: flex; justify-content: space-between; z-index: 4; }
-    .ufo-light { width: 8px; height: 8px; background: #ffeaa7; border-radius: 50%; animation: blink 0.5s infinite alternate; }
-    .tractor-beam { position: absolute; top: 40px; left: 50%; transform: translateX(-50%); width: 80px; height: 0px; background: linear-gradient(to bottom, rgba(0, 206, 201, 0.8), rgba(0, 206, 201, 0.1)); clip-path: polygon(20% 0, 80% 0, 100% 100%, 0 100%); z-index: 1; transition: height linear; }
-    .target-canvas { position: absolute; bottom: 120px; left: 50%; transform: translateX(-50%); font-size: 100px; z-index: 10; filter: grayscale(100%) brightness(1.5); transition: filter 1s, transform 0.3s; }
+    .color-board { position: relative; width: 100%; height: 450px; background: #1E293B; border-radius: 24px; overflow: hidden; border: 4px solid var(--brand-blue); margin-bottom: 20px; box-shadow: 0 15px 35px rgba(28, 61, 106, 0.15), inset 0 0 40px rgba(0,0,0,0.5); display: flex; flex-direction: column; justify-content: flex-end; }
+    .round-indicator { position: absolute; top: 20px; left: 20px; color: white; font-weight: 700; font-size: 15px; z-index: 50; background: var(--brand-blue); padding: 6px 18px; border-radius: 50px; box-shadow: 0 4px 10px rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.1); }
+    .tutorial-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.95); backdrop-filter: blur(4px); z-index: 100; display: flex; flex-direction: column; justify-content: center; align-items: center; transition: opacity 0.5s; text-align: center; padding: 30px; }
+    .tutorial-icon { font-size: 90px; margin-bottom: 10px; animation: bounce 2s infinite; filter: drop-shadow(0 10px 15px rgba(0,0,0,0.1)); }
+    .tutorial-word { font-size: 45px; font-weight: 800; margin-bottom: 5px; text-transform: uppercase; letter-spacing: 2px; text-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+    .btn-action { margin-top: 25px; padding: 16px 45px; font-size: 18px; font-weight: 700; background: var(--brand-green); color: white; border: none; border-radius: 50px; cursor: pointer; box-shadow: 0 6px 15px rgba(104, 169, 62, 0.3); transition: 0.3s; }
+    .btn-action:hover { background: #579232; transform: translateY(-2px); box-shadow: 0 8px 20px rgba(104, 169, 62, 0.4); }
+    .btn-action:active { transform: translateY(2px); box-shadow: 0 2px 5px rgba(104, 169, 62, 0.3); }
+    .css-ufo { position: absolute; top: -80px; left: 50%; transform: translateX(-50%); width: 130px; height: 55px; z-index: 20; transition: top linear; }
+    .ufo-dome { position: absolute; top: 0; left: 35px; width: 60px; height: 35px; background: rgba(129, 236, 236, 0.7); border-radius: 30px 30px 0 0; border: 2px solid #00cec9; z-index: 2; box-shadow: inset 0 5px 10px rgba(255,255,255,0.5); }
+    .ufo-base { position: absolute; bottom: 0; width: 100%; height: 28px; background: #94A3B8; border-radius: 20px; border: 3px solid #334155; box-shadow: inset 0 -6px 0 rgba(0,0,0,0.2), 0 10px 20px rgba(0,0,0,0.5); z-index: 3; }
+    .ufo-lights { position: absolute; bottom: 6px; left: 15px; width: 100px; display: flex; justify-content: space-between; z-index: 4; }
+    .ufo-light { width: 8px; height: 8px; background: #FEF08A; border-radius: 50%; animation: blink 0.5s infinite alternate; box-shadow: 0 0 5px #FEF08A; }
+    .tractor-beam { position: absolute; top: 45px; left: 50%; transform: translateX(-50%); width: 90px; height: 0px; background: linear-gradient(to bottom, rgba(45, 212, 191, 0.8), rgba(45, 212, 191, 0.1)); clip-path: polygon(20% 0, 80% 0, 100% 100%, 0 100%); z-index: 1; transition: height linear; }
+    .target-canvas { position: absolute; bottom: 130px; left: 50%; transform: translateX(-50%); font-size: 110px; z-index: 10; filter: grayscale(100%) brightness(1.5); transition: filter 1s, transform 0.3s; }
     .target-canvas.colored { filter: grayscale(0%) brightness(1); animation: celebrate 1s; }
     .target-canvas.abducted { bottom: 100%; opacity: 0; transition: bottom 1s, opacity 1s; }
-    .paint-station { width: 100%; height: 100px; background: #2f3640; border-top: 5px solid #353b48; display: flex; justify-content: center; align-items: center; gap: 20px; z-index: 30; }
-    .paint-bucket { position: relative; width: 60px; height: 60px; background: #f1f2f6; border: 4px solid #747d8c; border-radius: 10px 10px 15px 15px; cursor: pointer; display: flex; align-items: flex-start; justify-content: center; box-shadow: 0 10px 0 rgba(0,0,0,0.2); transition: 0.1s; }
-    .paint-bucket:active { transform: translateY(8px); box-shadow: 0 2px 0 rgba(0,0,0,0.2); }
-    .paint-fill { width: 100%; height: 80%; border-radius: 5px 5px 10px 10px; border-bottom: 5px solid rgba(0,0,0,0.2); }
+    .paint-station { width: 100%; height: 110px; background: #334155; border-top: 6px solid #475569; display: flex; justify-content: center; align-items: center; gap: 25px; z-index: 30; box-shadow: 0 -10px 20px rgba(0,0,0,0.2); }
+    .paint-bucket { position: relative; width: 65px; height: 65px; background: #F8FAFC; border: 4px solid #64748B; border-radius: 12px 12px 18px 18px; cursor: pointer; display: flex; align-items: flex-start; justify-content: center; box-shadow: 0 12px 0 rgba(0,0,0,0.2), 0 15px 15px rgba(0,0,0,0.3); transition: 0.2s; }
+    .paint-bucket:hover { transform: translateY(-4px); box-shadow: 0 16px 0 rgba(0,0,0,0.2), 0 20px 20px rgba(0,0,0,0.4); }
+    .paint-bucket:active { transform: translateY(10px); box-shadow: 0 2px 0 rgba(0,0,0,0.2), 0 5px 5px rgba(0,0,0,0.3); border-color: #94A3B8; }
+    .paint-fill { width: 100%; height: 80%; border-radius: 6px 6px 12px 12px; border-bottom: 5px solid rgba(0,0,0,0.2); }
     .splat { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0); width: 150px; height: 150px; background: currentColor; clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%); border-radius: 30%; z-index: 40; opacity: 0; pointer-events: none; }
     .splat-anim { animation: splatPop 0.6s forwards; }
-    @keyframes blink { 0% { background: #ffeaa7; } 100% { background: #ff7675; } }
+    @keyframes blink { 0% { background: #FEF08A; box-shadow: 0 0 5px #FEF08A; } 100% { background: #FCA5A5; box-shadow: 0 0 10px #FCA5A5; } }
     @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-15px); } }
     @keyframes celebrate { 0% { transform: translateX(-50%) scale(1); } 50% { transform: translateX(-50%) scale(1.3) rotate(10deg); } 100% { transform: translateX(-50%) scale(1) rotate(0); } }
     @keyframes splatPop { 0% { transform: translate(-50%, -50%) scale(0); opacity: 1; } 50% { transform: translate(-50%, -50%) scale(1.5); opacity: 0.8; } 100% { transform: translate(-50%, -50%) scale(1.2); opacity: 0; } }
@@ -46,20 +48,20 @@ $rounds = $lesson_data['rounds'] ?? [
     @keyframes ufoExplode { 0% { filter: brightness(1); } 50% { filter: brightness(5) hue-rotate(90deg) scale(1.2); opacity: 1;} 100% { transform: translateX(-50%) scale(0); opacity: 0; } }
 </style>
 
-<div class="game-area text-center" style="border: none; background: transparent; padding-top: 5px;">
-    <h3 style="margin: 0; margin-bottom: 15px; color: var(--primary);">🛸 Color Rescue</h3>
+<div class="game-area text-center" style="border: none; background: transparent; padding-top: 5px; box-shadow: none;">
+    <h3 style="margin: 0; margin-bottom: 20px; color: var(--brand-blue); font-size: 1.5rem;">🛸 Color Rescue</h3>
 
     <div class="color-board" id="game-board">
         <div class="round-indicator" id="round-indicator">Ronda 1/3</div>
 
         <div class="tutorial-overlay" id="tutorial-screen">
-            <h2 style="color: var(--primary); margin-top: 0; margin-bottom: 10px;" id="tut-title">Misión</h2>
+            <h2 style="color: var(--brand-blue); margin-top: 0; margin-bottom: 10px; font-size: 2rem;" id="tut-title">Misión</h2>
             <div class="tutorial-icon" id="tut-icon">🍎</div>
             <div class="tutorial-word" id="tut-word">RED</div>
-            <p style="color: var(--text-muted); font-size: 20px; margin-bottom: 15px;" id="tut-trans">(Rojo)</p>
+            <p style="color: #64748B; font-size: 20px; margin-bottom: 20px; font-weight: 600;" id="tut-trans">(Rojo)</p>
             
-            <div style="display: flex; gap: 15px; justify-content: center;">
-                <button class="btn-action" style="background: var(--primary); box-shadow: 0 6px 0 #3b2a9e;" onclick="playLessonAudio()">🔊 Escuchar</button>
+            <div style="display: flex; gap: 15px; justify-content: center; flex-wrap: wrap;">
+                <button class="btn-action" style="background: var(--brand-blue); box-shadow: 0 4px 14px rgba(28, 61, 106, 0.3);" onclick="playLessonAudio()">🔊 Escuchar</button>
                 <button class="btn-action" id="btn-start" onclick="startActionPhase()" style="display: none;">▶️ ¡Salvar Dibujo!</button>
             </div>
         </div>
@@ -80,12 +82,10 @@ $rounds = $lesson_data['rounds'] ?? [
 </div>
 
 <script>
-   // AÑADIDO: Adaptador Dinámico con Colores Primarios Vivos
     let roundsData = window.dynamicRoundsData || <?php echo json_encode($rounds); ?>;
     
     if (window.dynamicRoundsData) {
-        // Paleta de colores vivos y primarios garantizados
-        const brightColors = ['#ff4757', '#2ed573', '#1e90ff', '#ffa502', '#9b59b6', '#ff1493', '#00ced1', '#f1c40f'];
+        const brightColors = ['#EF4444', '#10B981', '#3B82F6', '#F59E0B', '#8B5CF6', '#EC4899', '#06B6D4', '#FCD34D'];
         
         roundsData = roundsData.map(r => {
             const randomColorHex = brightColors[Math.floor(Math.random() * brightColors.length)];
@@ -97,8 +97,8 @@ $rounds = $lesson_data['rounds'] ?? [
                 translation: r.translation,
                 context_es: "¡Pinta la palabra antes de que se la lleven!",
                 distractors: [
-                    { name: 'X', hex: '#333333' },
-                    { name: 'Y', hex: '#777777' }
+                    { name: 'X', hex: '#334155' },
+                    { name: 'Y', hex: '#64748B' }
                 ]
             };
         });
@@ -246,7 +246,7 @@ $rounds = $lesson_data['rounds'] ?? [
         gameActive = false;
         clearInterval(ufoInterval);
         if(typeof sfxWrong !== 'undefined') sfxWrong.play();
-        beam.style.background = 'linear-gradient(to bottom, rgba(231, 76, 60, 0.8), rgba(231, 76, 60, 0.1))'; 
+        beam.style.background = 'linear-gradient(to bottom, rgba(239, 68, 68, 0.8), rgba(239, 68, 68, 0.1))'; 
         canvasItem.classList.add('abducted');
 
         setTimeout(() => {

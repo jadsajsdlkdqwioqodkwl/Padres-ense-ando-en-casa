@@ -38,41 +38,44 @@ $page_title = $module_title;
     <?php include 'includes/head.php'; ?>
     <link rel="stylesheet" href="assets/css/main.css">
     <style>
-        .level-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 20px; margin-top: 30px; }
+        .level-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 25px; margin-top: 40px; }
         .level-card { 
-            background: white; border-radius: 15px; padding: 20px; text-align: center; 
-            box-shadow: 0 4px 10px rgba(0,0,0,0.05); text-decoration: none; color: inherit;
-            border: 3px solid transparent; transition: 0.3s; display: block; position: relative;
+            background: var(--white); border-radius: 16px; padding: 30px 20px; text-align: center; 
+            box-shadow: 0 10px 25px rgba(28, 61, 106, 0.05); text-decoration: none; color: inherit;
+            border: 2px solid #E2E8F0; transition: transform 0.3s, box-shadow 0.3s, border-color 0.3s; display: block; position: relative;
         }
-        .level-card:hover { transform: translateY(-5px); box-shadow: 0 10px 20px rgba(0,0,0,0.1); }
-        .level-card.completed { border-color: var(--success); background: #f0fdf4; }
-        .level-icon { font-size: 40px; margin-bottom: 10px; }
+        .level-card:hover { transform: translateY(-5px); box-shadow: 0 15px 35px rgba(28, 61, 106, 0.1); border-color: var(--brand-lblue); }
+        .level-card.completed { border-color: var(--brand-green); background: #F0FDF4; }
+        .level-icon { font-size: 50px; margin-bottom: 15px; }
         
         /* Estilos de la Barra de Progreso */
         .progress-container {
-            background: #e0e0e0; border-radius: 20px; height: 28px; width: 100%; 
-            max-width: 500px; margin: 20px auto; overflow: hidden; position: relative;
-            box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
+            background: #E2E8F0; border-radius: 50px; height: 32px; width: 100%; 
+            max-width: 600px; margin: 25px auto; overflow: hidden; position: relative;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.05);
         }
         .progress-fill {
-            background: linear-gradient(90deg, #4CAF50, #8BC34A); height: 100%; 
-            transition: width 0.8s ease-in-out; border-radius: 20px;
+            background: linear-gradient(90deg, var(--brand-green), #8BC34A); height: 100%; 
+            transition: width 0.8s ease-in-out; border-radius: 50px;
         }
         .progress-text {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%; 
             display: flex; align-items: center; justify-content: center; 
-            font-weight: bold; color: #333; font-size: 13px; text-shadow: 1px 1px 2px white;
+            font-weight: 700; color: var(--brand-blue); font-size: 14px; text-shadow: 0 1px 2px rgba(255,255,255,0.8);
         }
 
         /* NUEVAS CLASES AÑADIDAS PARA LA RENOVACIÓN DE VOCABULARIO */
         .pool-header {
-            background: #fff3cd; border-left: 5px solid #ffc107; padding: 15px;
-            margin-bottom: 20px; border-radius: 5px; font-size: 14px; text-align: left;
+            background: #FFFBEB; border-left: 6px solid var(--brand-orange); padding: 20px;
+            margin-bottom: 30px; border-radius: 12px; font-size: 15px; text-align: left;
+            color: #475569; line-height: 1.7; box-shadow: 0 4px 10px rgba(242, 156, 56, 0.05);
         }
         .day-badge {
-            background: #007bff; color: white; padding: 5px 10px; border-radius: 10px;
-            font-size: 12px; position: absolute; top: -10px; right: -10px; box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            background: var(--brand-blue); color: white; padding: 6px 14px; border-radius: 50px;
+            font-size: 13px; font-weight: 700; position: absolute; top: -12px; right: -10px; 
+            box-shadow: 0 4px 10px rgba(28, 61, 106, 0.2);
         }
+        .level-title { font-size: 1.2rem; margin: 10px 0; color: var(--brand-blue); }
     </style>
 </head>
 <body>
@@ -80,15 +83,15 @@ $page_title = $module_title;
         <?php include 'includes/navbar.php'; ?>
         
         <div class="text-center">
-            <h1>Semana: <?php echo htmlspecialchars($module_title); ?></h1>
+            <h1 style="font-size: 2.2rem; margin-bottom: 20px;">Semana: <?php echo htmlspecialchars($module_title); ?></h1>
             
             <div class="pool-header">
-                <strong>🌟 Tu Pool de Vocabulario:</strong> Cada día te ofreceremos 10 palabras nuevas. 
+                <strong style="color: var(--brand-orange); font-size: 16px;">🌟 Tu Pool de Vocabulario:</strong> Cada día te ofreceremos 10 palabras nuevas. 
                 Tú eliges las 5 que más te gusten para aprender con mnemotecnias. 
                 ¡Al día siguiente, demostrarás lo aprendido para darle una foto de regalo a papá!
             </div>
             
-            <p>¡Selecciona tu día de entrenamiento!</p>
+            <p style="color: #64748B; font-size: 1.1rem; font-weight: 600;">¡Selecciona tu día de entrenamiento!</p>
             
             <div class="progress-container">
                 <div class="progress-fill" style="width: <?php echo $progress_percent; ?>%;"></div>
@@ -111,9 +114,9 @@ $page_title = $module_title;
                     <div class="day-badge">Día <?php echo $lesson['order_num']; ?></div>
                     
                     <div class="level-icon"><?php echo $icon; ?></div>
-                    <h3>Día <?php echo $lesson['order_num']; ?></h3>
-                    <h2><?php echo htmlspecialchars($lesson['title']); ?></h2>
-                    <p style="color: #666; font-weight: bold;"><?php echo $stars_display; ?></p>
+                    <h3 style="color: #64748B; font-size: 14px; text-transform: uppercase; letter-spacing: 1px;">Día <?php echo $lesson['order_num']; ?></h3>
+                    <h2 class="level-title"><?php echo htmlspecialchars($lesson['title']); ?></h2>
+                    <p style="color: <?php echo $is_completed ? 'var(--brand-green)' : 'var(--brand-orange)'; ?>; font-weight: 800; margin-top: 15px;"><?php echo $stars_display; ?></p>
                 </a>
             <?php endforeach; ?>
         </div>

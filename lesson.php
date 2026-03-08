@@ -115,20 +115,23 @@ if ($step > 0 && $step <= 5) {
 <head>
     <?php include 'includes/head.php'; ?>
     <style>
-        .overlay-fullscreen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; color: white; padding: 20px; }
+        .overlay-fullscreen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(28, 61, 106, 0.95); backdrop-filter: blur(5px); z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; color: white; padding: 20px; }
         .modal-box { 
-            background: white; color: #333; border-radius: 20px; padding: 30px; 
-            max-width: 800px; width: 100%; box-shadow: 0 10px 30px rgba(0,0,0,0.5); 
+            background: var(--white); color: var(--text-main); border-radius: 24px; padding: 40px; 
+            max-width: 800px; width: 100%; box-shadow: 0 25px 50px rgba(0,0,0,0.2); 
             text-align: center; margin: auto; 
-            max-height: 85vh; overflow-y: auto; 
+            max-height: 85vh; overflow-y: auto; border-top: 6px solid var(--brand-blue);
         }
-        .word-pool-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 15px; margin: 20px 0; }
-        .pool-word { background: #f0f0f0; border: 3px solid #ccc; border-radius: 10px; padding: 15px; cursor: pointer; transition: 0.2s; font-weight: bold; font-size: 18px; }
-        .pool-word.selected { background: #d4edda; border-color: #28a745; color: #155724; transform: scale(1.05); box-shadow: 0 4px 10px rgba(40,167,69,0.3); }
-        .btn-large { background: #007bff; color: white; border: none; padding: 15px 30px; font-size: 20px; border-radius: 50px; cursor: pointer; font-weight: bold; transition: 0.3s; margin-top: 20px; display: inline-block; text-decoration: none; }
-        .btn-large:disabled { background: #ccc; cursor: not-allowed; }
-        .btn-large:hover:not(:disabled) { background: #0056b3; transform: scale(1.05); }
-        .mnemotecnia-card { border: 2px dashed #007bff; padding: 20px; border-radius: 15px; margin-bottom: 20px; background: #f8faff; text-align: left; }
+        .word-pool-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 15px; margin: 25px 0; }
+        .pool-word { background: var(--bg-light); border: 2px solid #E2E8F0; border-radius: 12px; padding: 15px; cursor: pointer; transition: 0.3s; font-weight: 700; font-size: 18px; color: var(--brand-blue); }
+        .pool-word:hover { border-color: var(--brand-lblue); transform: translateY(-2px); }
+        .pool-word.selected { background: #F0FDF4; border-color: var(--brand-green); color: var(--brand-green); transform: scale(1.05); box-shadow: 0 8px 20px rgba(104, 169, 62, 0.2); }
+        
+        .btn-large { background: var(--brand-green); color: white; border: none; padding: 16px 35px; font-size: 18px; border-radius: 50px; cursor: pointer; font-weight: 700; transition: 0.3s; margin-top: 25px; display: inline-block; text-decoration: none; box-shadow: 0 4px 14px rgba(104, 169, 62, 0.3); }
+        .btn-large:disabled { background: #CBD5E1; box-shadow: none; cursor: not-allowed; transform: none !important; }
+        .btn-large:hover:not(:disabled) { background: #579232; transform: translateY(-2px); box-shadow: 0 6px 20px rgba(104, 169, 62, 0.4); }
+        
+        .mnemotecnia-card { border: 2px dashed var(--brand-lblue); padding: 25px; border-radius: 16px; margin-bottom: 20px; background: #F0F9FF; text-align: left; }
     </style>
 </head>
 <body>
@@ -137,27 +140,29 @@ if ($step > 0 && $step <= 5) {
     <?php if($step == 0): ?>
         <?php if($lesson['order_num'] > 1): ?>
         <div id="exam-modal" class="overlay-fullscreen">
-            <div class="modal-box">
-                <h2 style="color: #d9534f;">📝 Examen de las Palabras de Ayer</h2>
-                <div id="exam-questions" style="text-align: left; margin: 20px 0;"></div>
+            <div class="modal-box" style="border-top-color: var(--brand-orange);">
+                <h2 style="color: var(--brand-orange); font-size: 2rem; margin-bottom: 10px;">📝 Examen de las Palabras de Ayer</h2>
+                <div id="exam-questions" style="text-align: left; margin: 25px 0;"></div>
                 <button id="btn-submit-exam" class="btn-large" onclick="evaluarExamen()">Entregar Examen</button>
             </div>
         </div>
         
         <div id="diploma-modal" class="overlay-fullscreen" style="display: none;">
-            <div class="modal-box">
-                <h2>🎉 ¡Felicidades! 🎉</h2>
-                <canvas id="diploma-canvas" width="600" height="600" style="display: block; width: 100%; border-radius: 15px; border: 5px solid #ffc107; margin-bottom: 20px;"></canvas>
-                <a id="btn-download-diploma" class="btn-large" style="background: #28a745; margin-right: 10px;" href="#" download="Mi_Diploma_Ingles.png">Descargar Foto</a>
-                <button class="btn-large" onclick="cerrarDiplomaYContinuar()">Continuar al Día de Hoy</button>
+            <div class="modal-box" style="border-top-color: #FBBF24;">
+                <h2 style="color: var(--brand-blue); font-size: 2.2rem; margin-bottom: 20px;">🎉 ¡Felicidades! 🎉</h2>
+                <canvas id="diploma-canvas" width="600" height="600" style="display: block; width: 100%; border-radius: 16px; border: 4px solid #FBBF24; margin-bottom: 25px; box-shadow: 0 10px 30px rgba(0,0,0,0.1);"></canvas>
+                <div style="display: flex; gap: 15px; justify-content: center; flex-wrap: wrap;">
+                    <a id="btn-download-diploma" class="btn-large" style="background: var(--brand-blue); margin-top: 0; box-shadow: 0 4px 14px rgba(28, 61, 106, 0.3);" href="#" download="Mi_Diploma_Ingles.png">Descargar Foto</a>
+                    <button class="btn-large" style="margin-top: 0;" onclick="cerrarDiplomaYContinuar()">Continuar al Día de Hoy</button>
+                </div>
             </div>
         </div>
         <?php endif; ?>
 
         <div id="pool-modal" class="overlay-fullscreen" style="<?php echo ($lesson['order_num'] > 1) ? 'display: none;' : ''; ?>">
             <div class="modal-box">
-                <h2 style="color: #007bff;">🎯 Tu Pool de Palabras</h2>
-                <p>Selecciona <strong>5 palabras</strong> para aprender el día de hoy.</p>
+                <h2 style="color: var(--brand-blue); font-size: 2rem;">🎯 Tu Pool de Palabras</h2>
+                <p style="color: #64748B; font-size: 1.1rem;">Selecciona <strong>5 palabras</strong> para aprender el día de hoy.</p>
                 <div class="word-pool-grid" id="pool-grid">
                     <?php foreach($pool_palabras as $index => $word): ?>
                         <div class="pool-word" data-en="<?php echo htmlspecialchars($word['en']); ?>" data-es="<?php echo htmlspecialchars($word['es']); ?>" data-phonetic="<?php echo htmlspecialchars($word['phonetic']); ?>" data-emoji="<?php echo htmlspecialchars($word['emoji']); ?>" data-mnemonic="<?php echo htmlspecialchars($word['mnemonic']); ?>" onclick="toggleWordSelection(this)">
@@ -165,15 +170,15 @@ if ($step > 0 && $step <= 5) {
                         </div>
                     <?php endforeach; ?>
                 </div>
-                <div style="font-size: 18px; font-weight: bold; margin-top: 10px;">Seleccionadas: <span id="selection-count">0</span>/5</div>
+                <div style="font-size: 18px; font-weight: 700; color: var(--brand-blue); margin-top: 15px;">Seleccionadas: <span id="selection-count">0</span>/5</div>
                 <button id="btn-confirm-pool" class="btn-large" disabled onclick="confirmarSeleccion()">Confirmar mis 5 palabras</button>
             </div>
         </div>
 
         <div id="mnemotecnia-modal" class="overlay-fullscreen" style="display: none;">
-            <div class="modal-box">
-                <h2 style="color: #28a745;">🧠 Aprende con Mnemotecnias</h2>
-                <p style="font-size: 18px; color: #555;">Papá/Mamá, enseña estos trucos y pronunciaciones antes de jugar.</p>
+            <div class="modal-box" style="border-top-color: var(--brand-green);">
+                <h2 style="color: var(--brand-green); font-size: 2.2rem; margin-bottom: 10px;">🧠 Aprende con Mnemotecnias</h2>
+                <p style="font-size: 16px; color: #64748B; margin-bottom: 30px;">Papá/Mamá, enseña estos trucos y pronunciaciones antes de jugar.</p>
                 <div id="mnemotecnias-container"></div>
                 <button class="btn-large" onclick="finalizarMnemotecnias()">¡A jugar!</button>
             </div>
@@ -184,28 +189,28 @@ if ($step > 0 && $step <= 5) {
         
         <div class="container">
             <?php include 'includes/navbar.php'; ?>
-            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; flex-wrap: wrap; gap: 10px;">
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 25px; flex-wrap: wrap; gap: 10px; background: #F0F9FF; padding: 15px 20px; border-radius: 12px; border: 1px solid var(--brand-lblue);">
                 <div style="display: flex; align-items: center; gap: 15px;">
-                    <h1 style="margin: 0; font-size: 24px;">Juego <?php echo $step; ?> de 5</h1>
-                    <button id="music-toggle" onclick="toggleMusic()" style="font-size: 24px; background: none; border: none; cursor: pointer; padding: 0;">🔇</button>
+                    <h1 style="margin: 0; font-size: 22px; color: var(--brand-blue);">🎮 Juego <?php echo $step; ?> de 5</h1>
+                    <button id="music-toggle" onclick="toggleMusic()" style="font-size: 26px; background: none; border: none; cursor: pointer; padding: 0; transition: 0.2s;" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'">🔇</button>
                 </div>
             </div>
             
             <div class="game-wrapper">
                 <?php 
                 if (file_exists($template_file)) { include $template_file; } 
-                else { echo "<div style='color:red;'>Error: Falta archivo {$template_file}</div>"; }
+                else { echo "<div style='color:var(--brand-orange); font-weight:bold;'>Error: Falta archivo {$template_file}</div>"; }
                 ?>
             </div>
         </div>
         
         <div id="end-game-modal" class="overlay-fullscreen" style="display: none; z-index: 10000;">
-            <div class="modal-box">
-                <h2 style="color: #28a745;">🎉 ¡Nivel Completado! 🎉</h2>
-                <div style="font-size: 60px;" id="end-emoji"></div>
-                <h3 style="font-size: 30px; color: #007bff; margin: 10px 0;" id="end-word"></h3>
-                <p style="font-size: 20px; font-weight: bold; color: #d9534f;" id="end-phonetic"></p>
-                <p style="font-size: 18px; color: #555; background: #e9ecef; padding: 15px; border-radius: 10px; font-style: italic; margin-top: 15px;" id="end-mnemonic"></p>
+            <div class="modal-box" style="border-top-color: var(--brand-green);">
+                <h2 style="color: var(--brand-green); font-size: 2.2rem; margin-bottom: 20px;">🎉 ¡Nivel Completado! 🎉</h2>
+                <div style="font-size: 70px; margin-bottom: 10px;" id="end-emoji"></div>
+                <h3 style="font-size: 32px; color: var(--brand-blue); margin: 10px 0; font-weight: 800;" id="end-word"></h3>
+                <p style="font-size: 20px; font-weight: 700; color: var(--brand-orange);" id="end-phonetic"></p>
+                <p style="font-size: 18px; color: #475569; background: #F8FAFC; padding: 20px; border-radius: 12px; font-style: italic; margin-top: 20px; border: 1px solid #E2E8F0;" id="end-mnemonic"></p>
                 <button class="btn-large" id="btn-next-level">Siguiente Reto ➡️</button>
             </div>
         </div>
@@ -216,12 +221,8 @@ if ($step > 0 && $step <= 5) {
     <script>
     const currentPlayingWord = <?php echo json_encode($current_word ?? null); ?>;
 
-    // ==========================================
-    // LÓGICA DE NAVEGACIÓN Y MODAL DE VICTORIA (JUEGOS)
-    // ==========================================
     function unlockNextButton(lessonId, stars, moduleId) {
         if(currentPlayingWord) {
-            // Mostrar modal de repaso antes de avanzar
             document.getElementById('end-emoji').innerText = currentPlayingWord.emoji;
             document.getElementById('end-word').innerText = currentPlayingWord.en + " = " + currentPlayingWord.es;
             document.getElementById('end-phonetic').innerText = "Se pronuncia: (" + currentPlayingWord.phonetic + ")";
@@ -251,9 +252,6 @@ if ($step > 0 && $step <= 5) {
         }
     }
 
-    // ==========================================
-    // LÓGICA DE SELECCIÓN Y EXÁMENES (STEP 0)
-    // ==========================================
     <?php if($step == 0): ?>
     let palabrasSeleccionadas = [];
 
@@ -284,11 +282,11 @@ if ($step > 0 && $step <= 5) {
             const card = document.createElement('div');
             card.className = 'mnemotecnia-card';
             card.innerHTML = `
-                <div style="margin-bottom: 10px;">
-                    <h3 style="margin: 0; font-size: 24px; color: #007bff;">${palabra.emoji} ${palabra.en} <span style="color: #666;">= ${palabra.es}</span></h3>
-                    <p style="color: #d9534f; font-weight: bold; margin: 5px 0;">Se pronuncia: (${palabra.phonetic})</p>
+                <div style="margin-bottom: 12px;">
+                    <h3 style="margin: 0; font-size: 26px; color: var(--brand-blue);">${palabra.emoji} ${palabra.en} <span style="color: #64748B;">= ${palabra.es}</span></h3>
+                    <p style="color: var(--brand-orange); font-weight: 700; margin: 5px 0; font-size: 16px;">Se pronuncia: (${palabra.phonetic})</p>
                 </div>
-                <div style="background: #e9ecef; padding: 10px; border-radius: 8px; font-style: italic;">💡 ${palabra.mnemonic}</div>
+                <div style="background: var(--white); padding: 15px; border-radius: 10px; font-style: italic; color: #475569; border: 1px solid #E2E8F0;">💡 ${palabra.mnemonic}</div>
             `;
             container.appendChild(card);
         });
@@ -312,10 +310,10 @@ if ($step > 0 && $step <= 5) {
         let html = '';
         if (palabrasAyer && palabrasAyer.length > 0) {
             palabrasAyer.forEach((palabra, i) => {
-                html += `<div style="margin-bottom: 15px; padding: 15px; background: #f8f9fa; border-radius: 10px; border-left: 5px solid #007bff;">
-                    <strong>¿Qué significa '${palabra.en}'?</strong><br>
-                    <label><input type="radio" name="q${i}" value="correct"> ${palabra.es}</label><br>
-                    <label><input type="radio" name="q${i}" value="wrong"> Otra cosa</label>
+                html += `<div style="margin-bottom: 15px; padding: 20px; background: #F8FAFC; border-radius: 12px; border-left: 6px solid var(--brand-blue); border-top: 1px solid #E2E8F0; border-right: 1px solid #E2E8F0; border-bottom: 1px solid #E2E8F0;">
+                    <strong style="font-size: 18px; color: var(--brand-blue); display: block; margin-bottom: 10px;">¿Qué significa '${palabra.en}'?</strong>
+                    <label style="cursor: pointer; display: block; margin-bottom: 8px; font-size: 16px;"><input type="radio" name="q${i}" value="correct"> ${palabra.es}</label>
+                    <label style="cursor: pointer; display: block; font-size: 16px;"><input type="radio" name="q${i}" value="wrong"> Otra cosa</label>
                 </div>`;
             });
         }
@@ -328,23 +326,27 @@ if ($step > 0 && $step <= 5) {
         
         const canvas = document.getElementById('diploma-canvas');
         const ctx = canvas.getContext('2d');
-        ctx.fillStyle = "#fff8e7"; ctx.fillRect(0, 0, canvas.width, canvas.height);
-        ctx.strokeStyle = "#ffc107"; ctx.lineWidth = 15; ctx.strokeRect(15, 15, canvas.width - 30, canvas.height - 30);
-        ctx.fillStyle = "#333"; ctx.textAlign = "center";
-        ctx.font = "bold 32px Arial"; ctx.fillText("🏆 ¡REPORTE DE LOGROS! 🏆", canvas.width/2, 70);
+        ctx.fillStyle = "#FFFBEB"; ctx.fillRect(0, 0, canvas.width, canvas.height); // Fondo claro
+        ctx.strokeStyle = "#FBBF24"; ctx.lineWidth = 15; ctx.strokeRect(15, 15, canvas.width - 30, canvas.height - 30);
         
-        let startY = 160;
-        ctx.font = "bold 24px Arial";
+        // Estilo de texto de cabecera
+        ctx.fillStyle = "#1C3D6A"; ctx.textAlign = "center";
+        ctx.font = "bold 36px -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif"; 
+        ctx.fillText("🏆 REPORTE DE LOGROS 🏆", canvas.width/2, 80);
+        
+        let startY = 170;
+        ctx.font = "bold 26px -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
         if (palabrasAyer && palabrasAyer.length > 0) {
             palabrasAyer.forEach(p => { 
-                ctx.fillStyle = "#007bff"; 
-                // Añadimos la pronunciación al texto del diploma
+                ctx.fillStyle = "#1C3D6A"; 
                 const phonTxt = p.phonetic ? " (" + p.phonetic + ")" : "";
                 ctx.fillText(p.en + phonTxt + " = " + p.es, canvas.width/2, startY); 
-                startY += 45; 
+                startY += 48; 
             });
         }
-        ctx.fillStyle = "#ff4757"; ctx.fillText("¡PREGÚNTAME ESTO EN LA CENA!", canvas.width/2, startY + 50);
+        ctx.fillStyle = "#F29C38"; 
+        ctx.font = "bold 24px -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
+        ctx.fillText("¡PREGÚNTAME ESTO EN LA CENA!", canvas.width/2, startY + 60);
         document.getElementById('btn-download-diploma').href = canvas.toDataURL('image/png');
     }
 

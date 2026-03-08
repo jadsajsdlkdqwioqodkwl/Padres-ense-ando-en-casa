@@ -9,34 +9,55 @@
 
 <style>
     :root {
-        --primary: #4834d4;
-        --accent: #ff9f43;
-        --success: #2ed573;
-        --dark: #2f3542;
-        --light: #f1f2f6;
-        --bg: #f8faff;
-        --card-bg: #FFFFFF;
-        --border-color: #eee;
-        --text-muted: #57606f;
+        /* Paleta Oficial de Landing Page */
+        --brand-blue: #1C3D6A;   
+        --brand-green: #68A93E;  
+        --brand-orange: #F29C38; 
+        --brand-lblue: #5CB2E4;  
+        --bg-light: #F8FAFC;     
+        --text-main: #333333;
+        --text-muted: #64748B;
+        --white: #FFFFFF;
+
+        /* Retrocompatibilidad Segura (NO BORRAR) */
+        --primary: var(--brand-blue);
+        --accent: var(--brand-orange);
+        --success: var(--brand-green);
+        --dark: var(--text-main);
+        --light: var(--bg-light);
+        --bg: var(--bg-light);
+        --card-bg: var(--white);
+        --border-color: #E2E8F0;
     }
 
     body {
-        font-family: 'Outfit', sans-serif;
-        background: linear-gradient(135deg, #f8faff 0%, #e0e7ff 100%);
-        color: var(--dark);
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        background-color: var(--bg-light);
+        color: var(--text-main);
         margin: 0; padding: 20px;
         display: flex; flex-direction: column; align-items: center;
         gap: 30px; padding-bottom: 100px;
         min-height: 100vh;
+        line-height: 1.6;
     }
 
-    h1, h2, h3 { font-family: 'Fredoka', sans-serif; color: var(--primary); }
+    h1, h2, h3 { 
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; 
+        color: var(--brand-blue); 
+        letter-spacing: -0.5px;
+        font-weight: 800;
+    }
     
     .container {
-        background: var(--card-bg); width: 100%; max-width: 800px;
-        padding: 40px; border-radius: 25px;
-        box-shadow: 0 10px 30px rgba(72, 52, 212, 0.08);
-        position: relative; border: 1px solid var(--border-color);
+        background: var(--card-bg); 
+        width: 100%; 
+        max-width: 1000px;
+        padding: 40px; 
+        border-radius: 16px;
+        box-shadow: 0 15px 35px rgba(28, 61, 106, 0.05);
+        position: relative; 
+        border-top: 5px solid var(--brand-green);
     }
+    
     .text-center { text-align: center; }
 </style>
