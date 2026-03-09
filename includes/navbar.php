@@ -5,12 +5,24 @@ $current_stars = $user_info ? $user_info['total_stars'] : 0;
 $child_name = $user_info ? $user_info['child_name'] : 'Explorador';
 ?>
 <style>
-    /* FIX: Navbar Responsiva, centrada y sin "Zoom" forzado */
+    /* FIX: Navbar con marco visible, bordes definidos y centrada */
+    .top-navbar-wrapper {
+        width: 100%;
+        padding: 0;
+        margin-bottom: 25px;
+        box-sizing: border-box;
+    }
+
     .top-navbar { 
         display: flex; justify-content: space-between; align-items: center; 
-        margin-bottom: 25px; border-bottom: 2px solid var(--border-color); 
-        padding-bottom: 15px; flex-wrap: wrap; gap: 15px; 
-        width: 100%; max-width: 100%; box-sizing: border-box; /* Previene que se salga de la pantalla */
+        background: #ffffff;
+        border: 2px solid #E2E8F0; /* Bordes visibles */
+        border-radius: 16px; /* Bordes redondeados */
+        padding: 15px 25px; 
+        flex-wrap: wrap; gap: 15px; 
+        width: 100%; max-width: 100%; 
+        box-sizing: border-box; 
+        box-shadow: 0 10px 25px rgba(28, 61, 106, 0.05);
     }
     
     .nav-brand { 
@@ -51,10 +63,9 @@ $child_name = $user_info ? $user_info['child_name'] : 'Explorador';
         font-size: clamp(0.85rem, 2.5vw, 0.95rem); text-align: center; box-sizing: border-box; white-space: nowrap;
     }
 
-    /* Parches Responsivos Extremos para la Navbar en Celulares Pequeños */
     @media (max-width: 768px) {
-        .top-navbar { flex-direction: column; text-align: center; justify-content: center; }
-        .nav-brand { width: 100%; display: flex; justify-content: center; margin-bottom: 5px; }
+        .top-navbar { flex-direction: column; text-align: center; justify-content: center; padding: 15px; }
+        .nav-brand { width: 100%; display: flex; justify-content: center; margin-bottom: 10px; }
         .nav-menu { width: 100%; justify-content: center; gap: 8px; }
     }
     
@@ -65,18 +76,20 @@ $child_name = $user_info ? $user_info['child_name'] : 'Explorador';
     }
 </style>
 
-<div class="top-navbar">
-    <div class="nav-brand">
-        <a href="dashboard.php">
-            <img src="assets/logo-myworld.svg" alt="My World" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline';">
-            <span style="display:none;">🚀 My World</span>
-        </a>
-    </div>
-    <div class="nav-menu">
-        <span class="user-badge">👤 <?php echo htmlspecialchars($child_name); ?></span>
-        <div class="stars-badge">⭐ <span id="star-count"><?php echo $current_stars; ?></span></div>
-        <a href="dashboard.php" class="nav-link">⬅️ Módulos</a>
-        <a href="trophies.php" class="nav-link" style="background: var(--brand-orange); color: white; border: none; box-shadow: 0 4px 10px rgba(242, 156, 56, 0.3);">🏆 Trofeos</a>
-        <a href="logout.php" class="nav-link nav-logout">Salir</a>
+<div class="top-navbar-wrapper">
+    <div class="top-navbar">
+        <div class="nav-brand">
+            <a href="dashboard.php">
+                <img src="assets/logo-myworld.svg" alt="My World" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline';">
+                <span style="display:none;">🚀 My World</span>
+            </a>
+        </div>
+        <div class="nav-menu">
+            <span class="user-badge">👤 <?php echo htmlspecialchars($child_name); ?></span>
+            <div class="stars-badge">⭐ <span id="star-count"><?php echo $current_stars; ?></span></div>
+            <a href="dashboard.php" class="nav-link">⬅️ Módulos</a>
+            <a href="trophies.php" class="nav-link" style="background: var(--brand-orange); color: white; border: none; box-shadow: 0 4px 10px rgba(242, 156, 56, 0.3);">🏆 Trofeos</a>
+            <a href="logout.php" class="nav-link nav-logout">Salir</a>
+        </div>
     </div>
 </div>

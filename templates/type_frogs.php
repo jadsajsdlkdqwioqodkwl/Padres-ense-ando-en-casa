@@ -1,7 +1,5 @@
 <?php
 // templates/type_frogs.php
-// (Sin cabeceras repetidas. Este código es inyectado directamente en lesson.php)
-
 $lesson_id = $lesson_id ?? ($lesson['id'] ?? 0);
 $reward_stars = $reward_stars ?? ($lesson['reward_stars'] ?? 5);
 ?>
@@ -17,7 +15,6 @@ $reward_stars = $reward_stars ?? ($lesson['reward_stars'] ?? 5);
         .game-wrapper { display: none !important; }
     }
 
-    /* FIX: Modales seguros absolutos forzados para sobreescribir cualquier padre */
     #tutorial-modal.modal-overlay {
         position: fixed !important; top: 0 !important; left: 0 !important;
         width: 100% !important; height: 100% !important;
@@ -35,7 +32,6 @@ $reward_stars = $reward_stars ?? ($lesson['reward_stars'] ?? 5);
         border: 4px solid var(--brand-blue, #1E3A8A);
     }
 
-    /* FIX: Río 100% Fluido y centrado */
     .river-board { 
         position: relative; width: 100%; max-width: 100%; height: 65vh; min-height: 450px; max-height: 800px; 
         background: linear-gradient(180deg, #38BDF8 0%, #0284C7 100%); border-radius: 24px; 
@@ -56,8 +52,8 @@ $reward_stars = $reward_stars ?? ($lesson['reward_stars'] ?? 5);
     .pad-emoji { font-size: clamp(28px, 6vw, 45px); line-height: 1; margin-bottom: 2px; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3)); }
     .pad-word { background: #ffffff; color: #1E3A8A; font-size: clamp(10px, 2.5vw, 15px); font-weight: 900; padding: 2px 10px; border-radius: 20px; box-shadow: 0 2px 5px rgba(0,0,0,0.2); text-transform: uppercase; text-align: center;}
 
-    /* FIX RANA: Posicionamiento para evitar corte de cara/cuerpo */
-    .frog-player { position: absolute; width: clamp(50px, 12vw, 80px); height: clamp(50px, 12vw, 80px); display: flex; justify-content: center; align-items: center; font-size: clamp(45px, 11vw, 75px); line-height: 1; transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); z-index: 20; pointer-events: none; filter: drop-shadow(0 10px 10px rgba(0,0,0,0.4)); transform: translate(-50%, -20%); }
+    /* FIX RANA: Altura estabilizada para que coordine con las hojas */
+    .frog-player { position: absolute; width: clamp(50px, 12vw, 80px); height: clamp(50px, 12vw, 80px); display: flex; justify-content: center; align-items: center; font-size: clamp(45px, 11vw, 75px); line-height: 1; transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); z-index: 20; pointer-events: none; filter: drop-shadow(0 10px 10px rgba(0,0,0,0.4)); transform: translate(-50%, -10%); }
     
     .frog-player.jumping { transform: translate(-50%, -60%) scale(1.3); filter: drop-shadow(0 25px 20px rgba(0,0,0,0.3)); z-index: 30; }
     
@@ -146,7 +142,6 @@ $reward_stars = $reward_stars ?? ($lesson['reward_stars'] ?? 5);
         document.getElementById('tut-trans').innerText = `(${roundData.translation})`;
         document.getElementById('hud-word').innerText = targetWord;
         
-        // Asignar mnemotecnia y botón de audio
         if(roundData.mnemonic) {
             document.getElementById('tut-mnemonic').innerText = "💡 " + roundData.mnemonic;
         } else {
@@ -158,8 +153,7 @@ $reward_stars = $reward_stars ?? ($lesson['reward_stars'] ?? 5);
         document.getElementById('round-counter').innerText = `${index + 1}/${roundsData.length}`;
 
         frog.classList.remove('jumping');
-        // FIX: Rana más arriba por defecto para no pisar el límite oculto del div
-        frog.style.bottom = '15%';
+        frog.style.bottom = '12%'; /* FIX: Altura base de la ranita ajustada */
         frog.style.left = '50%';
         frog.style.opacity = '1';
         
@@ -180,8 +174,8 @@ $reward_stars = $reward_stars ?? ($lesson['reward_stars'] ?? 5);
     }
 
     function createRow(index) {
-        // Cálculo porcentual ajustado para el río
-        let bottomPct = 25 + (index * 25); 
+        // FIX: La distribución porcentual empieza más arriba para que no queden "muy abajo"
+        let bottomPct = 30 + (index * 25); 
         const isCorrectPos = Math.floor(Math.random() * 3); 
         
         const row = document.createElement('div');
@@ -220,10 +214,8 @@ $reward_stars = $reward_stars ?? ($lesson['reward_stars'] ?? 5);
         const rectBoard = board.getBoundingClientRect();
         const rectPad = element.getBoundingClientRect();
         
-        // Matemáticas Responsivas Puras: Obtenemos el porcentaje exacto de X para la rana
         const targetXPct = ((rectPad.left - rectBoard.left + rectPad.width/2) / rectBoard.width) * 100;
         
-        // Y lo sacamos directamente del contenedor para alinear con CSS
         const parentRow = element.closest('.row-container');
         const targetYPct = parseFloat(parentRow.style.bottom);
 
@@ -258,7 +250,7 @@ $reward_stars = $reward_stars ?? ($lesson['reward_stars'] ?? 5);
                 frog.style.opacity = '0';
                 
                 setTimeout(() => {
-                    frog.style.bottom = '15%'; // Retorna al inicio flotante
+                    frog.style.bottom = '12%'; /* FIX: Retorna a la altura base sincronizada */
                     frog.style.left = '50%'; 
                     frog.style.opacity = '1';
                     isMoving = false; 
@@ -284,7 +276,7 @@ $reward_stars = $reward_stars ?? ($lesson['reward_stars'] ?? 5);
         if(typeof AudioManager !== 'undefined') AudioManager.playSound('win');
         
         frog.classList.add('jumping');
-        frog.style.bottom = '90%'; // Salto final a la orilla segura (safe-bank)
+        frog.style.bottom = '90%'; 
         frog.style.left = '50%';
         
         currentRoundIndex++;

@@ -1,13 +1,11 @@
 <?php
 // templates/type_monster.php
-// Carga dinámica limpia para ser inyectada en lesson.php
 $lesson_id = $lesson_id ?? ($lesson['id'] ?? 0);
 $time_limit = $lesson_data['time_limit'] ?? 20; 
 $reward_stars = $reward_stars ?? ($lesson['reward_stars'] ?? 5);
 ?>
 
 <style>
-    /* Seguro de Pantalla Horizontal */
     #landscape-warning {
         display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
         background: #1E293B; z-index: 100000; color: white; justify-content: center; 
@@ -18,7 +16,6 @@ $reward_stars = $reward_stars ?? ($lesson['reward_stars'] ?? 5);
         .game-wrapper { display: none !important; }
     }
 
-    /* FIX: Modal Seguro Absoluto */
     #tutorial-modal.modal-overlay {
         position: fixed !important; top: 0 !important; left: 0 !important;
         width: 100% !important; height: 100% !important;
@@ -40,13 +37,11 @@ $reward_stars = $reward_stars ?? ($lesson['reward_stars'] ?? 5);
     
     .game-board { position: relative; width: 100%; max-width: 100%; min-height: 350px; background: #F8FAFC; border-radius: 24px; overflow: hidden; border: 4px solid var(--brand-blue); margin: 0 auto 25px auto; box-shadow: 0 10px 25px rgba(28, 61, 106, 0.1); box-sizing: border-box; }
     
-    /* MONSTRUO CSS */
     .css-monster { position: absolute; left: 2%; bottom: 20px; width: 80px; height: 80px; background: #EF4444; border: 3px solid var(--brand-blue); border-radius: 40% 60% 70% 30% / 40% 50% 60% 50%; animation: morph 2s linear infinite, wobble 0.5s alternate infinite; transition: left 0.2s linear, transform 0.3s; z-index: 3; box-shadow: inset -5px -5px 0 rgba(0,0,0,0.2); }
     .css-monster::before, .css-monster::after { content: ''; position: absolute; top: 18px; width: 16px; height: 16px; background: white; border-radius: 50%; border: 3px solid var(--brand-blue); }
     .css-monster::before { left: 16px; } .css-monster::after { right: 16px; }
     .css-monster-mouth { position: absolute; bottom: 12px; left: 22px; width: 35px; height: 18px; background: var(--brand-blue); border-radius: 0 0 18px 18px; transition: height 0.3s, border-radius 0.3s; }
     
-    /* OBJETIVO DINÁMICO */
     .twemoji-target { position: absolute; right: 5%; bottom: 10px; font-size: 4.5rem; z-index: 2; filter: drop-shadow(0 10px 10px rgba(0,0,0,0.2)); transition: transform 0.3s; }
     
     .slot-container { display: flex; justify-content: center; gap: 10px; margin-bottom: 25px; flex-wrap: wrap; padding: 0 10px; z-index: 5; position: relative; width: 100%; box-sizing: border-box; }
@@ -54,10 +49,9 @@ $reward_stars = $reward_stars ?? ($lesson['reward_stars'] ?? 5);
     .letter-slot.filled { border-style: solid; border-color: #4CAF50; background: #F0FDF4; color: #4CAF50; transform: scale(1.05); box-shadow: 0 4px 10px rgba(76, 175, 80, 0.2); }
     
     .bubbles-container { display: flex; justify-content: center; flex-wrap: wrap; gap: 12px; min-height: 80px; padding: 0 10px; position: relative; width: 100%; box-sizing: border-box; }
-    .drag-bubble { width: clamp(50px, 14vw, 60px); height: clamp(50px, 14vw, 60px); background: #F59E0B; color: white; border-radius: 16px; display: flex; justify-content: center; align-items: center; font-size: clamp(24px, 6vw, 30px); font-weight: 800; cursor: grab; box-shadow: 0 6px 0 #D97706, 0 10px 15px rgba(245, 158, 11, 0.3); transition: transform 0.1s, opacity 0.3s; user-select: none; touch-action: none; z-index: 10; }
-    .drag-bubble:active { cursor: grabbing; }
+    .drag-bubble { width: clamp(50px, 14vw, 60px); height: clamp(50px, 14vw, 60px); background: #F59E0B; color: white; border-radius: 16px; display: flex; justify-content: center; align-items: center; font-size: clamp(24px, 6vw, 30px); font-weight: 800; cursor: grab; box-shadow: 0 6px 0 #D97706, 0 10px 15px rgba(245, 158, 11, 0.3); transition: transform 0.1s, opacity 0.3s; user-select: none; z-index: 10; touch-action: none; }
     .drag-bubble.hidden { opacity: 0; pointer-events: none; transform: scale(0); }
-    .drag-bubble.dragging { position: fixed; z-index: 9999; transform: scale(1.2); box-shadow: 0 15px 25px rgba(245, 158, 11, 0.5); pointer-events: none; }
+    .drag-bubble.dragging { position: fixed; z-index: 99999; transform: scale(1.2); box-shadow: 0 15px 25px rgba(245, 158, 11, 0.5); pointer-events: none; margin: 0 !important; }
     
     .round-indicator { position: absolute; top: 15px; left: 15px; background: var(--brand-blue, #1E3A8A); color: white; font-weight: 700; padding: 6px 18px; border-radius: 50px; font-size: 14px; z-index: 50; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
     .danger-zone { animation: flashRed 1s infinite; }
@@ -212,66 +206,85 @@ $reward_stars = $reward_stars ?? ($lesson['reward_stars'] ?? 5);
         initDragAndDrop();
     }
 
+    // FIX: Lógica de Drag & Drop estricta para Touch/Mobile
+    let activeBubble = null;
+    let ghostBubble = null;
+
     function initDragAndDrop() {
         const bubbles = document.querySelectorAll('.drag-bubble');
         bubbles.forEach(bubble => {
-            bubble.addEventListener('pointerdown', handlePointerDown);
+            bubble.addEventListener('touchstart', handleDragStart, {passive: false});
+            bubble.addEventListener('mousedown', handleDragStart);
             bubble.addEventListener('click', () => {
-                if(!bubble.hasAttribute('data-dragged')) {
-                    processMove(bubble);
-                }
+                if(!bubble.hasAttribute('data-dragged')) processMove(bubble);
             });
         });
     }
 
-    function handlePointerDown(e) {
+    function handleDragStart(e) {
         if (!gameActive || e.target.classList.contains('hidden')) return;
-        const bubble = e.target;
-        bubble.removeAttribute('data-dragged');
-        
-        let startX = e.clientX;
-        let startY = e.clientY;
-        let isDragging = false;
-        
-        const ghost = bubble.cloneNode(true);
-        
-        function onPointerMove(ev) {
-            const dx = Math.abs(ev.clientX - startX);
-            const dy = Math.abs(ev.clientY - startY);
-            
-            if (!isDragging && (dx > 5 || dy > 5)) {
-                isDragging = true;
-                bubble.setAttribute('data-dragged', 'true');
-                bubble.style.opacity = '0.3';
-                
-                ghost.classList.add('dragging');
-                document.body.appendChild(ghost);
-            }
-            
-            if (isDragging) {
-                ghost.style.left = (ev.clientX - ghost.offsetWidth / 2) + 'px';
-                ghost.style.top = (ev.clientY - ghost.offsetHeight / 2) + 'px';
-            }
+        if (e.type === 'touchstart') e.preventDefault(); 
+
+        activeBubble = e.target;
+        activeBubble.removeAttribute('data-dragged');
+
+        let clientX = e.type.includes('touch') ? e.touches[0].clientX : e.clientX;
+        let clientY = e.type.includes('touch') ? e.touches[0].clientY : e.clientY;
+
+        ghostBubble = activeBubble.cloneNode(true);
+        ghostBubble.classList.add('dragging');
+        document.body.appendChild(ghostBubble);
+
+        activeBubble.style.opacity = '0.3';
+        activeBubble.setAttribute('data-dragged', 'true');
+
+        moveGhost(clientX, clientY);
+
+        document.addEventListener('touchmove', handleDragMove, {passive: false});
+        document.addEventListener('mousemove', handleDragMove);
+        document.addEventListener('touchend', handleDragEnd);
+        document.addEventListener('mouseup', handleDragEnd);
+    }
+
+    function moveGhost(x, y) {
+        if(ghostBubble) {
+            ghostBubble.style.left = (x - ghostBubble.offsetWidth / 2) + 'px';
+            ghostBubble.style.top = (y - ghostBubble.offsetHeight / 2) + 'px';
         }
-        
-        function onPointerUp(ev) {
-            document.removeEventListener('pointermove', onPointerMove);
-            document.removeEventListener('pointerup', onPointerUp);
-            
-            if (isDragging) {
-                ghost.remove();
-                bubble.style.opacity = '1';
-                
-                const slotsRect = document.getElementById('slots-container').getBoundingClientRect();
-                if (ev.clientX >= slotsRect.left && ev.clientX <= slotsRect.right &&
-                    ev.clientY >= slotsRect.top && ev.clientY <= slotsRect.bottom) {
-                    processMove(bubble);
-                }
-            }
+    }
+
+    function handleDragMove(e) {
+        if(!ghostBubble) return;
+        if (e.type === 'touchmove') e.preventDefault(); 
+
+        let clientX = e.type.includes('touch') ? e.touches[0].clientX : e.clientX;
+        let clientY = e.type.includes('touch') ? e.touches[0].clientY : e.clientY;
+
+        moveGhost(clientX, clientY);
+    }
+
+    function handleDragEnd(e) {
+        document.removeEventListener('touchmove', handleDragMove);
+        document.removeEventListener('mousemove', handleDragMove);
+        document.removeEventListener('touchend', handleDragEnd);
+        document.removeEventListener('mouseup', handleDragEnd);
+
+        if(!ghostBubble || !activeBubble) return;
+
+        let clientX = e.type.includes('touch') ? e.changedTouches[0].clientX : e.clientX;
+        let clientY = e.type.includes('touch') ? e.changedTouches[0].clientY : e.clientY;
+
+        ghostBubble.remove();
+        ghostBubble = null;
+        activeBubble.style.opacity = '1';
+
+        const slotsRect = document.getElementById('slots-container').getBoundingClientRect();
+        if (clientX >= slotsRect.left && clientX <= slotsRect.right &&
+            clientY >= slotsRect.top && clientY <= slotsRect.bottom) {
+            processMove(activeBubble);
         }
-        
-        document.addEventListener('pointermove', onPointerMove);
-        document.addEventListener('pointerup', onPointerUp);
+
+        activeBubble = null;
     }
 
     function startGame() {
