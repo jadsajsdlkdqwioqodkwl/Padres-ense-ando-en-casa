@@ -1,29 +1,91 @@
+// assets/js/engine.js
 // ==========================================
-// SOUNDTRACK & ENGINE (RENOVADO FASE 1)
+// SOUNDTRACK & ENGINE (RENOVADO FASE 2 - AUTO-PLAY & FLOATING BTN)
 // ==========================================
-let isMusicPlaying = false;
-// Crea un elemento de audio en memoria. Solo necesitas colocar un archivo 'soundtrack.mp3' en tu carpeta de assets.
+let isMusicPlaying = localStorage.getItem('mw_music_pref') === 'true';
 const bgMusic = new Audio('assets/soundtrack.mp3'); 
 bgMusic.loop = true;
 bgMusic.volume = 0.15;
 
-function toggleMusic() {
-    const musicBtn = document.getElementById('music-toggle');
-    if (isMusicPlaying) { 
-        bgMusic.pause(); 
-        if(musicBtn) musicBtn.innerText = '🔇'; 
-    } else { 
-        bgMusic.play().catch(e => console.log("Requiere interacción del usuario para reproducir audio.")); 
-        if(musicBtn) musicBtn.innerText = '🎵'; 
+function attemptAutoplay() {
+    if (isMusicPlaying) {
+        bgMusic.play().then(() => {
+            updateFloatingMusicButton(true);
+        }).catch(e => {
+            console.warn("Autoplay bloqueado por el navegador. Esperando interacción del usuario.");
+            isMusicPlaying = false; 
+            updateFloatingMusicButton(false);
+        });
     }
-    isMusicPlaying = !isMusicPlaying;
 }
+
+function toggleMusic() {
+    isMusicPlaying = !isMusicPlaying;
+    localStorage.setItem('mw_music_pref', isMusicPlaying);
+    
+    if (isMusicPlaying) { 
+        bgMusic.play().catch(e => console.log("Requiere interacción.")); 
+        updateFloatingMusicButton(true);
+    } else { 
+        bgMusic.pause(); 
+        updateFloatingMusicButton(false);
+    }
+}
+
+function updateFloatingMusicButton(isPlaying) {
+    let btn = document.getElementById('music-floating-btn');
+    if(btn) {
+        btn.innerHTML = isPlaying ? '🎵' : '🔇';
+        if(!isPlaying) {
+            btn.classList.add('pulse-anim');
+        } else {
+            btn.classList.remove('pulse-anim');
+        }
+    }
+}
+
+// Inyectar el botón flotante en toda la app
+document.addEventListener("DOMContentLoaded", () => {
+    if(!document.getElementById('music-floating-btn')) {
+        const btn = document.createElement('button');
+        btn.id = 'music-floating-btn';
+        btn.title = "Activar/Desactivar Música";
+        btn.innerHTML = isMusicPlaying ? '🎵' : '🔇';
+        
+        // Estilos invasivos pero amigables
+        Object.assign(btn.style, {
+            position: 'fixed', bottom: '20px', left: '20px',
+            width: '60px', height: '60px', borderRadius: '50%',
+            background: '#F29C38', color: 'white', border: '4px solid #FFFFFF',
+            fontSize: '24px', cursor: 'pointer', zIndex: '99999',
+            boxShadow: '0 4px 15px rgba(0,0,0,0.3)', transition: 'transform 0.2s'
+        });
+        
+        btn.onclick = toggleMusic;
+        document.body.appendChild(btn);
+        
+        // Animación CSS dinámica
+        const style = document.createElement('style');
+        style.innerHTML = `
+            @keyframes pulse-music { 0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(242, 156, 56, 0.7); } 70% { transform: scale(1.1); box-shadow: 0 0 0 15px rgba(242, 156, 56, 0); } 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(242, 156, 56, 0); } }
+            .pulse-anim { animation: pulse-music 2s infinite; }
+            #music-floating-btn:active { transform: scale(0.9) !important; }
+        `;
+        document.head.appendChild(style);
+    }
+
+    // Intentar reproducir al primer clic en cualquier parte si estaba activo
+    window.addEventListener('click', function initAudio() {
+        if(localStorage.getItem('mw_music_pref') === 'true' && bgMusic.paused) {
+            attemptAutoplay();
+        }
+        window.removeEventListener('click', initAudio);
+    }, { once: true });
+});
 
 // ==========================================
 // ELIMINACIÓN DE AUDIO (Rastros silenciados)
 // ==========================================
-// Mantenemos las funciones declaradas pero vacías para garantizar CERO BUGS 
-// si alguna plantilla antigua aún intenta llamarlas.
 function playTTS(text, forceSpanish = false) { return; }
 function playSpanglish(introEs, wordEn, transEs) { return; }
 function playIntroAudio() { return; } 

@@ -45,13 +45,13 @@
         img.emoji { height: 1.2em; width: 1.2em; margin: 0 .05em 0 .1em; vertical-align: -0.1em; display: inline-block; pointer-events: none; }
 
         /* Clases Globales Responsivas */
-        .container { max-width: 1200px; margin: 0 auto; padding: 0 5%; width: 100%; }
+        .container { max-width: 1200px; margin: 0 auto; padding: 0 5%; width: 100%; box-sizing: border-box;}
         .grid-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 30px; }
         .flex-container { display: flex; flex-wrap: wrap; gap: 20px; align-items: center; }
         .text-center { text-align: center; }
         
         /* Botón Fluido */
-        .btn { display: inline-block; background: var(--brand-green); color: var(--white); font-weight: 700; padding: clamp(12px, 2vw, 16px) clamp(20px, 4vw, 32px); border-radius: 50px; text-align: center; transition: background 0.3s, transform 0.2s; border: none; cursor: pointer; font-size: clamp(0.95rem, 2vw, 1.1rem); box-shadow: 0 4px 14px rgba(104, 169, 62, 0.3); word-wrap: break-word; max-width: 100%; }
+        .btn { display: inline-block; background: var(--brand-green); color: var(--white); font-weight: 700; padding: clamp(12px, 2vw, 16px) clamp(20px, 4vw, 32px); border-radius: 50px; text-align: center; transition: background 0.3s, transform 0.2s; border: none; cursor: pointer; font-size: clamp(0.95rem, 2vw, 1.1rem); box-shadow: 0 4px 14px rgba(104, 169, 62, 0.3); word-wrap: break-word; max-width: 100%; box-sizing: border-box; }
         .btn:hover { background: #579232; transform: translateY(-2px); box-shadow: 0 6px 20px rgba(104, 169, 62, 0.4); }
         
         .underline { position: relative; white-space: nowrap; z-index: 1; }
@@ -60,7 +60,7 @@
         /* Navbar */
         header { padding: 15px 0; background: var(--white); position: relative; z-index: 10; box-shadow: 0 1px 10px rgba(0,0,0,0.03); }
         .nav-inner { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px; }
-        .logo img { height: clamp(35px, 5vw, 45px); width: auto; }
+        .logo img { height: clamp(35px, 5vw, 45px); width: auto; max-width: 100%; }
         .nav-links { display: flex; align-items: center; gap: clamp(10px, 3vw, 20px); flex-wrap: wrap; justify-content: center; }
         .login-link { color: var(--brand-blue); font-weight: 700; font-size: 0.95rem; }
 
@@ -69,7 +69,7 @@
         .hero-text h1 { font-size: clamp(2rem, 6vw, 3.5rem); font-weight: 800; line-height: 1.1; color: var(--brand-blue); margin-bottom: 20px; letter-spacing: -1px; }
         .hero-text p { font-size: clamp(1rem, 2.5vw, 1.25rem); color: var(--text-muted); margin-bottom: 30px; }
         .hero-price { font-size: clamp(0.9rem, 2vw, 1.1rem); font-weight: 600; color: var(--brand-blue); margin-top: 15px; display: block; }
-        .hero-image-wrapper img { border-radius: 20px; box-shadow: 0 20px 40px rgba(28, 61, 106, 0.1); transform: rotate(2deg); transition: transform 0.5s; width: 100%; }
+        .hero-image-wrapper img { border-radius: 20px; box-shadow: 0 20px 40px rgba(28, 61, 106, 0.1); transform: rotate(2deg); transition: transform 0.5s; width: 100%; max-width: 100%; }
         .hero-image-wrapper img:hover { transform: rotate(0deg); }
 
         /* Agitation & Benefits */
@@ -87,7 +87,7 @@
         .benefit-item p { font-size: clamp(0.9rem, 2vw, 0.95rem); color: rgba(255,255,255,0.9); }
 
         /* Features Zig-Zag */
-        .feature-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: clamp(30px, 5vw, 50px); align-items: center; margin-bottom: clamp(40px, 8vw, 80px); }
+        .feature-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: clamp(30px, 5vw, 50px); align-items: center; margin-bottom: clamp(40px, 8vw, 80px); }
         .feature-row:nth-child(even) .feature-text { order: -1; }
         .feature-text h2 { font-size: clamp(1.6rem, 4vw, 2rem); color: var(--brand-blue); margin-bottom: 20px; }
         .feature-image img { border-radius: 12px; box-shadow: 0 10px 30px rgba(28, 61, 106, 0.08); width: 100%; }
@@ -95,7 +95,7 @@
         /* Checkout */
         .checkout-section { background: var(--bg-light); padding: clamp(50px, 8vw, 80px) 0; text-align: center; }
         .checkout-script-font { font-family: "Georgia", serif; font-style: italic; font-size: clamp(1.8rem, 5vw, 2.5rem); color: var(--brand-blue); margin-bottom: 30px; }
-        .checkout-box { max-width: 500px; margin: 0 auto; background: var(--white); padding: clamp(20px, 5vw, 40px); border-radius: 16px; box-shadow: 0 15px 35px rgba(28, 61, 106, 0.05); text-align: center; border-top: 5px solid var(--brand-green); width: 100%; }
+        .checkout-box { max-width: 500px; margin: 0 auto; background: var(--white); padding: clamp(20px, 5vw, 40px); border-radius: 16px; box-shadow: 0 15px 35px rgba(28, 61, 106, 0.05); text-align: center; border-top: 5px solid var(--brand-green); width: 100%; box-sizing: border-box; }
         .price-tag { text-align: center; font-size: clamp(2rem, 6vw, 2.5rem); font-weight: 800; color: var(--brand-blue); margin-bottom: 25px; }
         .price-tag span { font-size: clamp(0.9rem, 2vw, 1rem); color: var(--text-muted); font-weight: normal; display: block; }
         .btn-pay { width: 100%; font-size: clamp(1rem, 2.5vw, 1.1rem); padding: 16px; margin-top: 10px; }
@@ -103,13 +103,13 @@
         /* Forms */
         .form-group { margin-bottom: 20px; text-align: left; }
         .form-group label { display: block; font-size: 0.9rem; font-weight: 600; margin-bottom: 8px; color: var(--brand-blue); }
-        .form-control { width: 100%; padding: 14px; border: 2px solid #E2E8F0; border-radius: 8px; font-size: 16px; transition: border-color 0.3s; box-sizing: border-box; }
+        .form-control { width: 100%; padding: 14px; border: 2px solid #E2E8F0; border-radius: 8px; font-size: 16px; transition: border-color 0.3s; box-sizing: border-box; max-width: 100%; }
         .form-control:focus { border-color: var(--brand-lblue); outline: none; box-shadow: 0 0 0 3px rgba(92, 178, 228, 0.2); }
         
         /* Modal Fluido */
-        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(28, 61, 106, 0.7); z-index: 1000; justify-content: center; align-items: center; padding: 15px; opacity: 0; transition: opacity 0.3s ease; overflow-y: auto; }
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(28, 61, 106, 0.7); z-index: 1000; justify-content: center; align-items: center; padding: 15px; opacity: 0; transition: opacity 0.3s ease; overflow-y: auto; box-sizing: border-box; }
         .modal-overlay.active { display: flex; opacity: 1; }
-        .modal-content { background: var(--white); width: 100%; max-width: 450px; padding: clamp(20px, 5vw, 40px); border-radius: 16px; position: relative; box-shadow: 0 25px 50px rgba(0,0,0,0.25); border-top: 5px solid var(--brand-green); margin: auto; }
+        .modal-content { background: var(--white); width: 100%; max-width: 450px; padding: clamp(20px, 5vw, 40px); border-radius: 16px; position: relative; box-shadow: 0 25px 50px rgba(0,0,0,0.25); border-top: 5px solid var(--brand-green); margin: auto; box-sizing: border-box; }
         .modal-close { position: absolute; top: 10px; right: 15px; font-size: 2rem; color: var(--text-muted); cursor: pointer; border: none; background: none; }
 
         /* Parches Responsivos Extra para Tostadoras */
@@ -118,9 +118,10 @@
             .hero-image-wrapper img { transform: none; }
         }
         @media (max-width: 480px) {
-            .nav-inner { justify-content: center; }
-            .nav-links { width: 100%; justify-content: space-between; }
+            .nav-inner { flex-direction: column; justify-content: center; text-align: center; }
+            .nav-links { width: 100%; justify-content: center; flex-direction: column; gap: 15px; }
             .btn { width: 100%; }
+            .logo img { max-width: 200px; }
         }
     </style>
 </head>

@@ -31,14 +31,15 @@ $reward_stars = $reward_stars ?? ($lesson['reward_stars'] ?? 5);
     /* OBJETIVO DINÁMICO */
     .twemoji-target { position: absolute; right: 5%; bottom: 10px; font-size: 4.5rem; z-index: 2; filter: drop-shadow(0 10px 10px rgba(0,0,0,0.2)); transition: transform 0.3s; }
     
-    .slot-container { display: flex; justify-content: center; gap: 10px; margin-bottom: 25px; flex-wrap: wrap; padding: 0 10px; }
+    .slot-container { display: flex; justify-content: center; gap: 10px; margin-bottom: 25px; flex-wrap: wrap; padding: 0 10px; z-index: 5; position: relative;}
     .letter-slot { width: clamp(45px, 12vw, 60px); height: clamp(55px, 15vw, 70px); border: 3px dashed #CBD5E1; border-radius: 16px; display: flex; justify-content: center; align-items: center; font-size: clamp(24px, 6vw, 34px); font-weight: 800; background: #ffffff; box-shadow: inset 0 3px 6px rgba(0,0,0,0.05); transition: 0.3s; color: #94A3B8; }
     .letter-slot.filled { border-style: solid; border-color: #4CAF50; background: #F0FDF4; color: #4CAF50; transform: scale(1.05); box-shadow: 0 4px 10px rgba(76, 175, 80, 0.2); }
     
-    .bubbles-container { display: flex; justify-content: center; flex-wrap: wrap; gap: 12px; min-height: 80px; padding: 0 10px; }
-    .drag-bubble { width: clamp(50px, 14vw, 60px); height: clamp(50px, 14vw, 60px); background: #F59E0B; color: white; border-radius: 16px; display: flex; justify-content: center; align-items: center; font-size: clamp(24px, 6vw, 30px); font-weight: 800; cursor: pointer; box-shadow: 0 6px 0 #D97706, 0 10px 15px rgba(245, 158, 11, 0.3); transition: transform 0.1s, opacity 0.3s; user-select: none; touch-action: manipulation; z-index: 10; }
-    .drag-bubble:active { transform: translateY(6px); box-shadow: 0 0px 0 #D97706, 0 2px 5px rgba(245, 158, 11, 0.3); }
+    .bubbles-container { display: flex; justify-content: center; flex-wrap: wrap; gap: 12px; min-height: 80px; padding: 0 10px; position: relative;}
+    .drag-bubble { width: clamp(50px, 14vw, 60px); height: clamp(50px, 14vw, 60px); background: #F59E0B; color: white; border-radius: 16px; display: flex; justify-content: center; align-items: center; font-size: clamp(24px, 6vw, 30px); font-weight: 800; cursor: grab; box-shadow: 0 6px 0 #D97706, 0 10px 15px rgba(245, 158, 11, 0.3); transition: transform 0.1s, opacity 0.3s; user-select: none; touch-action: none; z-index: 10; }
+    .drag-bubble:active { cursor: grabbing; }
     .drag-bubble.hidden { opacity: 0; pointer-events: none; transform: scale(0); }
+    .drag-bubble.dragging { position: fixed; z-index: 9999; transform: scale(1.2); box-shadow: 0 15px 25px rgba(245, 158, 11, 0.5); pointer-events: none; }
     
     .round-indicator { position: absolute; top: 15px; left: 15px; background: var(--brand-blue, #1E3A8A); color: white; font-weight: 700; padding: 6px 18px; border-radius: 50px; font-size: 14px; z-index: 50; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
     .danger-zone { animation: flashRed 1s infinite; }
@@ -70,12 +71,12 @@ $reward_stars = $reward_stars ?? ($lesson['reward_stars'] ?? 5);
                     <h2 class="modal-title">¡Defiende la Base! 👾</h2>
                     <p class="modal-text" id="tut-context">Atrapa las letras correctas de:</p>
                     
-                    <div style="font-size: 3rem; margin: 10px 0;" id="tut-emoji"></div>
+                    <div style="font-size: 3rem; margin: 10px 0;" id="tut-emoji-display"></div>
                     <div style="font-size: 2.5rem; font-weight: 900; color: #38BDF8; letter-spacing: 2px; text-shadow: 0 0 20px rgba(56, 189, 248, 0.3);" id="tut-word">WORD</div>
                     <p style="color: #64748B; font-size: 1.2rem; font-weight: 600; margin-bottom: 15px;" id="tut-trans">(Traducción)</p>
                     
                     <div style="display: flex; justify-content: center; margin-bottom: 25px;">
-                        <button class="btn-audio-huge" onclick="playPronunciation(targetWord)" title="Escuchar pronunciación">🔊</button>
+                        <button class="btn-audio-huge" id="btn-tut-audio" title="Escuchar pronunciación">🔊</button>
                     </div>
 
                     <button id="btn-start" onclick="startGame()" class="btn-play bg-orange-500">▶️ ¡Jugar Ahora!</button>
@@ -117,6 +118,7 @@ $reward_stars = $reward_stars ?? ($lesson['reward_stars'] ?? 5);
     let currentRoundIndex = 0;
     let currentCorrect = 0;
     let wordLength = 0;
+    let currentTargetWord = '';
     
     let gameActive = false;
     let monsterPos = 2; 
@@ -136,11 +138,17 @@ $reward_stars = $reward_stars ?? ($lesson['reward_stars'] ?? 5);
         const round = roundsData[index];
         wordLength = round.word.length;
         currentCorrect = 0;
+        currentTargetWord = round.word; // FIX: Variable global para el audio
         
         document.getElementById('round-indicator').innerText = `Ronda ${index + 1}/${roundsData.length}`;
         document.getElementById('tut-context').innerText = round.context_es;
         document.getElementById('tut-word').innerText = round.word;
         document.getElementById('tut-trans').innerText = `(${round.translation})`;
+        
+        // Asignar evento de audio de forma segura
+        document.getElementById('btn-tut-audio').onclick = function() {
+            if(typeof playPronunciation === 'function') playPronunciation(currentTargetWord);
+        };
         
         document.getElementById('tut-emoji-display').innerText = round.emoji;
         dynamicTarget.innerText = round.emoji;
@@ -164,7 +172,7 @@ $reward_stars = $reward_stars ?? ($lesson['reward_stars'] ?? 5);
         
         let bubblesHTML = '';
         allChars.forEach((char, idx) => {
-            bubblesHTML += `<div class="drag-bubble" id="bubble-${idx}" data-char="${char}" onclick="handleBubbleClick(this)">${char}</div>`;
+            bubblesHTML += `<div class="drag-bubble" id="bubble-${idx}" data-char="${char}">${char}</div>`;
         });
         document.getElementById('bubbles-container').innerHTML = bubblesHTML;
 
@@ -172,11 +180,81 @@ $reward_stars = $reward_stars ?? ($lesson['reward_stars'] ?? 5);
         document.getElementById('tutorial-modal').style.opacity = '1';
         
         applyTwemoji(document.body);
+        initDragAndDrop();
+    }
+
+    function initDragAndDrop() {
+        const bubbles = document.querySelectorAll('.drag-bubble');
+        bubbles.forEach(bubble => {
+            // Soporte híbrido: Click/Tap y Drag
+            bubble.addEventListener('pointerdown', handlePointerDown);
+            bubble.addEventListener('click', () => {
+                if(!bubble.hasAttribute('data-dragged')) {
+                    processMove(bubble);
+                }
+            });
+        });
+    }
+
+    function handlePointerDown(e) {
+        if (!gameActive || e.target.classList.contains('hidden')) return;
+        const bubble = e.target;
+        bubble.removeAttribute('data-dragged');
+        
+        let startX = e.clientX;
+        let startY = e.clientY;
+        let isDragging = false;
+        
+        // Clona la burbuja visualmente para el arrastre
+        const ghost = bubble.cloneNode(true);
+        
+        function onPointerMove(ev) {
+            const dx = Math.abs(ev.clientX - startX);
+            const dy = Math.abs(ev.clientY - startY);
+            
+            if (!isDragging && (dx > 5 || dy > 5)) {
+                isDragging = true;
+                bubble.setAttribute('data-dragged', 'true');
+                bubble.style.opacity = '0.3';
+                
+                ghost.classList.add('dragging');
+                document.body.appendChild(ghost);
+            }
+            
+            if (isDragging) {
+                ghost.style.left = (ev.clientX - ghost.offsetWidth / 2) + 'px';
+                ghost.style.top = (ev.clientY - ghost.offsetHeight / 2) + 'px';
+            }
+        }
+        
+        function onPointerUp(ev) {
+            document.removeEventListener('pointermove', onPointerMove);
+            document.removeEventListener('pointerup', onPointerUp);
+            
+            if (isDragging) {
+                ghost.remove();
+                bubble.style.opacity = '1';
+                
+                // Verificar si se soltó sobre el contenedor de slots
+                const slotsRect = document.getElementById('slots-container').getBoundingClientRect();
+                if (ev.clientX >= slotsRect.left && ev.clientX <= slotsRect.right &&
+                    ev.clientY >= slotsRect.top && ev.clientY <= slotsRect.bottom) {
+                    processMove(bubble);
+                }
+            }
+        }
+        
+        document.addEventListener('pointermove', onPointerMove);
+        document.addEventListener('pointerup', onPointerUp);
     }
 
     function startGame() {
         document.getElementById('tutorial-modal').style.opacity = '0';
         setTimeout(() => { document.getElementById('tutorial-modal').style.display = 'none'; }, 300);
+        
+        // Forzar audio de motor si es necesario al iniciar la partida
+        if(typeof attemptAutoplay === 'function') attemptAutoplay();
+        
         gameActive = true;
         startMonster();
     }
@@ -200,11 +278,6 @@ $reward_stars = $reward_stars ?? ($lesson['reward_stars'] ?? 5);
 
             if (monsterPos >= targetPos) gameOver(false);
         }, 100);
-    }
-
-    function handleBubbleClick(bubbleEl) {
-        if (!gameActive || bubbleEl.classList.contains('hidden')) return;
-        processMove(bubbleEl);
     }
 
     function processMove(bubbleEl) {
