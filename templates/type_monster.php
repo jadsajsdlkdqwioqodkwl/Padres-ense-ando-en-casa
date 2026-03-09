@@ -1,11 +1,13 @@
 <?php
 // templates/type_monster.php
+// Carga dinámica limpia para ser inyectada en lesson.php
 $lesson_id = $lesson_id ?? ($lesson['id'] ?? 0);
 $time_limit = $lesson_data['time_limit'] ?? 20; 
 $reward_stars = $reward_stars ?? ($lesson['reward_stars'] ?? 5);
 ?>
 
 <style>
+    /* Seguro de Pantalla Horizontal */
     #landscape-warning {
         display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
         background: #1E293B; z-index: 100000; color: white; justify-content: center; 
@@ -38,20 +40,22 @@ $reward_stars = $reward_stars ?? ($lesson['reward_stars'] ?? 5);
     /* Layout Maestro: Control estricto de los bordes del tablero de juego */
     .game-board { position: relative; width: 100%; max-width: 800px; min-height: 350px; background: #F8FAFC; border-radius: 24px; overflow: hidden; border: 4px solid var(--brand-blue); margin: 0 auto 25px auto; box-shadow: 0 10px 25px rgba(28, 61, 106, 0.1); box-sizing: border-box; }
     
+    /* MONSTRUO CSS */
     .css-monster { position: absolute; left: 2%; bottom: 20px; width: 80px; height: 80px; background: #EF4444; border: 3px solid var(--brand-blue); border-radius: 40% 60% 70% 30% / 40% 50% 60% 50%; animation: morph 2s linear infinite, wobble 0.5s alternate infinite; transition: left 0.2s linear, transform 0.3s; z-index: 3; box-shadow: inset -5px -5px 0 rgba(0,0,0,0.2); }
     .css-monster::before, .css-monster::after { content: ''; position: absolute; top: 18px; width: 16px; height: 16px; background: white; border-radius: 50%; border: 3px solid var(--brand-blue); }
     .css-monster::before { left: 16px; } .css-monster::after { right: 16px; }
     .css-monster-mouth { position: absolute; bottom: 12px; left: 22px; width: 35px; height: 18px; background: var(--brand-blue); border-radius: 0 0 18px 18px; transition: height 0.3s, border-radius 0.3s; }
     
+    /* OBJETIVO DINÁMICO */
     .twemoji-target { position: absolute; right: 5%; bottom: 10px; font-size: 4.5rem; z-index: 2; filter: drop-shadow(0 10px 10px rgba(0,0,0,0.2)); transition: transform 0.3s; }
     
     .slot-container { display: flex; justify-content: center; gap: 10px; margin-bottom: 25px; flex-wrap: wrap; padding: 0 10px; z-index: 5; position: relative; width: 100%; box-sizing: border-box; }
     .letter-slot { width: clamp(45px, 12vw, 60px); height: clamp(55px, 15vw, 70px); border: 3px dashed #CBD5E1; border-radius: 16px; display: flex; justify-content: center; align-items: center; font-size: clamp(24px, 6vw, 34px); font-weight: 800; background: #ffffff; box-shadow: inset 0 3px 6px rgba(0,0,0,0.05); transition: 0.3s; color: #94A3B8; }
     .letter-slot.filled { border-style: solid; border-color: #4CAF50; background: #F0FDF4; color: #4CAF50; transform: scale(1.05); box-shadow: 0 4px 10px rgba(76, 175, 80, 0.2); }
     
-    /* FIX TOUCH: Reemplazado el cursor:grab por pointer y touch-action optimizado */
     .bubbles-container { display: flex; justify-content: center; flex-wrap: wrap; gap: 12px; min-height: 80px; padding: 0 10px; position: relative; width: 100%; box-sizing: border-box; }
-    .drag-bubble { width: clamp(50px, 14vw, 60px); height: clamp(50px, 14vw, 60px); background: #F59E0B; color: white; border-radius: 16px; display: flex; justify-content: center; align-items: center; font-size: clamp(24px, 6vw, 30px); font-weight: 800; cursor: pointer; box-shadow: 0 6px 0 #D97706, 0 10px 15px rgba(245, 158, 11, 0.3); transition: transform 0.1s, opacity 0.3s; user-select: none; z-index: 10; touch-action: manipulation; }
+    .drag-bubble { width: clamp(50px, 14vw, 60px); height: clamp(50px, 14vw, 60px); background: #F59E0B; color: white; border-radius: 16px; display: flex; justify-content: center; align-items: center; font-size: clamp(24px, 6vw, 30px); font-weight: 800; cursor: pointer; box-shadow: 0 6px 0 #D97706, 0 10px 15px rgba(245, 158, 11, 0.3); transition: transform 0.1s, opacity 0.3s; user-select: none; touch-action: manipulation; z-index: 10; }
+    .drag-bubble:active { transform: translateY(6px); box-shadow: 0 0px 0 #D97706, 0 2px 5px rgba(245, 158, 11, 0.3); }
     .drag-bubble.hidden { opacity: 0; pointer-events: none; transform: scale(0); }
     
     .round-indicator { position: absolute; top: 15px; left: 15px; background: var(--brand-blue, #1E3A8A); color: white; font-weight: 700; padding: 6px 18px; border-radius: 50px; font-size: 14px; z-index: 50; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
@@ -174,6 +178,7 @@ $reward_stars = $reward_stars ?? ($lesson['reward_stars'] ?? 5);
             document.getElementById('tut-mnemonic').style.display = 'none';
         }
 
+        // Recuperamos la funcionalidad de audio que estaba en el modal responsivo
         document.getElementById('btn-tut-audio').onclick = function() {
             if(typeof playPronunciation === 'function') playPronunciation(currentTargetWord);
         };
@@ -200,7 +205,8 @@ $reward_stars = $reward_stars ?? ($lesson['reward_stars'] ?? 5);
         
         let bubblesHTML = '';
         allChars.forEach((char, idx) => {
-            bubblesHTML += `<div class="drag-bubble" id="bubble-${idx}" data-char="${char}">${char}</div>`;
+            // LÓGICA DE EVENTO RESTAURADA DEL CÓDIGO ANTIGUO (FUNCIONA AL TOCAR)
+            bubblesHTML += `<div class="drag-bubble" id="bubble-${idx}" data-char="${char}" onclick="handleBubbleClick(this)">${char}</div>`;
         });
         document.getElementById('bubbles-container').innerHTML = bubblesHTML;
 
@@ -208,65 +214,6 @@ $reward_stars = $reward_stars ?? ($lesson['reward_stars'] ?? 5);
         document.getElementById('tutorial-modal').style.opacity = '1';
         
         applyTwemoji(document.body);
-        initTapLogic(); 
-    }
-
-    // FIX: Sistema de toques instantáneos unificado (Mouse/Touch)
-    function initTapLogic() {
-        const bubbles = document.querySelectorAll('.drag-bubble');
-        bubbles.forEach(bubble => {
-            bubble.addEventListener('pointerdown', function(e) {
-                e.preventDefault(); 
-                if (!gameActive || this.classList.contains('hidden')) return;
-                
-                // Efecto visual de botón presionado
-                this.style.transform = 'scale(0.9)';
-                setTimeout(() => {
-                    if (!this.classList.contains('hidden')) {
-                        this.style.transform = 'scale(1)';
-                    }
-                }, 100);
-
-                processMove(this);
-            });
-        });
-    }
-
-    function processMove(bubbleEl) {
-        if (!bubbleEl || currentCorrect >= wordLength) return;
-
-        const tappedChar = bubbleEl.getAttribute('data-char');
-        const currentSlot = document.getElementById('slot-' + currentCorrect);
-        const expectedChar = currentSlot.getAttribute('data-expected');
-
-        if (tappedChar === expectedChar) {
-            // Respuesta Correcta
-            if(typeof AudioManager !== 'undefined') AudioManager.playSound('pop');
-            currentSlot.innerText = tappedChar;
-            currentSlot.classList.add('filled');
-            bubbleEl.classList.add('hidden'); // Oculta la burbuja seleccionada
-            currentCorrect++;
-            
-            // Recompensa: El monstruo retrocede
-            monsterPos = Math.max(2, monsterPos - 12); 
-            monster.style.left = monsterPos + '%';
-
-            if (currentCorrect === wordLength) checkNextRound();
-        } else {
-            // Respuesta Incorrecta
-            if(typeof AudioManager !== 'undefined') AudioManager.playSound('wrong');
-            gameBoard.classList.add('danger-zone');
-            bubbleEl.style.animation = 'shake 0.3s';
-            setTimeout(() => { 
-                gameBoard.classList.remove('danger-zone'); 
-                bubbleEl.style.animation = 'none'; 
-            }, 300);
-            
-            // Castigo: El monstruo avanza
-            monsterPos += 4; 
-            monster.style.left = monsterPos + '%';
-            if (monsterPos >= targetPos) gameOver(false);
-        }
     }
 
     function startGame() {
@@ -298,6 +245,40 @@ $reward_stars = $reward_stars ?? ($lesson['reward_stars'] ?? 5);
 
             if (monsterPos >= targetPos) gameOver(false);
         }, 100);
+    }
+
+    // FUNCIÓN RESTAURADA DEL CÓDIGO ANTIGUO
+    function handleBubbleClick(bubbleEl) {
+        if (!gameActive || bubbleEl.classList.contains('hidden')) return;
+        processMove(bubbleEl);
+    }
+
+    // FUNCIÓN RESTAURADA DEL CÓDIGO ANTIGUO (con soporte para el audio del sistema)
+    function processMove(bubbleEl) {
+        if (!bubbleEl || currentCorrect >= wordLength) return;
+
+        const draggedChar = bubbleEl.getAttribute('data-char');
+        const currentSlot = document.getElementById('slot-' + currentCorrect);
+        const expectedChar = currentSlot.getAttribute('data-expected');
+
+        if (draggedChar === expectedChar) {
+            if(typeof AudioManager !== 'undefined') AudioManager.playSound('pop');
+            currentSlot.innerText = draggedChar;
+            currentSlot.classList.add('filled');
+            bubbleEl.classList.add('hidden');
+            currentCorrect++;
+            
+            monsterPos = Math.max(2, monsterPos - 12); 
+            monster.style.left = monsterPos + '%';
+
+            if (currentCorrect === wordLength) checkNextRound();
+        } else {
+            if(typeof AudioManager !== 'undefined') AudioManager.playSound('wrong');
+            gameBoard.classList.add('danger-zone');
+            bubbleEl.style.animation = 'shake 0.3s';
+            setTimeout(() => { gameBoard.classList.remove('danger-zone'); bubbleEl.style.animation = 'none'; }, 300);
+            monsterPos += 2; 
+        }
     }
 
     function giveHint() {

@@ -184,7 +184,7 @@ if (isset($_SESSION['user_id'])) {
             
             <form id="checkout-form">
                 <input type="text" id="child_name" class="form-control" placeholder="Nombre de tu hijo/a" required>
-                <input type="tel" id="parent_phone" class="form-control" placeholder="Tu número de WhatsApp (Ej: 999888777)" required>
+                <input type="tel" id="parent_phone" class="form-control" placeholder="Tu número de WhatsApp (Ej: 999888777)" required pattern="^9\d{8}$" minlength="9" maxlength="9" title="Debe empezar con 9 y tener exactamente 9 dígitos">
                 
                 <button type="submit" class="btn-cart" id="btn-comprar">Pagar S/ 39.00 (Simulador)</button>
             </form>
@@ -249,6 +249,13 @@ if (isset($_SESSION['user_id'])) {
             e.preventDefault();
             const childName = document.getElementById('child_name').value.trim();
             const parentPhone = document.getElementById('parent_phone').value.trim();
+
+            // FIX: Verificación JS adicional por seguridad por si el navegador omite el pattern de HTML
+            const phoneRegex = /^9\d{8}$/;
+            if (!phoneRegex.test(parentPhone)) {
+                alert("El número de WhatsApp debe empezar con 9 y tener exactamente 9 dígitos.");
+                return;
+            }
 
             const btn = document.getElementById('btn-comprar');
             btn.innerText = "Procesando pago..."; 
