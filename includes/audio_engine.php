@@ -4,11 +4,10 @@
 ?>
 <script>
     const AudioManager = {
-        // Carga el estado guardado por el usuario (mutado o no)
-        muted: localStorage.getItem('app_muted') === 'true',
+        // Inicializa silenciado por defecto para no romper las reglas del navegador
+        muted: true,
         
         // Instancias de Audio
-        bgm: new Audio('assets/audio/bgm.mp3'),
         sounds: {
             correct: new Audio('assets/audio/correct.mp3'),
             wrong: new Audio('assets/audio/wrong.mp3'),
@@ -17,69 +16,31 @@
         },
 
         init: function() {
-            // Configurar música de fondo (Loop infinito, volumen bajo)
-            this.bgm.loop = true;
-            this.bgm.volume = 0.15; // 15% para que no opaque los efectos
+            // Sincronizar el estado de silencio con la preferencia global de la app al cargar
+            this.muted = localStorage.getItem('mw_music_pref') === 'false';
             
-            // Configurar volumen de efectos (70% para que destaquen)
-            Object.values(this.sounds).forEach(s => s.volume = 0.7);
-
-            this.applyMute();
-
-            // Ciberseguridad/UX: Los navegadores bloquean el audio si no hay interacción previa.
-            // Escuchamos el primer click o tecla para iniciar la música de fondo.
-            const startAudioContext = () => {
-                if (!this.muted) {
-                    this.bgm.play().catch(e => console.warn("Autoplay bloqueado por el navegador", e));
-                }
-                // Una vez iniciado, removemos los listeners para no saturar memoria
-                document.removeEventListener('pointerdown', startAudioContext);
-                document.removeEventListener('keydown', startAudioContext);
-            };
-
-            document.addEventListener('pointerdown', startAudioContext);
-            document.addEventListener('keydown', startAudioContext);
-            
-            // Sincronizar el ícono visual del botón
-            this.updateUI();
+            // Forzar el volumen de efectos al 100% y precargarlos
+            Object.values(this.sounds).forEach(s => {
+                s.volume = 1.0;
+                s.load(); 
+            });
         },
 
         playSound: function(type) {
             if (this.muted || !this.sounds[type]) return;
             
-            // Clonamos el nodo de audio. Esto es VITAL porque si el niño acierta 
-            // 2 veces rápido, el sonido debe superponerse, no reiniciarse bruscamente.
-            let soundClone = this.sounds[type].cloneNode();
-            soundClone.volume = this.sounds[type].volume;
-            soundClone.play().catch(e => console.warn("Error al reproducir efecto", e));
-        },
-
-        toggleMute: function() {
-            this.muted = !this.muted;
-            localStorage.setItem('app_muted', this.muted); // Guardar preferencia en el dispositivo
-            this.applyMute();
-            this.updateUI();
-        },
-
-        applyMute: function() {
-            if (this.muted) {
-                this.bgm.pause();
-            } else {
-                // Solo intentar reproducir si el navegador ya permite audio
-                if (this.bgm.readyState >= 2) {
-                    this.bgm.play().catch(e => console.warn("Esperando interacción", e));
+            try {
+                // FIX: Compatible con móviles y Safari. 
+                // Pausamos y reiniciamos el tiempo en lugar de usar cloneNode()
+                this.sounds[type].pause();
+                this.sounds[type].currentTime = 0;
+                
+                let playPromise = this.sounds[type].play();
+                if (playPromise !== undefined) {
+                    playPromise.catch(e => console.warn("Efecto de audio bloqueado por el navegador:", e));
                 }
-            }
-        },
-
-        updateUI: function() {
-            // Busca el botón que pusimos en lesson.php
-            const btn = document.getElementById('music-toggle');
-            if (btn) {
-                btn.innerText = this.muted ? '🔇' : '🔊';
-                // Añadir un pequeño efecto visual al cambiar
-                btn.style.transform = 'scale(1.2)';
-                setTimeout(() => btn.style.transform = 'scale(1)', 200);
+            } catch (e) {
+                console.warn("Error reproduciendo el efecto:", e);
             }
         }
     };
@@ -88,9 +49,4 @@
     document.addEventListener('DOMContentLoaded', () => {
         AudioManager.init();
     });
-
-    // Función global llamada por el botón "onclick" en HTML
-    function toggleMusic() {
-        AudioManager.toggleMute();
-    }
 </script>

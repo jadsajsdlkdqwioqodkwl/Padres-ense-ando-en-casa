@@ -30,6 +30,11 @@ function toggleMusic() {
     isMusicPlaying = !isMusicPlaying;
     localStorage.setItem('mw_music_pref', isMusicPlaying);
     
+    // FIX MAESTRO: Sincronizamos los efectos especiales (pop, correct, win) con el mismo botón
+    if (typeof AudioManager !== 'undefined') {
+        AudioManager.muted = !isMusicPlaying;
+    }
+    
     if (isMusicPlaying) { 
         bgMusic.play().catch(e => console.log("Requiere interacción.")); 
         updateFloatingMusicButton(true);
@@ -64,6 +69,11 @@ function updateFloatingMusicButton(isPlaying) {
 
 // Inyectar el botón flotante en toda la app
 document.addEventListener("DOMContentLoaded", () => {
+    // Sincronizar el estado del motor de efectos al cargar la página
+    if (typeof AudioManager !== 'undefined') {
+        AudioManager.muted = !isMusicPlaying;
+    }
+
     // Sincronizar el botón interno del juego al cargar
     let gameBtn = document.getElementById('music-toggle');
     if(gameBtn) {
