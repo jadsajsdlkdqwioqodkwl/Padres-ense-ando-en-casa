@@ -71,44 +71,63 @@ if ($step > 0 && $step <= 5) {
     }
     
     $current_word = $saved_words[$step - 1];
-    $distractors = ["BIRD", "FISH", "STAR", "SHOE"]; shuffle($distractors);
+
+    // SISTEMA ESCALABLE: Generación inteligente de distractores usando el Pool Real
+    $distractor_pool = array_filter($pool_palabras, function($p) use ($current_word) {
+        return strtoupper($p['en']) !== strtoupper($current_word['en']);
+    });
+    shuffle($distractor_pool);
+    // Extraemos 4 distractores aleatorios del pool global
+    $d1 = array_values($distractor_pool)[0];
+    $d2 = array_values($distractor_pool)[1];
+    $d3 = array_values($distractor_pool)[2];
+    $d4 = array_values($distractor_pool)[3];
 
     // BUCLE DE 1 SOLA RONDA CON LOS NUEVOS NOMBRES OFICIALES
     for ($i = 0; $i < 1; $i++) {
         if ($step == 1) {
-            $template_file = 'templates/type_frogs.php'; // Juego de Ranas (Jumper) reintegrado
+            $template_file = 'templates/type_frogs.php'; 
             $dynamic_rounds[] = [
                 'target_word' => strtoupper($current_word['en']), 'translation' => $current_word['es'], 'phonetic' => $current_word['phonetic'],
-                'distractors' => [$distractors[0], $distractors[1]], 'context_es' => '¡Cruza el río saltando en la palabra!'
+                'emoji' => $current_word['emoji'], // ¡Ahora la rana envía su emoji!
+                'distractors' => [
+                    ['word' => strtoupper($d1['en']), 'emoji' => $d1['emoji']],
+                    ['word' => strtoupper($d2['en']), 'emoji' => $d2['emoji']]
+                ],
+                'context_es' => '¡Cruza el río saltando en la palabra!'
             ];
         } elseif ($step == 2) {
-            $template_file = 'templates/type_ninja.php'; // Word Ninja
+            $template_file = 'templates/type_ninja.php';
             $dynamic_rounds[] = [
                 'target_word' => strtoupper($current_word['en']), 'translation' => $current_word['es'], 'phonetic' => $current_word['phonetic'],
-                'items' => [['content' => $current_word['emoji'], 'is_correct' => true], ['content' => '⭐', 'is_correct' => false], ['content' => '❓', 'is_correct' => false]]
+                'items' => [
+                    ['content' => $current_word['emoji'], 'is_correct' => true], 
+                    ['content' => $d3['emoji'], 'is_correct' => false], 
+                    ['content' => $d4['emoji'], 'is_correct' => false]
+                ]
             ];
         } elseif ($step == 3) {
-            $template_file = 'templates/type_monster.php'; // Defender
+            $template_file = 'templates/type_monster.php'; 
             $dynamic_rounds[] = [
                 'word' => strtoupper($current_word['en']), 'translation' => $current_word['es'], 'phonetic' => $current_word['phonetic'],
                 'emoji' => $current_word['emoji'],
-                'distractors' => ['X', 'Z', 'M', 'Q']
+                'distractors' => [strtoupper($d1['en'][0]), strtoupper($d2['en'][0]), 'X', 'Z']
             ];
         } elseif ($step == 4) {
-            $template_file = 'templates/type_moles.php'; // Topos
+            $template_file = 'templates/type_moles.php'; 
             $dynamic_rounds[] = [
                 'target_word' => strtoupper($current_word['en']), 'translation' => $current_word['es'], 'phonetic' => $current_word['phonetic'],
                 'emoji' => $current_word['emoji'],
                 'distractors' => [
-                    ['word' => $distractors[0], 'emoji' => '📦'],
-                    ['word' => $distractors[1], 'emoji' => '❓']
+                    ['word' => strtoupper($d1['en']), 'emoji' => $d1['emoji']],
+                    ['word' => strtoupper($d2['en']), 'emoji' => $d2['emoji']]
                 ]
             ];
         } elseif ($step == 5) {
-            $template_file = 'templates/type_rocket.php'; // Cohete Espacial
+            $template_file = 'templates/type_rocket.php'; 
             $dynamic_rounds[] = [
                 'target_word' => strtoupper($current_word['en']), 'translation' => $current_word['es'], 'phonetic' => $current_word['phonetic'],
-                'distractors' => [$distractors[2], $distractors[3]]
+                'distractors' => [strtoupper($d3['en']), strtoupper($d4['en'])]
             ];
         }
     }
@@ -122,6 +141,7 @@ if ($step > 0 && $step <= 5) {
     <style>
         img.emoji { height: 1.2em; width: 1.2em; margin: 0 .05em 0 .1em; vertical-align: -0.1em; display: inline-block; pointer-events: none; }
         
+        /* Modal General de lesson.php */
         .overlay-fullscreen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(28, 61, 106, 0.95); backdrop-filter: blur(5px); z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; color: white; padding: 20px; }
         .modal-box { 
             background: var(--white); color: var(--text-main); border-radius: 24px; padding: 40px; 
@@ -129,6 +149,22 @@ if ($step > 0 && $step <= 5) {
             text-align: center; margin: auto; 
             max-height: 85vh; overflow-y: auto; border-top: 6px solid var(--brand-blue);
         }
+
+        /* --- ESTILOS DE MODAL PREMIUM IMPORTADOS DESDE DASHBOARD --- */
+        /* Proveen una UI consistente y hermosa a los tutoriales de los mini-juegos */
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(8px); display: flex; justify-content: center; align-items: center; opacity: 0; pointer-events: none; transition: opacity 0.3s ease; z-index: 9999; padding: 20px; }
+        .modal-overlay.active { opacity: 1; pointer-events: auto; }
+        .modal-content { background: white; padding: 40px; border-radius: 24px; max-width: 520px; width: 100%; text-align: center; box-shadow: 0 25px 60px rgba(0,0,0,0.4); transform: scale(0.9); transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); border: 4px solid var(--brand-blue, #1E3A8A); }
+        .modal-overlay.active .modal-content { transform: scale(1); }
+        .modal-title { font-size: clamp(1.8rem, 5vw, 2.2rem); color: var(--brand-blue, #1E3A8A); margin-bottom: 20px; font-weight: 900; }
+        .modal-text { color: #475569; font-size: clamp(1rem, 3vw, 1.15rem); line-height: 1.7; margin-bottom: 10px; }
+        
+        .btn-play { margin-top: 30px; padding: 16px 30px; background: var(--brand-orange, #F59E0B); color: white; border-radius: 50px; font-weight: 800; font-size: 1.2rem; border: none; cursor: pointer; transition: 0.3s; width: 100%; box-shadow: 0 10px 20px rgba(245, 158, 11, 0.3); }
+        .btn-play:hover { background: #D97706; transform: translateY(-3px); box-shadow: 0 15px 25px rgba(245, 158, 11, 0.4); }
+        .btn-play.bg-green-500 { background: var(--brand-green, #10B981); box-shadow: 0 10px 20px rgba(16, 185, 129, 0.3); }
+        .btn-play.bg-green-500:hover { background: #059669; }
+        /* ------------------------------------------------------------ */
+
         .word-pool-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 15px; margin: 25px 0; }
         .pool-word { background: var(--bg-light); border: 2px solid #E2E8F0; border-radius: 12px; padding: 15px; cursor: pointer; transition: 0.3s; font-weight: 700; font-size: 18px; color: var(--brand-blue); display: flex; align-items: center; justify-content: center; gap: 8px;}
         .pool-word:hover { border-color: var(--brand-lblue); transform: translateY(-2px); }
@@ -227,7 +263,6 @@ if ($step > 0 && $step <= 5) {
     <?php endif; ?>
 
     <script>
-    // Inicialización de Twemoji a nivel Global para todo el Lesson Selector
     document.addEventListener('DOMContentLoaded', () => {
         twemoji.parse(document.body, { folder: 'svg', ext: '.svg' });
     });
@@ -243,7 +278,6 @@ if ($step > 0 && $step <= 5) {
             
             document.getElementById('end-game-modal').style.display = 'flex';
             
-            // Forzamos el parseo de Twemoji en el modal inyectado
             twemoji.parse(document.getElementById('end-game-modal'), { folder: 'svg', ext: '.svg' });
 
             document.getElementById('btn-next-level').onclick = () => {
@@ -308,7 +342,6 @@ if ($step > 0 && $step <= 5) {
             container.appendChild(card);
         });
         document.getElementById('mnemotecnia-modal').style.display = 'flex';
-        // Parseamos los emojis de las tarjetas inyectadas
         twemoji.parse(container, { folder: 'svg', ext: '.svg' });
     }
 
@@ -346,10 +379,9 @@ if ($step > 0 && $step <= 5) {
         
         const canvas = document.getElementById('diploma-canvas');
         const ctx = canvas.getContext('2d');
-        ctx.fillStyle = "#FFFBEB"; ctx.fillRect(0, 0, canvas.width, canvas.height); // Fondo claro
+        ctx.fillStyle = "#FFFBEB"; ctx.fillRect(0, 0, canvas.width, canvas.height); 
         ctx.strokeStyle = "#FBBF24"; ctx.lineWidth = 15; ctx.strokeRect(15, 15, canvas.width - 30, canvas.height - 30);
         
-        // Estilo de texto de cabecera
         ctx.fillStyle = "#1C3D6A"; ctx.textAlign = "center";
         ctx.font = "bold 36px -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif"; 
         ctx.fillText("🏆 REPORTE DE LOGROS 🏆", canvas.width/2, 80);

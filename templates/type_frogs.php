@@ -7,7 +7,6 @@ $reward_stars = $reward_stars ?? ($lesson['reward_stars'] ?? 5);
 ?>
 
 <style>
-    /* Seguro de Pantalla Horizontal (Landscape Warning) */
     #landscape-warning {
         display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
         background: #1E293B; z-index: 10000; color: white; justify-content: center; 
@@ -19,6 +18,10 @@ $reward_stars = $reward_stars ?? ($lesson['reward_stars'] ?? 5);
     }
 
     .river-board { position: relative; width: 100%; min-height: 550px; max-width: 100%; background: linear-gradient(180deg, #38BDF8 0%, #0284C7 100%); border-radius: 24px; overflow: hidden; border: 4px solid #1E3A8A; margin-bottom: 20px; box-shadow: 0 15px 35px rgba(28, 61, 106, 0.2); touch-action: pan-y; display: flex; flex-direction: column; justify-content: flex-end; }
+    
+    /* AÑADIDO: Orilla Segura al Final del Río */
+    .safe-bank { position: absolute; top: 0; left: 0; width: 100%; height: 80px; background: #68A93E; border-bottom: 8px solid #4D7C2D; z-index: 5; border-radius: 0 0 50% 50%; box-shadow: 0 10px 15px rgba(0,0,0,0.2); }
+
     .water-texture { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-image: radial-gradient(circle at 50px 50px, rgba(255,255,255,0.2) 2px, transparent 3px), radial-gradient(circle at 150px 100px, rgba(255,255,255,0.1) 2px, transparent 3px); background-size: 200px 200px; animation: waterFlow 10s linear infinite; pointer-events: none; }
     .row-container { position: absolute; width: 100%; height: 100px; display: flex; justify-content: space-around; align-items: center; transition: bottom 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); z-index: 10; }
     
@@ -56,6 +59,7 @@ $reward_stars = $reward_stars ?? ($lesson['reward_stars'] ?? 5);
         </div>
 
         <div class="river-board" id="river-board">
+            <div class="safe-bank"></div>
             <div class="water-texture"></div>
             
             <div id="tutorial-modal" class="modal-overlay active">
@@ -64,7 +68,7 @@ $reward_stars = $reward_stars ?? ($lesson['reward_stars'] ?? 5);
                     <p class="modal-text" id="tut-context">Salta solo en las hojas que tengan esta palabra:</p>
                     <div style="font-size: 3rem; font-weight: 900; color: #F59E0B; letter-spacing: 2px; margin: 15px 0;" id="tut-word">WORD</div>
                     <p style="color: #64748B; font-size: 1.2rem; font-weight: 600; margin-bottom: 25px;" id="tut-trans">(Traducción)</p>
-                    <button id="btn-start" onclick="startGame()" class="btn-play w-full bg-green-500">▶️ ¡Jugar Ahora!</button>
+                    <button id="btn-start" onclick="startGame()" class="btn-play bg-green-500">▶️ ¡Jugar Ahora!</button>
                 </div>
             </div>
 
@@ -82,6 +86,7 @@ $reward_stars = $reward_stars ?? ($lesson['reward_stars'] ?? 5);
     let roundData = null;
     let gameActive = false;
     let currentStep = 0;
+    let isMoving = false; // AÑADIDO: Bloqueo Anti-Spam de Clics
     const maxSteps = 3;
     
     const board = document.getElementById('river-board');
@@ -94,7 +99,7 @@ $reward_stars = $reward_stars ?? ($lesson['reward_stars'] ?? 5);
     document.addEventListener('DOMContentLoaded', () => {
         if(roundsData.length === 0) {
             roundsData = [{
-                target_word: 'FROG', translation: 'Rana', distractors: ['CAT', 'DOG', 'BIRD']
+                target_word: 'FROG', translation: 'Rana', emoji: '🐸', distractors: [{word: 'CAT', emoji: '🐱'}, {word: 'DOG', emoji: '🐶'}]
             }];
         }
         loadRound(currentRoundIndex);
@@ -117,9 +122,10 @@ $reward_stars = $reward_stars ?? ($lesson['reward_stars'] ?? 5);
         rowsContainer.innerHTML = '';
         activeRows = [];
         currentStep = 0;
+        isMoving = false;
 
         document.getElementById('tutorial-modal').classList.add('active');
-        twemoji.parse(document.getElementById('tutorial-modal'), { folder: 'svg', ext: '.svg' });
+        if (typeof twemoji !== 'undefined') twemoji.parse(document.getElementById('tutorial-modal'), { folder: 'svg', ext: '.svg' });
     }
 
     function startGame() {
@@ -140,8 +146,10 @@ $reward_stars = $reward_stars ?? ($lesson['reward_stars'] ?? 5);
         let html = '';
         for(let i=0; i<3; i++) {
             let isTarget = (i === isCorrectPos);
-            let wordDisplay = isTarget ? targetWord : (roundData.distractors ? roundData.distractors[Math.floor(Math.random() * roundData.distractors.length)] : 'ERR');
-            let emojiDisplay = isTarget ? '⭐' : '🍂';
+            // EDICIÓN: Ahora extrae de forma robusta los emojis y palabras
+            let distObj = roundData.distractors ? roundData.distractors[Math.floor(Math.random() * roundData.distractors.length)] : {word: 'ERR', emoji: '🍂'};
+            let wordDisplay = isTarget ? targetWord : (distObj.word || distObj);
+            let emojiDisplay = isTarget ? (roundData.emoji || '⭐') : (distObj.emoji || '🍂');
             
             html += `
                 <div class="lily-pad" onpointerdown="jumpTo(this, ${isTarget}, ${i}, ${index})">
@@ -154,12 +162,14 @@ $reward_stars = $reward_stars ?? ($lesson['reward_stars'] ?? 5);
         }
         row.innerHTML = html;
         rowsContainer.appendChild(row);
-        twemoji.parse(row, { folder: 'svg', ext: '.svg' });
+        if (typeof twemoji !== 'undefined') twemoji.parse(row, { folder: 'svg', ext: '.svg' });
         activeRows.push(row);
     }
 
     function jumpTo(element, isCorrect, xPos, rowIndex) {
-        if(!gameActive || rowIndex !== currentStep) return;
+        // AÑADIDO: isMoving detiene clics durante la animación del río
+        if(!gameActive || rowIndex !== currentStep || isMoving) return;
+        isMoving = true; 
         
         const rectBoard = board.getBoundingClientRect();
         const rectPad = element.getBoundingClientRect();
@@ -179,9 +189,9 @@ $reward_stars = $reward_stars ?? ($lesson['reward_stars'] ?? 5);
                 currentStep++;
                 
                 if(currentStep < maxSteps) {
-                    setTimeout(() => scrollRiverDown(), 400);
+                    setTimeout(() => scrollRiverDown(), 200);
                 } else {
-                    setTimeout(executeWin, 500);
+                    setTimeout(executeWin, 400); // 400ms después del último salto, avanza a la isla
                 }
             } else {
                 element.style.opacity = '0';
@@ -197,6 +207,7 @@ $reward_stars = $reward_stars ?? ($lesson['reward_stars'] ?? 5);
                 setTimeout(() => {
                     frog.style.opacity = '1';
                     frog.style.left = 'calc(50% - 30px)'; 
+                    isMoving = false; // Desbloquea
                 }, 800);
             }
         }, 400); 
@@ -209,20 +220,26 @@ $reward_stars = $reward_stars ?? ($lesson['reward_stars'] ?? 5);
         });
         let frogBottom = parseInt(frog.style.bottom);
         frog.style.bottom = (frogBottom - 120) + 'px';
+        
+        // AÑADIDO: Libera el bloqueo una vez que la animación de CSS termina
+        setTimeout(() => { isMoving = false; }, 500);
     }
 
     function executeWin() {
         gameActive = false;
         frog.classList.add('jumping');
-        frog.style.bottom = '120%';
+        // EDICIÓN: En lugar de saltar al agua, ahora salta hacia la Orilla Segura
+        frog.style.bottom = 'calc(100% - 60px)';
+        frog.style.left = 'calc(50% - 30px)';
         
         currentRoundIndex++;
         if (currentRoundIndex < roundsData.length) {
             setTimeout(() => { loadRound(currentRoundIndex); }, 1500);
         } else {
-            // Se invoca la función global de lesson.php
             if(typeof unlockNextButton !== 'undefined') {
-                unlockNextButton(<?php echo $lesson_id; ?>, <?php echo $reward_stars; ?>, <?php echo $lesson['module_id'] ?? 0; ?>);
+                setTimeout(() => {
+                    unlockNextButton(<?php echo $lesson_id; ?>, <?php echo $reward_stars; ?>, <?php echo $lesson['module_id'] ?? 0; ?>);
+                }, 800);
             }
         }
     }

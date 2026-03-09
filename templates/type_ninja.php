@@ -1,25 +1,13 @@
 <?php
 // templates/type_ninja.php
-session_start();
-require_once '../includes/config.php';
-
-// Ciberseguridad
-if (!isset($_SESSION['user_id'])) {
-    header("Location: ../login.php");
-    exit();
-}
-
-require_once '../includes/head.php';
-require_once '../includes/navbar.php';
+// IMPORTANTE: Ya no se llama a session_start() ni headers. Este archivo es inyectado en lesson.php
 
 $lesson_id = $lesson_id ?? ($lesson['id'] ?? 0);
 $reward_stars = $reward_stars ?? ($lesson['reward_stars'] ?? 5);
 ?>
 
-<script src="https://unpkg.com/twemoji@latest/dist/twemoji.min.js" crossorigin="anonymous"></script>
-
 <style>
-    img.emoji { height: 1.2em; width: 1.2em; margin: 0 .05em 0 .1em; vertical-align: -0.1em; display: inline-block; pointer-events: none; }
+    /* El CSS de img.emoji y de modal premium ahora los hereda de lesson.php */
     
     #landscape-warning {
         display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
@@ -68,7 +56,7 @@ $reward_stars = $reward_stars ?? ($lesson['reward_stars'] ?? 5);
                     <div style="font-size: 3rem; margin: 10px 0;" id="tut-emoji"></div>
                     <div style="font-size: 2.5rem; font-weight: 900; color: #38BDF8; letter-spacing: 2px; text-shadow: 0 0 20px rgba(56, 189, 248, 0.3);" id="tut-word">WORD</div>
                     <p style="color: #64748B; font-size: 1.2rem; font-weight: 600; margin-bottom: 25px;" id="tut-trans">(Traducción)</p>
-                    <button id="btn-start" onclick="startGame()" class="btn-play w-full bg-orange-500 hover:bg-orange-600">▶️ ¡Jugar Ahora!</button>
+                    <button id="btn-start" onclick="startGame()" class="btn-play">▶️ ¡Jugar Ahora!</button>
                 </div>
             </div>
 
@@ -97,11 +85,9 @@ $reward_stars = $reward_stars ?? ($lesson['reward_stars'] ?? 5);
     let spawnTimer = 0;
     let targetWord = "";
     let targetEmoji = "";
-    let itemsArray = []; // Array estructurado: [{word, emoji, is_correct}]
+    let itemsArray = []; 
 
     document.addEventListener('DOMContentLoaded', () => {
-        twemoji.parse(document.body, { folder: 'svg', ext: '.svg' });
-        
         if(roundsData.length === 0) {
             roundsData = [{
                 target_word: 'APPLE', translation: 'Manzana', emoji: '🍎',
@@ -134,7 +120,7 @@ $reward_stars = $reward_stars ?? ($lesson['reward_stars'] ?? 5);
         activeItems = [];
 
         document.getElementById('tutorial-modal').classList.add('active');
-        twemoji.parse(document.getElementById('tutorial-modal'), { folder: 'svg', ext: '.svg' });
+        if (typeof twemoji !== 'undefined') twemoji.parse(document.getElementById('tutorial-modal'), { folder: 'svg', ext: '.svg' });
     }
 
     function startGame() {
@@ -176,7 +162,6 @@ $reward_stars = $reward_stars ?? ($lesson['reward_stars'] ?? 5);
         let isCorrect = Math.random() > 0.4;
         let pool = itemsArray.filter(i => i.is_correct === isCorrect);
         
-        // Fallback seguro si la BD no envía ítems destructurados
         if(pool.length === 0) {
             if (isCorrect) pool = [{word: targetWord, content: targetEmoji, is_correct: true}];
             else pool = [{word: 'ERR', content: '❌', is_correct: false}];
@@ -198,7 +183,7 @@ $reward_stars = $reward_stars ?? ($lesson['reward_stars'] ?? 5);
         
         el.style.transform = `translate(${startX}px, ${startY}px)`;
         board.appendChild(el);
-        twemoji.parse(el, { folder: 'svg', ext: '.svg' }); 
+        if (typeof twemoji !== 'undefined') twemoji.parse(el, { folder: 'svg', ext: '.svg' }); 
         
         el.addEventListener('pointerdown', (e) => sliceItem(e, el, isCorrect, itemData.content));
         el.addEventListener('pointerenter', (e) => { if(e.buttons > 0) sliceItem(e, el, isCorrect, itemData.content); });
@@ -227,7 +212,7 @@ $reward_stars = $reward_stars ?? ($lesson['reward_stars'] ?? 5);
             <div class="ninja-emoji sliced-left" style="position:absolute;">${originalContent}</div>
             <div class="ninja-emoji sliced-right" style="position:absolute; clip-path: inset(50% 0 0 0); margin-top:-60px;">${originalContent}</div>
         `;
-        twemoji.parse(el, { folder: 'svg', ext: '.svg' });
+        if (typeof twemoji !== 'undefined') twemoji.parse(el, { folder: 'svg', ext: '.svg' });
 
         if(isCorrect) {
             score++;
@@ -261,13 +246,13 @@ $reward_stars = $reward_stars ?? ($lesson['reward_stars'] ?? 5);
         modal.querySelector('#tut-trans').style.display = 'none';
         modal.querySelector('.btn-play').innerHTML = "Siguiente Misión 🚀";
         modal.classList.add('active');
-        twemoji.parse(modal, { folder: 'svg', ext: '.svg' });
+        if (typeof twemoji !== 'undefined') twemoji.parse(modal, { folder: 'svg', ext: '.svg' });
 
         if(typeof fireConfetti !== 'undefined') fireConfetti();
         
         // GUARDADO DE PROGRESO EN BD
         const payload = { lesson_id: <?php echo $lesson_id; ?>, stars: <?php echo $reward_stars; ?> };
-        fetch('../app/save_progress.php', {
+        fetch('app/save_progress.php', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(payload)
@@ -278,5 +263,3 @@ $reward_stars = $reward_stars ?? ($lesson['reward_stars'] ?? 5);
         }).catch(error => console.error(error));
     }
 </script>
-
-<?php require_once '../includes/footer.php'; ?>

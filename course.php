@@ -37,7 +37,13 @@ $page_title = $module_title;
 <head>
     <?php include 'includes/head.php'; ?>
     <link rel="stylesheet" href="assets/css/main.css">
+    
+    <script src="https://unpkg.com/twemoji@latest/dist/twemoji.min.js" crossorigin="anonymous"></script>
+
     <style>
+        /* AÑADIDO: Regla global para Twemoji */
+        img.emoji { height: 1.2em; width: 1.2em; margin: 0 .05em 0 .1em; vertical-align: -0.1em; display: inline-block; pointer-events: none; }
+
         .level-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 25px; margin-top: 40px; }
         .level-card { 
             background: var(--white); border-radius: 16px; padding: 30px 20px; text-align: center; 
@@ -108,7 +114,7 @@ $page_title = $module_title;
                 $stars_display = $is_completed ? "⭐ " . $lesson['stars_earned'] : "🎁 " . $lesson['reward_stars'] . " Estrellas";
                 
                 $completed_class = $is_completed ? 'completed' : '';
-                $icon = $is_completed ? '✅' : '📅'; // AÑADIDO: Cambio de icono a calendario para representar días
+                $icon = $is_completed ? '✅' : '📅'; 
             ?>
                 <a href="lesson.php?id=<?php echo $lesson['id']; ?>" class="level-card <?php echo $completed_class; ?>">
                     <div class="day-badge">Día <?php echo $lesson['order_num']; ?></div>
@@ -123,5 +129,13 @@ $page_title = $module_title;
     </div>
     
     <?php include 'includes/footer.php'; ?>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            if (typeof twemoji !== 'undefined') {
+                twemoji.parse(document.body, { folder: 'svg', ext: '.svg' });
+            }
+        });
+    </script>
 </body>
 </html>
