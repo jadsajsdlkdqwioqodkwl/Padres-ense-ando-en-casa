@@ -14,10 +14,17 @@ try {
     // Obtener módulos
     $stmtModules = $pdo->query("SELECT * FROM modules ORDER BY order_num ASC");
     $modules = $stmtModules->fetchAll(PDO::FETCH_ASSOC);
+
+    // Obtener el total de estrellas del usuario
+    $stmtStars = $pdo->prepare("SELECT SUM(stars) as total_stars FROM progress WHERE user_id = ? AND is_completed = 1");
+    $stmtStars->execute([$_SESSION['user_id']]);
+    $user_total_stars = (int)$stmtStars->fetchColumn();
+
 } catch (PDOException $e) {
     // Registro interno del error (evita exponer vulnerabilidades al front-end)
     error_log("Error al cargar los módulos en el dashboard: " . $e->getMessage());
     $modules = [];
+    $user_total_stars = 0;
 }
 
 $page_title = "Mis Módulos";
@@ -48,7 +55,7 @@ img.emoji {
     /* Baja el minmax a 240px para soportar pantallas ultradelgadas (ej. iPhone SE) */
     grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
     gap: 30px;
-    margin-top: 40px;
+    margin-top: 30px;
     padding-bottom: 40px;
 }
 
@@ -67,7 +74,7 @@ img.emoji {
     overflow: hidden;
 }
 
-.module-card:hover {
+.module-card:hover:not(.locked-card) {
     transform: translateY(-8px);
     box-shadow: 0 20px 45px rgba(28,61,106,0.12);
     border-color: var(--brand-lblue, #bae6fd);
@@ -80,7 +87,7 @@ img.emoji {
     filter: drop-shadow(0 10px 10px rgba(0,0,0,0.1));
 }
 
-.module-card:hover .module-icon {
+.module-card:hover:not(.locked-card) .module-icon {
     transform: scale(1.15) rotate(5deg);
 }
 
@@ -98,7 +105,7 @@ img.emoji {
     box-shadow: 0 4px 6px rgba(0,0,0,0.05);
 }
 
-.module-card:hover .btn-enter {
+.module-card:hover:not(.locked-card) .btn-enter {
     background: #E2E8F0;
     transform: scale(1.05);
 }
@@ -183,6 +190,20 @@ img.emoji {
     box-shadow: 0 15px 25px rgba(16, 185, 129, 0.4);
 }
 
+/* Indicador de estrellas superior */
+.stars-hud {
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    margin-top: 20px;
+    background: #FFFBEB;
+    padding: 10px 25px;
+    border-radius: 50px;
+    border: 2px solid #FDE68A;
+    box-shadow: 0 4px 15px rgba(245, 158, 11, 0.1);
+}
+
 </style>
 
 </head>
@@ -193,8 +214,14 @@ img.emoji {
 
     <?php include 'includes/navbar.php'; ?>
 
-    <div style="margin-top: 2rem; padding: 0 1rem;">
-        <h1 style="color:var(--brand-blue, #1E3A8A); font-size: clamp(2rem, 6vw, 3rem); font-weight: 900; margin-bottom: 10px; letter-spacing: -1px;">
+    <div style="margin-top: 1rem; padding: 0 1rem;">
+        
+        <div class="stars-hud">
+            <span style="font-size: 24px;">⭐</span>
+            <span style="font-size: 20px; font-weight: 900; color: #D97706;"><?php echo $user_total_stars; ?> Estrellas Totales</span>
+        </div>
+
+        <h1 style="color:var(--brand-blue, #1E3A8A); font-size: clamp(2rem, 6vw, 3rem); font-weight: 900; margin-bottom: 10px; margin-top: 15px; letter-spacing: -1px;">
             Explora tu Mundo 🌍
         </h1>
         <p style="color:#64748B; font-size: clamp(1rem, 3vw, 1.2rem); font-weight: 500;">
@@ -222,25 +249,44 @@ img.emoji {
                 $safe_id = (int)($mod['id'] ?? 0);
                 $safe_title = htmlspecialchars($mod['title'] ?? 'Módulo');
                 $safe_color = htmlspecialchars($mod['color_theme'] ?? '#38BDF8');
+
+                // Lógica Progresiva de Bloqueo
+                $required_stars = ($mod['order_num'] - 1) * 15; // Requiere 15 estrellas de la semana anterior
+                $is_locked = $user_total_stars < $required_stars;
             ?>
 
-            <a href="course.php?module=<?php echo $safe_id; ?>" 
-               class="module-card"
-               style="border-bottom:8px solid <?php echo $safe_color; ?>;">
-
-                <div class="module-icon">
-                    <?php echo $icon; ?>
+            <?php if ($is_locked): ?>
+                <div class="module-card locked-card" style="border-bottom:8px solid #CBD5E1; background: #F8FAFC; cursor: not-allowed; opacity: 0.8;">
+                    <div class="module-icon" style="filter: grayscale(100%);">🔒</div>
+                    <h2 style="color:#94A3B8; margin-bottom:10px; font-weight: 800; font-size: 1.8rem;">
+                        <?php echo $safe_title; ?>
+                    </h2>
+                    <p style="color: #64748B; font-size: 14px; font-weight: bold; margin-bottom: 15px;">
+                        Necesitas <?php echo $required_stars; ?> ⭐ para desbloquear
+                    </p>
+                    <div class="btn-enter" style="background: #E2E8F0; color: #94A3B8; border-color: #CBD5E1;">
+                        Bloqueado
+                    </div>
                 </div>
+            <?php else: ?>
+                <a href="course.php?module=<?php echo $safe_id; ?>" 
+                   class="module-card"
+                   style="border-bottom:8px solid <?php echo $safe_color; ?>;">
 
-                <h2 style="color:<?php echo $safe_color; ?>; margin-bottom:10px; font-weight: 800; font-size: 1.8rem;">
-                    <?php echo $safe_title; ?>
-                </h2>
+                    <div class="module-icon">
+                        <?php echo $icon; ?>
+                    </div>
 
-                <div class="btn-enter">
-                    Entrar a la Semana ➡️
-                </div>
+                    <h2 style="color:<?php echo $safe_color; ?>; margin-bottom:10px; font-weight: 800; font-size: 1.8rem;">
+                        <?php echo $safe_title; ?>
+                    </h2>
 
-            </a>
+                    <div class="btn-enter">
+                        Entrar a la Semana ➡️
+                    </div>
+
+                </a>
+            <?php endif; ?>
 
             <?php endforeach; ?>
         <?php endif; ?>

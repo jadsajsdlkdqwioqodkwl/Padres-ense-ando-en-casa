@@ -4,19 +4,6 @@
 
 $lesson_id = $lesson_id ?? ($lesson['id'] ?? 0);
 $reward_stars = $reward_stars ?? ($lesson['reward_stars'] ?? 5);
-
-// Fallback estructurado para el juego de atrapar la palabra
-$lesson_data = $lesson_data ?? [
-    'target_word' => 'APPLE',
-    'translation' => 'Manzana',
-    'emoji' => '🍎',
-    'distractors' => [
-        ['word' => 'CAR', 'emoji' => '🚗'],
-        ['word' => 'DOG', 'emoji' => '🐶'],
-        ['word' => 'STAR', 'emoji' => '⭐']
-    ],
-    'context_es' => '¡Golpea a la manzana cuando salga de su escondite!'
-];
 ?>
 
 <style>
@@ -71,9 +58,16 @@ $lesson_data = $lesson_data ?? [
     </div>
 
     <div class="moles-game-container">
-        <div class="flex justify-between items-center mb-6 px-4">
-            <h3 class="text-2xl font-black text-white drop-shadow-md">Aciertos: <span id="score">0</span>/5 🎯</h3>
-            <h3 class="text-2xl font-black text-white drop-shadow-md">⏱️ <span id="timeLeft">30</span>s</h3>
+        <div class="flex justify-between items-center mb-6 px-4" style="flex-wrap: wrap; gap: 15px; text-align: center;">
+            <h3 class="text-2xl font-black text-white drop-shadow-md" style="margin: 0; font-size: clamp(16px, 4vw, 24px);">🎯 <span id="score">0</span>/5</h3>
+            
+            <div style="background: rgba(255,255,255,0.9); padding: 5px 15px; border-radius: 50px; font-weight: 900; color: #1E3A8A; display:flex; align-items:center; gap:10px; box-shadow: 0 4px 10px rgba(0,0,0,0.2);">
+                <span id="hud-target-emoji" style="font-size: clamp(20px, 5vw, 26px);"></span>
+                <span id="hud-target-word" style="font-size: clamp(14px, 4vw, 18px);"></span>
+                <button class="btn-audio-huge" style="width: 35px; height: 35px; font-size: 16px; border-width: 2px;" onclick="playMolesAudio()">🔊</button>
+            </div>
+
+            <h3 class="text-2xl font-black text-white drop-shadow-md" style="margin: 0; font-size: clamp(16px, 4vw, 24px);">⏱️ <span id="timeLeft">30</span>s</h3>
         </div>
 
         <div class="moles-grid" id="molesGrid">
@@ -87,7 +81,10 @@ $lesson_data = $lesson_data ?? [
 </main>
 
 <script>
-    const lessonDataMoles = <?php echo json_encode($lesson_data); ?>;
+    // FIX DE LOGICA: Integrar la ronda dinámica en vez de un fallback quemado
+    const roundsDataMoles = window.dynamicRoundsData || [];
+    const lessonDataMoles = roundsDataMoles[0] || { target_word: 'ERROR', translation: 'Error', emoji: '❌', distractors: [] };
+    
     const targetWordMoles = lessonDataMoles.target_word || lessonDataMoles.word;
     const targetEmojiMoles = lessonDataMoles.emoji || '📦';
     const distractorsMoles = lessonDataMoles.distractors || [];
@@ -111,8 +108,19 @@ $lesson_data = $lesson_data ?? [
         document.getElementById('tut-trans').innerText = `(${lessonDataMoles.translation})`;
         if(lessonDataMoles.context_es) document.getElementById('tut-context').innerText = lessonDataMoles.context_es;
         
+        // Asignación de HUD
+        document.getElementById('hud-target-emoji').innerText = targetEmojiMoles;
+        document.getElementById('hud-target-word').innerText = targetWordMoles;
+        
         twemoji.parse(startModalMoles, { folder: 'svg', ext: '.svg' });
+        twemoji.parse(document.querySelector('.moles-game-container'), { folder: 'svg', ext: '.svg' });
     });
+
+    function playMolesAudio() {
+        if(typeof playPronunciation !== 'undefined') {
+            playPronunciation(targetWordMoles);
+        }
+    }
 
     btnStartMoles.addEventListener('click', () => {
         startModalMoles.classList.remove('active');

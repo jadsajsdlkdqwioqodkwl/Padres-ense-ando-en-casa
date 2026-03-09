@@ -122,6 +122,10 @@
             .nav-links { width: 100%; justify-content: center; flex-direction: column; gap: 15px; }
             .btn { width: 100%; }
             .logo img { max-width: 200px; }
+            
+            /* Solución al borde cortado para textos finales */
+            .checkout-script-font { padding: 0 15px; }
+            .guarantee { padding: 0 15px; }
         }
     </style>
 </head>

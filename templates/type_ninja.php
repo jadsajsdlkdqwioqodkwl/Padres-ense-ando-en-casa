@@ -32,6 +32,13 @@ $reward_stars = $reward_stars ?? ($lesson['reward_stars'] ?? 5);
     
     @keyframes sliceLeft { to { transform: translate(-60px, 60px) rotate(-25deg); opacity: 0; } }
     @keyframes sliceRight { to { transform: translate(60px, 60px) rotate(25deg); opacity: 0; } }
+
+    /* Ajuste Extra Móvil para el HUD */
+    @media (max-width: 480px) {
+        .target-hud { padding: 8px 25px; top: 10px; }
+        .target-hud > div:first-child { font-size: 20px !important; }
+        .target-hud > div:last-child { font-size: 18px !important; }
+    }
 </style>
 
 <div id="landscape-warning">
@@ -41,7 +48,7 @@ $reward_stars = $reward_stars ?? ($lesson['reward_stars'] ?? 5);
 </div>
 
 <main class="game-wrapper container mx-auto px-4 py-8" style="min-height: 85vh;">
-    <div class="game-area text-center mx-auto" style="max-width: 900px;">
+    <div class="game-area text-center mx-auto" style="max-width: 900px; padding: 15px;">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
             <h3 class="text-2xl font-black text-gray-800">⚔️ Word Ninja</h3>
             <div id="round-counter" style="background: #1E3A8A; color: white; padding: 5px 15px; border-radius: 20px; font-weight: 700;">1/1</div>
@@ -176,10 +183,12 @@ $reward_stars = $reward_stars ?? ($lesson['reward_stars'] ?? 5);
             <div class="ninja-word">${itemData.word || itemData.content}</div>
         `;
         
-        let startX = Math.random() * (board.offsetWidth - 120) + 60;
+        // Optimización Responsiva X: Restringir márgenes según el ancho del contenedor actual
+        let currentBoardWidth = board.offsetWidth;
+        let startX = Math.random() * (currentBoardWidth - 100) + 50;
         let startY = board.offsetHeight;
         let velocityY = -(Math.random() * 0.4 + 1.1); 
-        let velocityX = (board.offsetWidth / 2 - startX) * 0.0015; 
+        let velocityX = (currentBoardWidth / 2 - startX) * 0.0015; 
         
         el.style.transform = `translate(${startX}px, ${startY}px)`;
         board.appendChild(el);
@@ -238,28 +247,10 @@ $reward_stars = $reward_stars ?? ($lesson['reward_stars'] ?? 5);
     }
 
     function executeWin() {
-        const modal = document.getElementById('tutorial-modal');
-        modal.querySelector('.modal-title').innerHTML = "¡Rango Ninja Obtenido! 🥋";
-        modal.querySelector('.modal-text').innerHTML = "¡Tu agudeza visual es impresionante!";
-        modal.querySelector('#tut-emoji').style.display = 'none';
-        modal.querySelector('#tut-word').style.display = 'none';
-        modal.querySelector('#tut-trans').style.display = 'none';
-        modal.querySelector('.btn-play').innerHTML = "Siguiente Misión 🚀";
-        modal.classList.add('active');
-        if (typeof twemoji !== 'undefined') twemoji.parse(modal, { folder: 'svg', ext: '.svg' });
-
+        // En lugar de inyectar un modal propio, delegamos directamente al global de lesson.php
         if(typeof fireConfetti !== 'undefined') fireConfetti();
-        
-        // GUARDADO DE PROGRESO EN BD
-        const payload = { lesson_id: <?php echo $lesson_id; ?>, stars: <?php echo $reward_stars; ?> };
-        fetch('app/save_progress.php', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(payload)
-        })
-        .then(res => res.json())
-        .then(data => {
-            if(typeof unlockNextButton !== 'undefined') unlockNextButton(payload.lesson_id, payload.stars, <?php echo $lesson['module_id'] ?? 0; ?>);
-        }).catch(error => console.error(error));
+        if(typeof unlockNextButton !== 'undefined') {
+            unlockNextButton(<?php echo $lesson_id; ?>, <?php echo $reward_stars; ?>, <?php echo $lesson['module_id'] ?? 0; ?>);
+        }
     }
 </script>

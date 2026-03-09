@@ -1,9 +1,16 @@
 // assets/js/engine.js
 // ==========================================
-// SOUNDTRACK & ENGINE (RENOVADO FASE 2 - AUTO-PLAY & FLOATING BTN)
+// SOUNDTRACK & ENGINE (MÚSICA DINÁMICA POR NIVEL)
 // ==========================================
 let isMusicPlaying = localStorage.getItem('mw_music_pref') === 'true';
-const bgMusic = new Audio('assets/soundtrack.mp3'); 
+
+// Determinar la pista de audio (específica del nivel o la global)
+const globalMusicSrc = 'assets/soundtrack.mp3';
+const musicSrc = (typeof window.levelMusicUrl !== 'undefined' && window.levelMusicUrl && window.levelMusicUrl.trim() !== '') 
+                    ? window.levelMusicUrl 
+                    : globalMusicSrc;
+
+const bgMusic = new Audio(musicSrc); 
 bgMusic.loop = true;
 bgMusic.volume = 0.15;
 
