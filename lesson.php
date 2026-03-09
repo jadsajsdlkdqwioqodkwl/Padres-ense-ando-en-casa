@@ -3,6 +3,7 @@ require_once 'includes/config.php';
 $lesson_id = isset($_GET['id']) ? (int)$_GET['id'] : 1;
 $step = isset($_GET['step']) ? (int)$_GET['step'] : 0; // 0 = Mnemotecnias, 1-5 = Juegos
 
+// Ciberseguridad: Consulta preparada con validación estricta
 $stmt = $pdo->prepare("SELECT l.*, m.title as module_title FROM lessons l JOIN modules m ON l.module_id = m.id WHERE l.id = ?");
 $stmt->execute([$lesson_id]);
 $lesson = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -91,24 +92,30 @@ if ($step > 0 && $step <= 5) {
                     ['word' => strtoupper($d1['en']), 'emoji' => $d1['emoji']],
                     ['word' => strtoupper($d2['en']), 'emoji' => $d2['emoji']]
                 ],
-                'context_es' => '¡Cruza el río saltando en la palabra!'
+                'context_es' => '¡Cruza el río saltando en la palabra!',
+                'mnemonic' => $current_word['mnemonic']
             ];
         } elseif ($step == 2) {
             $template_file = 'templates/type_ninja.php';
             $dynamic_rounds[] = [
                 'target_word' => strtoupper($current_word['en']), 'translation' => $current_word['es'], 'phonetic' => $current_word['phonetic'],
+                'emoji' => $current_word['emoji'],
                 'items' => [
                     ['content' => $current_word['emoji'], 'is_correct' => true], 
                     ['content' => $d3['emoji'], 'is_correct' => false], 
                     ['content' => $d4['emoji'], 'is_correct' => false]
-                ]
+                ],
+                'context_es' => 'Corta la figura correcta 3 veces:',
+                'mnemonic' => $current_word['mnemonic']
             ];
         } elseif ($step == 3) {
             $template_file = 'templates/type_monster.php'; 
             $dynamic_rounds[] = [
                 'word' => strtoupper($current_word['en']), 'translation' => $current_word['es'], 'phonetic' => $current_word['phonetic'],
                 'emoji' => $current_word['emoji'],
-                'distractors' => [strtoupper($d1['en'][0]), strtoupper($d2['en'][0]), 'X', 'Z']
+                'distractors' => [strtoupper($d1['en'][0]), strtoupper($d2['en'][0]), 'X', 'Z'],
+                'context_es' => 'Atrapa las letras correctas de:',
+                'mnemonic' => $current_word['mnemonic']
             ];
         } elseif ($step == 4) {
             $template_file = 'templates/type_moles.php'; 
@@ -118,16 +125,21 @@ if ($step > 0 && $step <= 5) {
                 'distractors' => [
                     ['word' => strtoupper($d1['en']), 'emoji' => $d1['emoji']],
                     ['word' => strtoupper($d2['en']), 'emoji' => $d2['emoji']]
-                ]
+                ],
+                'context_es' => 'Toca rápidamente los agujeros donde aparezca:',
+                'mnemonic' => $current_word['mnemonic']
             ];
         } elseif ($step == 5) {
             $template_file = 'templates/type_rocket.php'; 
             $dynamic_rounds[] = [
                 'target_word' => strtoupper($current_word['en']), 'translation' => $current_word['es'], 'phonetic' => $current_word['phonetic'],
+                'emoji' => $current_word['emoji'],
                 'distractors' => [
                     ['word' => strtoupper($d3['en']), 'emoji' => $d3['emoji']],
                     ['word' => strtoupper($d4['en']), 'emoji' => $d4['emoji']]
-                ]
+                ],
+                'context_es' => 'Mueve el cohete para atrapar solo:',
+                'mnemonic' => $current_word['mnemonic']
             ];
         }
     }
@@ -141,84 +153,84 @@ if ($step > 0 && $step <= 5) {
     <style>
         img.emoji { height: 1.2em; width: 1.2em; margin: 0 .05em 0 .1em; vertical-align: -0.1em; display: inline-block; pointer-events: none; }
         
-        .overlay-fullscreen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(28, 61, 106, 0.95); backdrop-filter: blur(5px); z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; color: white; padding: 20px; }
+        /* Modales seguros sin desbordamiento derecho */
+        .overlay-fullscreen { 
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+            background: rgba(28, 61, 106, 0.95); backdrop-filter: blur(5px); 
+            z-index: 9999; display: flex; flex-direction: column; align-items: center; 
+            justify-content: center; color: white; padding: 20px; box-sizing: border-box; 
+        }
         .modal-box { 
-            background: var(--white); color: var(--text-main); border-radius: 24px; padding: clamp(20px, 5vw, 40px); 
-            max-width: 800px; width: 100%; box-shadow: 0 25px 50px rgba(0,0,0,0.2); 
-            text-align: center; margin: auto; 
+            background: var(--white); color: var(--text-main); border-radius: 24px; 
+            padding: clamp(20px, 5vw, 40px); width: 100%; max-width: 600px; 
+            box-shadow: 0 25px 50px rgba(0,0,0,0.2); text-align: center; margin: auto; 
             max-height: 85vh; overflow-y: auto; border-top: 6px solid var(--brand-blue);
+            box-sizing: border-box; 
         }
 
-        .modal-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(8px); display: flex; justify-content: center; align-items: center; opacity: 0; pointer-events: none; transition: opacity 0.3s ease; z-index: 9999; padding: 20px; }
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(8px); display: flex; justify-content: center; align-items: center; opacity: 0; pointer-events: none; transition: opacity 0.3s ease; z-index: 9999; padding: 20px; box-sizing: border-box; }
         .modal-overlay.active { opacity: 1; pointer-events: auto; }
-        .modal-content { background: white; padding: clamp(20px, 5vw, 40px); border-radius: 24px; max-width: 520px; width: 100%; text-align: center; box-shadow: 0 25px 60px rgba(0,0,0,0.4); transform: scale(0.9); transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); border: 4px solid var(--brand-blue, #1E3A8A); }
+        .modal-content { background: white; padding: clamp(20px, 5vw, 40px); border-radius: 24px; max-width: 520px; width: 100%; text-align: center; box-shadow: 0 25px 60px rgba(0,0,0,0.4); transform: scale(0.9); transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); border: 4px solid var(--brand-blue, #1E3A8A); box-sizing: border-box; margin: 0 auto; }
         .modal-overlay.active .modal-content { transform: scale(1); }
         .modal-title { font-size: clamp(1.8rem, 5vw, 2.2rem); color: var(--brand-blue, #1E3A8A); margin-bottom: 20px; font-weight: 900; }
         .modal-text { color: #475569; font-size: clamp(1rem, 3vw, 1.15rem); line-height: 1.7; margin-bottom: 10px; }
         
-        .btn-play { margin-top: 30px; padding: 16px 30px; background: var(--brand-orange, #F59E0B); color: white; border-radius: 50px; font-weight: 800; font-size: 1.2rem; border: none; cursor: pointer; transition: 0.3s; width: 100%; box-shadow: 0 10px 20px rgba(245, 158, 11, 0.3); }
+        .btn-play { margin-top: 30px; padding: 16px 30px; background: var(--brand-orange, #F59E0B); color: white; border-radius: 50px; font-weight: 800; font-size: 1.2rem; border: none; cursor: pointer; transition: 0.3s; width: 100%; box-shadow: 0 10px 20px rgba(245, 158, 11, 0.3); box-sizing: border-box; }
         .btn-play:hover { background: #D97706; transform: translateY(-3px); box-shadow: 0 15px 25px rgba(245, 158, 11, 0.4); }
         .btn-play.bg-green-500 { background: var(--brand-green, #10B981); box-shadow: 0 10px 20px rgba(16, 185, 129, 0.3); }
         .btn-play.bg-green-500:hover { background: #059669; }
 
-        /* AÑADIDO: BOTÓN DE AUDIO GIGANTE UX MEJORADO */
+        /* BOTÓN DE AUDIO GIGANTE UX MEJORADO */
         .btn-audio-huge {
-            font-size: clamp(25px, 5vw, 35px);
-            background: #DBEAFE;
-            color: #1E3A8A;
-            border: 4px solid #3B82F6;
-            border-radius: 50%;
-            width: clamp(55px, 10vw, 75px);
-            height: clamp(55px, 10vw, 75px);
-            cursor: pointer;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
+            font-size: clamp(25px, 5vw, 35px); background: #DBEAFE; color: #1E3A8A;
+            border: 4px solid #3B82F6; border-radius: 50%;
+            width: clamp(55px, 10vw, 75px); height: clamp(55px, 10vw, 75px);
+            cursor: pointer; display: inline-flex; align-items: center; justify-content: center;
             transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            box-shadow: 0 8px 25px rgba(59, 130, 246, 0.4);
-            flex-shrink: 0;
-            padding: 0;
+            box-shadow: 0 8px 25px rgba(59, 130, 246, 0.4); flex-shrink: 0; padding: 0;
         }
-        .btn-audio-huge:hover {
-            transform: scale(1.15) rotate(5deg);
-            background: #BFDBFE;
-            box-shadow: 0 12px 30px rgba(59, 130, 246, 0.5);
-        }
-        .btn-audio-huge:active {
-            transform: scale(0.95);
-        }
+        .btn-audio-huge:hover { transform: scale(1.15) rotate(5deg); background: #BFDBFE; box-shadow: 0 12px 30px rgba(59, 130, 246, 0.5); }
+        .btn-audio-huge:active { transform: scale(0.95); }
 
-        /* AÑADIDO: TAMAÑO DEL BOTÓN DE MÚSICA DEL JUEGO */
+        /* TAMAÑO DEL BOTÓN DE MÚSICA DEL JUEGO */
         .btn-music-game {
-            font-size: clamp(24px, 5vw, 32px);
-            background: #F8FAFC;
-            border: 3px solid #E2E8F0;
-            border-radius: 50%;
-            width: clamp(50px, 8vw, 65px);
-            height: clamp(50px, 8vw, 65px);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            padding: 0;
+            font-size: clamp(24px, 5vw, 32px); background: #F8FAFC;
+            border: 3px solid #E2E8F0; border-radius: 50%;
+            width: clamp(50px, 8vw, 65px); height: clamp(50px, 8vw, 65px);
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer; box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); padding: 0;
         }
-        .btn-music-game:hover {
-            transform: scale(1.1) rotate(-10deg);
-            border-color: var(--brand-lblue);
-        }
+        .btn-music-game:hover { transform: scale(1.1) rotate(-10deg); border-color: var(--brand-lblue); }
 
-        .word-pool-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 15px; margin: 25px 0; }
-        .pool-word { background: var(--bg-light); border: 2px solid #E2E8F0; border-radius: 12px; padding: 15px; cursor: pointer; transition: 0.3s; font-weight: 700; font-size: 18px; color: var(--brand-blue); display: flex; align-items: center; justify-content: center; gap: 8px;}
+        /* POOL DE PALABRAS ESTILO BURGER APILADAS */
+        .word-pool-grid { 
+            display: flex; flex-direction: column; gap: 15px; margin: 25px 0; 
+            width: 100%; box-sizing: border-box; 
+        }
+        .pool-word { 
+            background: var(--bg-light); border: 2px solid #E2E8F0; border-radius: 12px; 
+            padding: 15px; cursor: pointer; transition: 0.3s; font-weight: 700; 
+            font-size: 18px; color: var(--brand-blue); display: flex; align-items: center; 
+            justify-content: center; gap: 15px; width: 100%; box-sizing: border-box;
+        }
         .pool-word:hover { border-color: var(--brand-lblue); transform: translateY(-2px); }
-        .pool-word.selected { background: #F0FDF4; border-color: var(--brand-green); color: var(--brand-green); transform: scale(1.05); box-shadow: 0 8px 20px rgba(104, 169, 62, 0.2); }
+        .pool-word.selected { background: #F0FDF4; border-color: var(--brand-green); color: var(--brand-green); transform: scale(1.02); box-shadow: 0 8px 20px rgba(104, 169, 62, 0.2); }
         
-        .btn-large { background: var(--brand-green); color: white; border: none; padding: clamp(12px, 3vw, 16px) clamp(25px, 5vw, 35px); font-size: clamp(16px, 3vw, 18px); border-radius: 50px; cursor: pointer; font-weight: 700; transition: 0.3s; margin-top: 25px; display: inline-block; text-decoration: none; box-shadow: 0 4px 14px rgba(104, 169, 62, 0.3); }
+        .btn-large { background: var(--brand-green); color: white; border: none; padding: clamp(12px, 3vw, 16px) clamp(25px, 5vw, 35px); font-size: clamp(16px, 3vw, 18px); border-radius: 50px; cursor: pointer; font-weight: 700; transition: 0.3s; margin-top: 25px; display: inline-block; text-decoration: none; box-shadow: 0 4px 14px rgba(104, 169, 62, 0.3); width: 100%; box-sizing: border-box; }
         .btn-large:disabled { background: #CBD5E1; box-shadow: none; cursor: not-allowed; transform: none !important; }
         .btn-large:hover:not(:disabled) { background: #579232; transform: translateY(-2px); box-shadow: 0 6px 20px rgba(104, 169, 62, 0.4); }
         
-        .mnemotecnia-card { border: 2px dashed var(--brand-lblue); padding: clamp(15px, 4vw, 25px); border-radius: 16px; margin-bottom: 20px; background: #F0F9FF; text-align: left; }
+        .mnemotecnia-card { border: 2px dashed var(--brand-lblue); padding: clamp(15px, 4vw, 25px); border-radius: 16px; margin-bottom: 20px; background: #F0F9FF; text-align: left; width: 100%; box-sizing: border-box; }
+
+        /* Clases para áreas táctiles más amigables en el examen */
+        .exam-option-label {
+            cursor: pointer; display: block; margin-bottom: 12px; font-size: 16px; 
+            padding: 12px; background: #ffffff; border: 2px solid #E2E8F0; 
+            border-radius: 12px; transition: all 0.2s;
+        }
+        .exam-option-label:hover { background: #F0F9FF; border-color: var(--brand-lblue); }
+        .exam-option-label input[type="radio"] { transform: scale(1.3); margin-right: 10px; }
     </style>
 </head>
 <body>
@@ -237,10 +249,10 @@ if ($step > 0 && $step <= 5) {
         <div id="diploma-modal" class="overlay-fullscreen" style="display: none;">
             <div class="modal-box" style="border-top-color: #FBBF24;">
                 <h2 style="color: var(--brand-blue); font-size: clamp(1.8rem, 5vw, 2.2rem); margin-bottom: 20px;">🎉 ¡Felicidades! 🎉</h2>
-                <canvas id="diploma-canvas" width="600" height="600" style="display: block; width: 100%; border-radius: 16px; border: 4px solid #FBBF24; margin-bottom: 25px; box-shadow: 0 10px 30px rgba(0,0,0,0.1);"></canvas>
-                <div style="display: flex; gap: 15px; justify-content: center; flex-wrap: wrap;">
-                    <a id="btn-download-diploma" class="btn-large" style="background: var(--brand-blue); margin-top: 0; box-shadow: 0 4px 14px rgba(28, 61, 106, 0.3);" href="#" download="Mi_Diploma_Ingles.png">Descargar Foto</a>
-                    <button class="btn-large" style="margin-top: 0;" onclick="cerrarDiplomaYContinuar()">Continuar al Día de Hoy</button>
+                <canvas id="diploma-canvas" width="600" height="600" style="display: block; width: 100%; max-width: 100%; border-radius: 16px; border: 4px solid #FBBF24; margin-bottom: 25px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); box-sizing: border-box; background: #FFFBEB;"></canvas>
+                <div style="display: flex; gap: 15px; justify-content: center; flex-direction: column; width: 100%;">
+                    <button id="btn-download-diploma" class="btn-large" style="background: var(--brand-blue); margin-top: 0; box-shadow: 0 4px 14px rgba(28, 61, 106, 0.3);" onclick="descargarDiploma()">📸 Descargar Foto</button>
+                    <button class="btn-large" style="margin-top: 0;" onclick="cerrarDiplomaYContinuar()">Continuar al Día de Hoy ➡️</button>
                 </div>
             </div>
         </div>
@@ -252,10 +264,10 @@ if ($step > 0 && $step <= 5) {
                 <p style="color: #64748B; font-size: clamp(1rem, 3vw, 1.1rem);">Selecciona <strong>5 palabras</strong> para aprender el día de hoy.</p>
                 <div class="word-pool-grid" id="pool-grid">
                     </div>
-                <div style="display:flex; justify-content:center; gap:10px; margin-top:15px;">
-                    <button onclick="changePoolPage(-1)" id="btn-prev-page" class="btn" style="padding: 8px 15px; margin:0; background: #CBD5E1;">⬅️</button>
-                    <span id="page-indicator" style="align-self:center; font-weight:bold; color: var(--brand-blue);">1 / 5</span>
-                    <button onclick="changePoolPage(1)" id="btn-next-page" class="btn" style="padding: 8px 15px; margin:0; background: var(--brand-lblue);">➡️</button>
+                <div style="display:flex; justify-content:center; align-items:center; gap:15px; margin-top:15px; width: 100%;">
+                    <button onclick="changePoolPage(-1)" id="btn-prev-page" class="btn" style="padding: 10px 20px; margin:0; background: #CBD5E1; flex: 1;">⬅️</button>
+                    <span id="page-indicator" style="font-weight:bold; color: var(--brand-blue); flex: 1;">1 / 5</span>
+                    <button onclick="changePoolPage(1)" id="btn-next-page" class="btn" style="padding: 10px 20px; margin:0; background: var(--brand-lblue); flex: 1;">➡️</button>
                 </div>
                 <div style="font-size: 18px; font-weight: 700; color: var(--brand-blue); margin-top: 15px;">Seleccionadas: <span id="selection-count">0</span>/5</div>
                 <button id="btn-confirm-pool" class="btn-large" disabled onclick="confirmarSeleccion()">Confirmar mis 5 palabras</button>
@@ -266,7 +278,7 @@ if ($step > 0 && $step <= 5) {
             <div class="modal-box" style="border-top-color: var(--brand-green);">
                 <h2 style="color: var(--brand-green); font-size: clamp(1.8rem, 5vw, 2.2rem); margin-bottom: 10px;">🧠 Aprende con Mnemotecnias</h2>
                 <p style="font-size: clamp(14px, 3vw, 16px); color: #64748B; margin-bottom: 30px;">Papá/Mamá, presiona el botón de audio para aprender la pronunciación y enséñale estos trucos antes de jugar.</p>
-                <div id="mnemotecnias-container"></div>
+                <div id="mnemotecnias-container" style="width: 100%; box-sizing: border-box;"></div>
                 <button class="btn-large" onclick="finalizarMnemotecnias()">¡A jugar!</button>
             </div>
         </div>
@@ -279,7 +291,7 @@ if ($step > 0 && $step <= 5) {
             <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 25px; flex-wrap: wrap; gap: 10px; background: #F0F9FF; padding: 15px 20px; border-radius: 12px; border: 1px solid var(--brand-lblue); box-shadow: 0 10px 25px rgba(28, 61, 106, 0.05);">
                 <div style="display: flex; align-items: center; gap: 15px; width: 100%; justify-content: space-between;">
                     <h1 style="margin: 0; font-size: clamp(20px, 5vw, 26px); color: var(--brand-blue); font-weight: 900;">🎮 Juego <?php echo $step; ?> de 5</h1>
-                    <button id="music-toggle" class="btn-music-game" onclick="toggleMusic()" title="Música de fondo">🔇</button>
+                    <button id="music-toggle" class="btn-music-game" onclick="toggleMusic()" title="Música de fondo">🎵</button>
                 </div>
             </div>
             
@@ -321,7 +333,7 @@ if ($step > 0 && $step <= 5) {
         const fallbackTTS = () => {
             let utterance = new SpeechSynthesisUtterance(cleanWord);
             utterance.lang = 'en-US';
-            utterance.rate = 0.85; // Voz pausada para el niño
+            utterance.rate = 0.85; 
             utterance.pitch = 1.1; 
             window.speechSynthesis.speak(utterance);
         };
@@ -358,7 +370,6 @@ if ($step > 0 && $step <= 5) {
             fallbackTTS();
         }
     }
-    // --------------------------------------------------------
 
     document.addEventListener('DOMContentLoaded', () => {
         if (typeof twemoji !== 'undefined') twemoji.parse(document.body, { folder: 'svg', ext: '.svg' });
@@ -376,7 +387,6 @@ if ($step > 0 && $step <= 5) {
             document.getElementById('end-game-modal').style.display = 'flex';
             if (typeof twemoji !== 'undefined') twemoji.parse(document.getElementById('end-game-modal'), { folder: 'svg', ext: '.svg' });
 
-            // Configuramos el botón gigante del final y auto-reproducimos
             document.getElementById('btn-end-audio').onclick = () => playPronunciation(currentPlayingWord.en);
             setTimeout(() => playPronunciation(currentPlayingWord.en), 600);
 
@@ -407,7 +417,7 @@ if ($step > 0 && $step <= 5) {
     const poolPalabras = <?php echo json_encode($pool_palabras); ?>;
     let palabrasSeleccionadas = [];
     let currentPage = 0;
-    const wordsPerPage = 6;
+    const wordsPerPage = 5; 
 
     function renderPool() {
         const grid = document.getElementById('pool-grid');
@@ -419,7 +429,7 @@ if ($step > 0 && $step <= 5) {
         currentWords.forEach(word => {
             const isSelected = palabrasSeleccionadas.some(p => p.en === word.en);
             grid.innerHTML += `<div class="pool-word ${isSelected ? 'selected' : ''}" data-en="${word.en}" data-es="${word.es}" data-phonetic="${word.phonetic}" data-emoji="${word.emoji}" data-mnemonic="${word.mnemonic}" onclick="toggleWordSelection(this)">
-                <span>${word.emoji}</span><span>${word.en}</span>
+                <span style="font-size: 24px;">${word.emoji}</span><span>${word.en} = ${word.es}</span>
             </div>`;
         });
         
@@ -466,16 +476,15 @@ if ($step > 0 && $step <= 5) {
         palabrasSeleccionadas.forEach((palabra) => {
             const card = document.createElement('div');
             card.className = 'mnemotecnia-card';
-            // EDICIÓN: Añadimos el botón gigante al pool de mnemotecnias
             card.innerHTML = `
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap; gap: 15px;">
-                    <div>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap; gap: 15px; width: 100%;">
+                    <div style="flex: 1; min-width: 150px;">
                         <h3 style="margin: 0; font-size: clamp(20px, 5vw, 28px); color: var(--brand-blue);">${palabra.emoji} ${palabra.en} <span style="color: #64748B; font-size: clamp(16px, 4vw, 22px);">= ${palabra.es}</span></h3>
                         <p style="color: var(--brand-orange); font-weight: 800; margin: 8px 0 0 0; font-size: clamp(15px, 3.5vw, 18px);">Se pronuncia: (${palabra.phonetic})</p>
                     </div>
                     <button class="btn-audio-huge" onclick="playPronunciation('${palabra.en}')" title="Escuchar pronunciación">🔊</button>
                 </div>
-                <div style="background: var(--white); padding: 18px; border-radius: 12px; font-style: italic; color: #475569; border: 1px solid #E2E8F0; font-size: clamp(14px, 3.5vw, 17px);">💡 ${palabra.mnemonic}</div>
+                <div style="background: var(--white); padding: 18px; border-radius: 12px; font-style: italic; color: #475569; border: 1px solid #E2E8F0; font-size: clamp(14px, 3.5vw, 17px); width: 100%; box-sizing: border-box;">💡 ${palabra.mnemonic}</div>
             `;
             container.appendChild(card);
         });
@@ -495,15 +504,25 @@ if ($step > 0 && $step <= 5) {
 
     <?php if($lesson['order_num'] > 1): ?>
     const palabrasAyer = <?php echo json_encode($palabras_ayer); ?>;
+    
     document.addEventListener('DOMContentLoaded', () => {
         const examContainer = document.getElementById('exam-questions');
         let html = '';
         if (palabrasAyer && palabrasAyer.length > 0) {
             palabrasAyer.forEach((palabra, i) => {
-                html += `<div style="margin-bottom: 15px; padding: 20px; background: #F8FAFC; border-radius: 12px; border-left: 6px solid var(--brand-blue); border-top: 1px solid #E2E8F0; border-right: 1px solid #E2E8F0; border-bottom: 1px solid #E2E8F0;">
-                    <strong style="font-size: 18px; color: var(--brand-blue); display: block; margin-bottom: 10px;">¿Qué significa '${palabra.emoji} ${palabra.en}'?</strong>
-                    <label style="cursor: pointer; display: block; margin-bottom: 8px; font-size: 16px;"><input type="radio" name="q${i}" value="correct"> ${palabra.es}</label>
-                    <label style="cursor: pointer; display: block; font-size: 16px;"><input type="radio" name="q${i}" value="wrong"> Otra cosa</label>
+                // Generar un distractor aleatorio que no sea la respuesta correcta
+                let distractores = ["Otra cosa", "Algo diferente", "Cualquier cosa"];
+                let distractor = distractores[Math.floor(Math.random() * distractores.length)];
+                
+                // Aleatorizar la posición de la respuesta correcta
+                let esPrimero = Math.random() > 0.5;
+                let opt1 = esPrimero ? `<input type="radio" name="q${i}" value="correct"> ${palabra.es}` : `<input type="radio" name="q${i}" value="wrong"> ${distractor}`;
+                let opt2 = !esPrimero ? `<input type="radio" name="q${i}" value="correct"> ${palabra.es}` : `<input type="radio" name="q${i}" value="wrong"> ${distractor}`;
+
+                html += `<div style="margin-bottom: 15px; padding: 20px; background: #F8FAFC; border-radius: 12px; border-left: 6px solid var(--brand-blue); border: 1px solid #E2E8F0; border-left-width: 6px;">
+                    <strong style="font-size: 18px; color: var(--brand-blue); display: block; margin-bottom: 15px;">¿Qué significa '${palabra.emoji} ${palabra.en}'?</strong>
+                    <label class="exam-option-label">${opt1}</label>
+                    <label class="exam-option-label">${opt2}</label>
                 </div>`;
             });
         }
@@ -511,33 +530,88 @@ if ($step > 0 && $step <= 5) {
         if (typeof twemoji !== 'undefined') twemoji.parse(examContainer, { folder: 'svg', ext: '.svg' });
     });
 
+    // FASE 5: LÓGICA ESTRICTA DE VALIDACIÓN DEL EXAMEN
     function evaluarExamen() {
+        let allCorrect = true;
+        let totalQuestions = palabrasAyer.length;
+        
+        for (let i = 0; i < totalQuestions; i++) {
+            const radios = document.getElementsByName('q' + i);
+            let answered = false;
+            let isCorrect = false;
+            
+            for (let radio of radios) {
+                if (radio.checked) {
+                    answered = true;
+                    if (radio.value === 'correct') {
+                        isCorrect = true;
+                    }
+                }
+            }
+            
+            if (!answered || !isCorrect) {
+                allCorrect = false;
+                break; // Rompemos en el primer error
+            }
+        }
+
+        if (!allCorrect) {
+            alert("¡Oh no! 😟 Algunas respuestas están en blanco o son incorrectas. ¡Revisa con tu hijo e intenten de nuevo!");
+            return; // Bloquea la entrega del diploma
+        }
+
+        // Si pasa la validación, procesa el diploma
         document.getElementById('exam-modal').style.display = 'none';
         document.getElementById('diploma-modal').style.display = 'flex';
         
         const canvas = document.getElementById('diploma-canvas');
         const ctx = canvas.getContext('2d');
+        
+        // Fondo y Borde
         ctx.fillStyle = "#FFFBEB"; ctx.fillRect(0, 0, canvas.width, canvas.height); 
         ctx.strokeStyle = "#FBBF24"; ctx.lineWidth = 15; ctx.strokeRect(15, 15, canvas.width - 30, canvas.height - 30);
         
+        // Título
         ctx.fillStyle = "#1C3D6A"; ctx.textAlign = "center";
         ctx.font = "bold 36px -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif"; 
         ctx.fillText("🏆 REPORTE DE LOGROS 🏆", canvas.width/2, 80);
         
-        let startY = 170;
+        // Lista de palabras
+        let startY = 150;
         ctx.font = "bold 26px -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
         if (palabrasAyer && palabrasAyer.length > 0) {
             palabrasAyer.forEach(p => { 
                 ctx.fillStyle = "#1C3D6A"; 
                 const phonTxt = p.phonetic ? " (" + p.phonetic + ")" : "";
                 ctx.fillText(p.en + phonTxt + " = " + p.es, canvas.width/2, startY); 
-                startY += 48; 
+                startY += 55; 
             });
         }
+        
+        // Pie de página
         ctx.fillStyle = "#F29C38"; 
         ctx.font = "bold 24px -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
         ctx.fillText("¡PREGÚNTAME ESTO EN LA CENA!", canvas.width/2, startY + 60);
-        document.getElementById('btn-download-diploma').href = canvas.toDataURL('image/png');
+    }
+
+    // FASE 5: DESCARGA NATIVA A LA GALERÍA CON JAVASCRIPT
+    function descargarDiploma() {
+        const canvas = document.getElementById('diploma-canvas');
+        const dataURL = canvas.toDataURL('image/png');
+        
+        // Crear un link temporal seguro y forzar click (soporte iOS/Android)
+        const a = document.createElement('a');
+        a.href = dataURL;
+        a.download = 'Mi_Reporte_Ingles.png';
+        document.body.appendChild(a); // Necesario para Firefox y algunos Safari
+        a.click();
+        document.body.removeChild(a);
+        
+        // Feedback visual
+        const btn = document.getElementById('btn-download-diploma');
+        const originalText = btn.innerHTML;
+        btn.innerHTML = "✅ ¡Descargado!";
+        setTimeout(() => { btn.innerHTML = originalText; }, 2000);
     }
 
     function cerrarDiplomaYContinuar() {
@@ -549,7 +623,6 @@ if ($step > 0 && $step <= 5) {
     </script>
     
     <script>
-        // Ciberseguridad: Inicialización de variables globales robustas para el motor
         window.levelMusicUrl = <?php echo json_encode($lesson['level_music'] ?? null); ?>;
     </script>
     <script src="assets/js/engine.js"></script>

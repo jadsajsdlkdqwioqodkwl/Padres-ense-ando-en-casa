@@ -72,14 +72,14 @@
         .hero-image-wrapper img { border-radius: 20px; box-shadow: 0 20px 40px rgba(28, 61, 106, 0.1); transform: rotate(2deg); transition: transform 0.5s; width: 100%; max-width: 100%; }
         .hero-image-wrapper img:hover { transform: rotate(0deg); }
 
-        /* Agitation & Benefits */
-        .agitation, .features { padding: clamp(50px, 8vw, 80px) 0; background: var(--white); }
+        /* Agitation & Benefits - Padding ajustado para asegurar margenes */
+        .agitation, .features { padding: clamp(50px, 8vw, 80px) 5%; background: var(--white); }
         .section-title { font-size: clamp(1.8rem, 4vw, 2.2rem); color: var(--brand-blue); margin-bottom: 40px; font-weight: 800; letter-spacing: -0.5px; }
         .card-simple { padding: clamp(20px, 4vw, 30px); text-align: center; border: 1px solid #E2E8F0; border-radius: 12px; height: 100%; }
         .card-simple h4 { color: #E53E3E; margin-bottom: 15px; font-size: clamp(1.1rem, 2vw, 1.2rem); }
         .card-simple p { font-size: clamp(0.95rem, 2vw, 1rem); }
 
-        .benefits { background: var(--brand-blue); color: var(--white); padding: clamp(50px, 8vw, 80px) 0; }
+        .benefits { background: var(--brand-blue); color: var(--white); padding: clamp(50px, 8vw, 80px) 5%; }
         .benefits .section-title { color: var(--white); }
         .benefit-item { text-align: center; }
         .benefit-icon { width: 64px; height: 64px; margin: 0 auto 20px; background: rgba(255,255,255,0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; }
@@ -93,7 +93,7 @@
         .feature-image img { border-radius: 12px; box-shadow: 0 10px 30px rgba(28, 61, 106, 0.08); width: 100%; }
 
         /* Checkout */
-        .checkout-section { background: var(--bg-light); padding: clamp(50px, 8vw, 80px) 0; text-align: center; }
+        .checkout-section { background: var(--bg-light); padding: clamp(50px, 8vw, 80px) 5%; text-align: center; }
         .checkout-script-font { font-family: "Georgia", serif; font-style: italic; font-size: clamp(1.8rem, 5vw, 2.5rem); color: var(--brand-blue); margin-bottom: 30px; }
         .checkout-box { max-width: 500px; margin: 0 auto; background: var(--white); padding: clamp(20px, 5vw, 40px); border-radius: 16px; box-shadow: 0 15px 35px rgba(28, 61, 106, 0.05); text-align: center; border-top: 5px solid var(--brand-green); width: 100%; box-sizing: border-box; }
         .price-tag { text-align: center; font-size: clamp(2rem, 6vw, 2.5rem); font-weight: 800; color: var(--brand-blue); margin-bottom: 25px; }
@@ -231,11 +231,11 @@
                 <form id="bottom-payment-form">
                     <div class="form-group">
                         <label for="bottom_child_name">Nombre de tu hijo/a</label>
-                        <input type="text" id="bottom_child_name" class="form-control" placeholder="Ej: Mateo">
+                        <input type="text" id="bottom_child_name" class="form-control" placeholder="Ej: Mateo" required>
                     </div>
                     <div class="form-group">
                         <label for="bottom_parent_phone">Tu número de WhatsApp</label>
-                        <input type="tel" id="bottom_parent_phone" class="form-control" placeholder="Ej: 999888777">
+                        <input type="tel" id="bottom_parent_phone" class="form-control" placeholder="Ej: 999888777" pattern="^9\d{8}$" maxlength="9" required title="Debe empezar con 9 y tener 9 dígitos">
                     </div>
                     
                     <button type="submit" id="btn-comprar-bottom" class="btn btn-pay">Comprar Acceso Seguro 🔒</button>
@@ -261,7 +261,7 @@
                 </div>
                 <div class="form-group">
                     <label for="parent_phone">Tu número de WhatsApp</label>
-                    <input type="tel" id="parent_phone" class="form-control" placeholder="Ej: 999888777" required>
+                    <input type="tel" id="parent_phone" class="form-control" placeholder="Ej: 999888777" pattern="^9\d{8}$" maxlength="9" required title="Debe empezar con 9 y tener 9 dígitos">
                 </div>
                 
                 <button type="submit" id="btn-comprar-modal" class="btn btn-pay">Procesar Pago Seguro 🔒</button>
@@ -280,6 +280,12 @@
         });
 
         function procesarPago(childName, parentPhone, btnElement) {
+            // Verificación estricta de seguridad
+            const phoneRegex = /^9\d{8}$/;
+            if (!phoneRegex.test(parentPhone)) {
+                return alert("Por favor, ingresa un número de WhatsApp válido que empiece con 9 y tenga 9 dígitos.");
+            }
+
             const originalText = btnElement.innerText;
             btnElement.innerText = "Procesando...";
             btnElement.disabled = true;
@@ -333,7 +339,6 @@
             e.preventDefault();
             const childName = document.getElementById('child_name').value.trim();
             const parentPhone = document.getElementById('parent_phone').value.trim();
-            if(childName === '' || parentPhone === '') return alert("Por favor, ingresa los datos.");
             procesarPago(childName, parentPhone, document.getElementById('btn-comprar-modal'));
         });
 
@@ -341,11 +346,7 @@
             e.preventDefault();
             const childName = document.getElementById('bottom_child_name').value.trim();
             const parentPhone = document.getElementById('bottom_parent_phone').value.trim();
-            if (childName === '' || parentPhone === '') {
-                modal.classList.add('active');
-            } else {
-                procesarPago(childName, parentPhone, document.getElementById('btn-comprar-bottom'));
-            }
+            procesarPago(childName, parentPhone, document.getElementById('btn-comprar-bottom'));
         });
     </script>
 </body>

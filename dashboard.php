@@ -52,11 +52,11 @@ img.emoji {
 /* Optimización Responsiva Extrema */
 .module-grid {
     display: grid;
-    /* Baja el minmax a 240px para soportar pantallas ultradelgadas (ej. iPhone SE) */
     grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
     gap: 30px;
     margin-top: 30px;
     padding-bottom: 40px;
+    justify-content: center; /* Garantiza que los elementos se centren al hacer zoom out */
 }
 
 .module-card {
@@ -72,6 +72,8 @@ img.emoji {
     display: block;
     position: relative;
     overflow: hidden;
+    width: 100%; /* Asegura consistencia dimensional */
+    box-sizing: border-box;
 }
 
 .module-card:hover:not(.locked-card) {
@@ -115,8 +117,8 @@ img.emoji {
     position: fixed;
     top: 0;
     left: 0;
-    width: 100vw;
-    height: 100vh;
+    width: 100%; /* Corregido de 100vw para evitar scroll horizontal en Windows/Móviles */
+    height: 100%; /* Corregido de 100vh para asegurar cubrimiento total exacto */
     background: rgba(15, 23, 42, 0.85);
     backdrop-filter: blur(8px); /* Efecto vidrio (Glassmorphism) */
     display: flex;
@@ -127,6 +129,7 @@ img.emoji {
     transition: opacity 0.3s ease;
     z-index: 9999; /* Garantiza sobreponerse al Navbar */
     padding: 20px; /* Para que no choque con los bordes en celulares */
+    box-sizing: border-box; /* Fundamental para que el padding no desborde la pantalla */
 }
 
 .modal-overlay.active {
@@ -145,6 +148,8 @@ img.emoji {
     transform: scale(0.9);
     transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     border: 4px solid var(--brand-blue, #1E3A8A);
+    box-sizing: border-box; /* Asegura que el padding no expanda el div hacia la derecha */
+    margin: 0 auto; /* Asegura centrado perfecto dentro del flex container */
 }
 
 .modal-overlay.active .modal-content {
@@ -214,7 +219,7 @@ img.emoji {
 
     <?php include 'includes/navbar.php'; ?>
 
-    <div style="margin-top: 1rem; padding: 0 1rem;">
+    <div style="margin-top: 1rem; padding: 0 1rem; box-sizing: border-box;">
         
         <div class="stars-hud">
             <span style="font-size: 24px;">⭐</span>

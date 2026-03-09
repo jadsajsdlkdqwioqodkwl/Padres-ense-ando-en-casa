@@ -40,6 +40,7 @@ function toggleMusic() {
 }
 
 function updateFloatingMusicButton(isPlaying) {
+    // 1. Actualiza el botón global flotante si existe
     let btn = document.getElementById('music-floating-btn');
     if(btn) {
         btn.innerHTML = isPlaying ? '🎵' : '🔇';
@@ -49,10 +50,26 @@ function updateFloatingMusicButton(isPlaying) {
             btn.classList.remove('pulse-anim');
         }
     }
+    
+    // 2. FIX: Actualiza también el botón nativo del juego en lesson.php
+    let gameBtn = document.getElementById('music-toggle');
+    if(gameBtn) {
+        gameBtn.innerHTML = isPlaying ? '🎵' : '🔇';
+        // Parsear Twemoji en caso de que esté cargado
+        if (typeof twemoji !== 'undefined') {
+            twemoji.parse(gameBtn, { folder: 'svg', ext: '.svg' });
+        }
+    }
 }
 
 // Inyectar el botón flotante en toda la app
 document.addEventListener("DOMContentLoaded", () => {
+    // Sincronizar el botón interno del juego al cargar
+    let gameBtn = document.getElementById('music-toggle');
+    if(gameBtn) {
+        gameBtn.innerHTML = isMusicPlaying ? '🎵' : '🔇';
+    }
+
     if(!document.getElementById('music-floating-btn')) {
         const btn = document.createElement('button');
         btn.id = 'music-floating-btn';

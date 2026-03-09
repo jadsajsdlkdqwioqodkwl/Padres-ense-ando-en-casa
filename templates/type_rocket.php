@@ -8,18 +8,36 @@ $reward_stars = $reward_stars ?? ($lesson['reward_stars'] ?? 5);
 <style>
     /* Seguro de Pantalla Horizontal */
     #landscape-warning {
-        display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-        background: #1E293B; z-index: 10000; color: white; justify-content: center; 
-        align-items: center; flex-direction: column; text-align: center;
+        display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+        background: #1E293B; z-index: 100000; color: white; justify-content: center; 
+        align-items: center; flex-direction: column; text-align: center; box-sizing: border-box; padding: 20px;
     }
     @media screen and (max-height: 450px) and (orientation: landscape) {
         #landscape-warning { display: flex !important; }
         .game-wrapper { display: none !important; }
     }
 
+    /* FIX: Modal Seguro Absoluto para que esté estandarizado */
+    #tutorial-modal.modal-overlay {
+        position: fixed !important; top: 0 !important; left: 0 !important;
+        width: 100% !important; height: 100% !important;
+        box-sizing: border-box !important; padding: 20px !important;
+        display: none; justify-content: center; align-items: center;
+        background: rgba(15, 23, 42, 0.85); z-index: 999999 !important;
+    }
+    #tutorial-modal.modal-overlay.active { display: flex !important; }
+    
+    #tutorial-modal .modal-content {
+        width: 100% !important; max-width: 480px !important;
+        box-sizing: border-box !important; margin: 0 auto !important;
+        background: white; padding: clamp(20px, 5vw, 40px); border-radius: 24px;
+        text-align: center; box-shadow: 0 25px 60px rgba(0,0,0,0.4);
+        border: 4px solid var(--brand-blue, #1E3A8A);
+    }
+
     img.emoji { height: 1.2em; width: 1.2em; margin: 0 .05em 0 .1em; vertical-align: -0.1em; display: inline-block; pointer-events: none; }
 
-    .space-board { position: relative; width: 100%; height: 60vh; min-height: 480px; max-height: 750px; background: linear-gradient(180deg, #0F172A 0%, #1E293B 60%, var(--brand-blue) 100%); border-radius: 24px; overflow: hidden; border: 4px solid var(--brand-lblue); margin-bottom: 20px; box-shadow: 0 15px 35px rgba(28, 61, 106, 0.2); touch-action: pan-y; display: flex; }
+    .space-board { position: relative; width: 100%; max-width: 100%; height: 60vh; min-height: 480px; max-height: 750px; background: linear-gradient(180deg, #0F172A 0%, #1E293B 60%, var(--brand-blue) 100%); border-radius: 24px; overflow: hidden; border: 4px solid var(--brand-lblue); margin: 0 auto 20px auto; box-shadow: 0 15px 35px rgba(28, 61, 106, 0.2); touch-action: pan-y; display: flex; box-sizing: border-box; }
     
     .starfield { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-image: radial-gradient(2px 2px at 20px 30px, #ffffff, rgba(0,0,0,0)), radial-gradient(2px 2px at 40px 70px, #ffffff, rgba(0,0,0,0)), radial-gradient(2px 2px at 50px 160px, #ffffff, rgba(0,0,0,0)), radial-gradient(2px 2px at 90px 40px, #ffffff, rgba(0,0,0,0)); background-repeat: repeat; animation: spaceScroll 20s linear infinite; opacity: 0.5; pointer-events: none; }
     
@@ -36,7 +54,7 @@ $reward_stars = $reward_stars ?? ($lesson['reward_stars'] ?? 5);
     .item-emoji { font-size: clamp(30px, 8vw, 40px); margin-bottom: 5px; }
     .item-word { font-weight: 800; color: var(--brand-blue); font-size: clamp(12px, 3vw, 16px); text-transform: uppercase; }
     
-    .hud-top { position: absolute; top: 15px; left: 0; width: 100%; display: flex; justify-content: space-between; padding: 0 20px; z-index: 30; pointer-events: none; }
+    .hud-top { position: absolute; top: 15px; left: 0; width: 100%; display: flex; justify-content: space-between; padding: 0 20px; z-index: 30; pointer-events: none; box-sizing: border-box; }
     .target-display { background: rgba(255,255,255,0.1); backdrop-filter: blur(5px); border: 2px solid rgba(255,255,255,0.2); color: white; padding: 8px 25px; border-radius: 50px; font-weight: 800; font-size: clamp(16px, 4vw, 20px); letter-spacing: 2px; }
     .fuel-bar-container { width: clamp(80px, 25vw, 120px); height: 25px; background: rgba(0,0,0,0.5); border-radius: 50px; border: 2px solid rgba(255,255,255,0.2); overflow: hidden; position: relative; }
     .fuel-bar-fill { height: 100%; width: 0%; background: linear-gradient(90deg, #F29C38, #68A93E); transition: width 0.3s ease-out; }
@@ -57,41 +75,53 @@ $reward_stars = $reward_stars ?? ($lesson['reward_stars'] ?? 5);
     <p style="font-size: 1.2rem; color: #94A3B8;">Este juego espacial necesita jugarse en formato vertical para una mejor experiencia.</p>
 </div>
 
-<div class="game-area text-center" style="border: none; background: transparent; padding-top: 5px; box-shadow: none;">
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-        <h3 style="margin: 0; color: var(--brand-blue); font-size: 1.8rem;">🚀 Misión Espacial</h3>
-        <div id="round-counter" style="background: var(--brand-blue); color: white; padding: 5px 15px; border-radius: 20px; font-weight: 700;">1/1</div>
-    </div>
+<main class="game-wrapper container mx-auto px-4 py-8" style="min-height: 85vh; padding: 10px; box-sizing: border-box; width: 100%;">
+    <div class="game-area text-center mx-auto" style="max-width: 800px; border: none; background: transparent; padding-top: 5px; box-shadow: none; width: 100%; box-sizing: border-box;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <h3 style="margin: 0; color: var(--brand-blue); font-size: clamp(20px, 5vw, 26px); font-weight: 900;">🚀 Misión Espacial</h3>
+            <div id="round-counter" style="background: var(--brand-blue); color: white; padding: 5px 15px; border-radius: 20px; font-weight: 700;">1/1</div>
+        </div>
 
-    <div class="space-board" id="space-board">
-        <div class="starfield"></div>
-        
-        <div id="tutorial-modal" style="position: absolute; top:0; left:0; width:100%; height:100%; background:rgba(15, 23, 42, 0.95); z-index:100; display:flex; flex-direction:column; justify-content:center; align-items:center;">
-            <h2 style="color: var(--white); margin-top: 0; font-size: 2.2rem;">¡Llena el Tanque!</h2>
-            <p style="color: #94A3B8; font-size: 18px; margin-bottom: 15px;" id="tut-context">Atrapa el combustible correcto:</p>
-            <div style="font-size: 45px; font-weight: 800; color: #38BDF8; letter-spacing: 2px; text-shadow: 0 0 20px rgba(56, 189, 248, 0.5);" id="tut-word">WORD</div>
-            <p style="color: #64748B; font-size: 20px; font-weight: 600; margin-bottom: 10px;" id="tut-trans">(Traducción)</p>
+        <div id="tutorial-modal" class="modal-overlay active">
+            <div class="modal-content">
+                <h2 class="modal-title" style="margin-bottom: 10px;">¡Llena el Tanque! 🚀</h2>
+                <p class="modal-text" id="tut-context" style="margin-bottom: 10px;">Mueve el cohete para atrapar solo:</p>
+                
+                <div style="font-size: 3rem; margin: 10px 0;" id="tut-emoji-display"></div>
+                
+                <div style="display: flex; justify-content: center; align-items: center; gap: 15px; margin: 15px 0; flex-wrap: wrap;">
+                    <div style="font-size: clamp(2.5rem, 8vw, 3.5rem); font-weight: 900; color: #38BDF8; letter-spacing: 2px; text-shadow: 0 0 20px rgba(56, 189, 248, 0.3);" id="tut-word">WORD</div>
+                    <button class="btn-audio-huge" id="btn-tut-audio" title="Escuchar pronunciación" style="width: clamp(50px, 10vw, 65px); height: clamp(50px, 10vw, 65px); font-size: clamp(20px, 5vw, 26px); margin: 0;">🔊</button>
+                </div>
+
+                <p style="color: #64748B; font-size: 1.2rem; font-weight: 600; margin-bottom: 15px;" id="tut-trans">(Traducción)</p>
+                <p style="font-size: 14px; color: #475569; background: #F8FAFC; padding: 15px; border-radius: 12px; font-style: italic; margin-bottom: 25px; border: 1px solid #E2E8F0; width: 100%; box-sizing: border-box;" id="tut-mnemonic">💡 Cargando consejo...</p>
+
+                <button id="btn-start" onclick="startGame()" class="btn-play bg-orange-500" style="margin-top: 0;">▶️ ¡Despegar!</button>
+            </div>
+        </div>
+
+        <div class="space-board" id="space-board">
+            <div class="starfield"></div>
             
-            <button class="btn-large" id="btn-start" onclick="startGame()" style="background: var(--brand-orange); color: white; margin-top: 0;">▶️ ¡Despegar!</button>
-        </div>
+            <div class="hud-top">
+                <div class="target-display" id="hud-word">WORD</div>
+                <div class="fuel-bar-container"><div class="fuel-bar-fill" id="fuel-bar"></div></div>
+            </div>
 
-        <div class="hud-top">
-            <div class="target-display" id="hud-word">WORD</div>
-            <div class="fuel-bar-container"><div class="fuel-bar-fill" id="fuel-bar"></div></div>
-        </div>
+            <div class="lane" onpointerdown="moveRocket(0)"></div>
+            <div class="lane" onpointerdown="moveRocket(1)"></div>
+            <div class="lane" onpointerdown="moveRocket(2)"></div>
 
-        <div class="lane" onpointerdown="moveRocket(0)"></div>
-        <div class="lane" onpointerdown="moveRocket(1)"></div>
-        <div class="lane" onpointerdown="moveRocket(2)"></div>
-
-        <div class="rocket-player" id="rocket">
-            <div class="rocket-body">🚀</div>
-            <div class="rocket-flame" id="flame"></div>
+            <div class="rocket-player" id="rocket">
+                <div class="rocket-body">🚀</div>
+                <div class="rocket-flame" id="flame"></div>
+            </div>
+            
+            <div id="items-container"></div>
         </div>
-        
-        <div id="items-container"></div>
     </div>
-</div>
+</main>
 
 <script>
     function applyTwemoji(node) {
@@ -118,12 +148,9 @@ $reward_stars = $reward_stars ?? ($lesson['reward_stars'] ?? 5);
     let spawnTimer = 0;
     
     // FIX DE ESCALADO EXTREMO (IPAD PRO BLINDSPOT)
-    // Queremos que cualquier objeto tarde exactamente 2800ms en cruzar la pantalla completa, 
-    // sin importar si la pantalla mide 400px de alto o 1000px de alto.
     const timeToCrossScreenMs = 2800; 
     let dynamicFallSpeed = 0; 
 
-    // Al recargar o cambiar de tamaño, actualizamos la velocidad
     window.addEventListener('resize', () => { 
         dynamicFallSpeed = board.offsetHeight / timeToCrossScreenMs;
         if(gameActive) updateRocketPosition(); 
@@ -138,14 +165,27 @@ $reward_stars = $reward_stars ?? ($lesson['reward_stars'] ?? 5);
         document.getElementById('tut-word').innerText = targetWord;
         document.getElementById('tut-trans').innerText = `(${roundData.translation})`;
         document.getElementById('hud-word').innerText = targetWord;
+        document.getElementById('tut-emoji-display').innerText = roundData.emoji || '📦';
+
         if(roundData.context_es) document.getElementById('tut-context').innerText = roundData.context_es;
+        if(roundData.mnemonic) {
+            document.getElementById('tut-mnemonic').innerText = "💡 " + roundData.mnemonic;
+            document.getElementById('tut-mnemonic').style.display = 'block';
+        } else {
+            document.getElementById('tut-mnemonic').style.display = 'none';
+        }
+
+        document.getElementById('btn-tut-audio').onclick = () => {
+            if(typeof playPronunciation === 'function') playPronunciation(targetWord);
+        };
+
         document.getElementById('round-counter').innerText = `${index + 1}/${roundsData.length}`;
 
         score = 0;
         fuelBar.style.width = '0%';
         itemsContainer.innerHTML = '';
         fallingItems = [];
-        dynamicFallSpeed = board.offsetHeight / timeToCrossScreenMs; // Calculamos por primera vez
+        dynamicFallSpeed = board.offsetHeight / timeToCrossScreenMs; 
         
         rocket.classList.remove('blast-off');
         document.getElementById('flame').style.transform = 'scaleY(1)';
@@ -159,10 +199,12 @@ $reward_stars = $reward_stars ?? ($lesson['reward_stars'] ?? 5);
     }
 
     function startGame() {
-        if(typeof AudioManager !== 'undefined') AudioManager.playSound('pop'); // Sonido UI
+        if(typeof AudioManager !== 'undefined') AudioManager.playSound('pop'); 
         document.getElementById('tutorial-modal').style.opacity = '0';
         setTimeout(() => { document.getElementById('tutorial-modal').style.display = 'none'; }, 300);
         
+        if(typeof attemptAutoplay === 'function') attemptAutoplay();
+
         gameActive = true;
         lastTime = performance.now();
         requestAnimationFrame(gameLoop);
@@ -199,8 +241,21 @@ $reward_stars = $reward_stars ?? ($lesson['reward_stars'] ?? 5);
         const laneIndex = Math.floor(Math.random() * 3);
         const isCorrect = Math.random() > 0.4;
         
-        let wordDisplay = isCorrect ? targetWord : (roundData.distractors ? roundData.distractors[Math.floor(Math.random() * roundData.distractors.length)] : 'ERR');
-        let emojiDisplay = isCorrect ? '⭐' : '☄️';
+        // FIX: Pool Inteligente implementada
+        let wordDisplay = targetWord;
+        let emojiDisplay = roundData.emoji || '📦';
+
+        if (!isCorrect) {
+            let dists = roundData.distractors || [];
+            if (dists.length > 0) {
+                let d = dists[Math.floor(Math.random() * dists.length)];
+                wordDisplay = d.word || 'ERR';
+                emojiDisplay = d.emoji || '❓';
+            } else {
+                wordDisplay = 'ERR';
+                emojiDisplay = '☄️';
+            }
+        }
 
         const el = document.createElement('div');
         el.className = 'falling-item';
@@ -235,7 +290,6 @@ $reward_stars = $reward_stars ?? ($lesson['reward_stars'] ?? 5);
             let item = fallingItems[i];
             if(!item.active) continue;
 
-            // FÍSICA PROPORCIONAL: Usa la velocidad dinámica en lugar de una constante
             item.y += dynamicFallSpeed * dt;
             item.el.style.top = item.y + 'px';
             
@@ -256,7 +310,6 @@ $reward_stars = $reward_stars ?? ($lesson['reward_stars'] ?? 5);
         item.el.remove();
         
         if(item.isCorrect) {
-            // INTEGRACIÓN DE AUDIO EXITOSA
             if(typeof AudioManager !== 'undefined') AudioManager.playSound('correct');
 
             score++;
@@ -268,7 +321,6 @@ $reward_stars = $reward_stars ?? ($lesson['reward_stars'] ?? 5);
                 setTimeout(checkNextRound, 500);
             }
         } else {
-            // INTEGRACIÓN DE AUDIO FALLIDA
             if(typeof AudioManager !== 'undefined') AudioManager.playSound('wrong');
 
             board.classList.add('hit-flash');

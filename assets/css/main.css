@@ -54,6 +54,7 @@ body {
     position: relative;
     border-top: 5px solid var(--brand-green);
     transition: padding 0.3s ease; /* Transición suave para redimensionamiento */
+    box-sizing: border-box; /* Fundamental para evitar desbordamientos */
 }
 
 /* Tipografía Responsiva mediante clamp() para asegurar fluidez desde PC hasta móviles */
@@ -88,6 +89,7 @@ p { font-size: clamp(1rem, 2vw, 1.1rem); }
     text-decoration: none;
     max-width: 100%; /* Asegura que un texto muy largo no rompa el botón */
     word-wrap: break-word;
+    box-sizing: border-box;
 }
 
 .btn:hover { 
@@ -122,32 +124,45 @@ img {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
     gap: 20px;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+/* Fix global para las Pools de Palabras apiladas (Estilo Burger) */
+.words-pool-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    width: 100%;
+    box-sizing: border-box;
 }
 
 /* ==========================================
    FASE 1 y 2: MODALES Y PARCHES GLOBALES MÓVIL
 ========================================== */
 
-/* Forzar que TODOS los modales tengan scroll si la pantalla es muy pequeña */
+/* Forzar que TODOS los modales tengan scroll si la pantalla es muy pequeña y no desborden */
 .mission-modal {
     position: fixed !important;
     top: 0 !important;
     left: 0 !important;
-    width: 100vw !important;
-    height: 100vh !important;
+    width: 100% !important; /* Reemplazado 100vw para evitar error de scroll invisible */
+    height: 100% !important; /* Reemplazado 100vh para mejor adaptación */
     background: rgba(15, 23, 42, 0.98) !important;
     z-index: 9999 !important;
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    overflow-y: auto !important; /* Vital para la tostadora */
-    padding: 20px 15px !important; /* Menos padding lateral en móvil */
+    overflow-y: auto !important; 
+    padding: 20px 15px !important; 
     box-sizing: border-box;
 }
 
 .mission-modal > div, .mission-modal > h2, .mission-modal > p {
     flex-shrink: 0;
+    max-width: 100%;
+    box-sizing: border-box;
 }
 
 .modal-actions {
@@ -157,6 +172,7 @@ img {
     flex-wrap: wrap;
     margin-top: 20px;
     width: 100%;
+    box-sizing: border-box;
 }
 
 .btn-action {
@@ -165,6 +181,7 @@ img {
     text-align: center;
     white-space: normal;
     padding: 15px 20px !important;
+    box-sizing: border-box;
 }
 
 /* ==========================================
@@ -224,17 +241,19 @@ img {
     position: fixed;
     top: 0;
     left: 0;
-    width: 100vw;
-    height: 100vh;
+    width: 100%; /* FIX: 100% en lugar de 100vw para evitar que corte a la derecha */
+    height: 100%;
     background-color: rgba(0, 0, 0, 0.75);
     display: flex;
     justify-content: center;
     align-items: center;
-    z-index: 9999; /* Asegura que cubra el navbar y todo lo demás */
+    z-index: 9999; 
     opacity: 0;
     visibility: hidden;
     transition: opacity 0.3s ease, visibility 0.3s ease;
     backdrop-filter: blur(5px);
+    box-sizing: border-box; /* FIX: el padding ya no empuja el ancho total */
+    padding: 20px;
 }
 
 .modal-overlay.active {
@@ -246,7 +265,7 @@ img {
     background-color: #ffffff;
     border-radius: 24px;
     padding: 2.5rem;
-    width: 90%;
+    width: 100%; /* Ajuste principal de responsividad */
     max-width: 500px;
     text-align: center;
     box-shadow: 0 15px 35px rgba(0,0,0,0.4);
@@ -254,6 +273,8 @@ img {
     transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     position: relative;
     border: 4px solid #f0f0f0;
+    box-sizing: border-box;
+    margin: 0 auto;
 }
 
 .modal-overlay.active .modal-content {
@@ -290,6 +311,8 @@ img {
     align-items: center;
     justify-content: center;
     gap: 10px;
+    box-sizing: border-box;
+    max-width: 100%;
 }
 
 .btn-play:hover, .btn-primary:hover {
@@ -326,6 +349,7 @@ img.emoji {
     background: #8BC34A; /* Color pasto */
     border-radius: 24px;
     box-shadow: inset 0 0 30px rgba(0,0,0,0.15), 0 10px 20px rgba(0,0,0,0.1);
+    box-sizing: border-box;
 }
 
 .moles-grid {
@@ -334,6 +358,8 @@ img.emoji {
     gap: 25px;
     justify-items: center;
     align-items: center;
+    width: 100%;
+    box-sizing: border-box;
 }
 
 .mole-hole {
@@ -346,6 +372,7 @@ img.emoji {
     overflow: hidden;
     border: 8px solid #5D4037; /* Borde de tierra exterior */
     box-shadow: inset 0 15px 15px rgba(0,0,0,0.6);
+    box-sizing: border-box;
 }
 
 .mole {
@@ -367,6 +394,18 @@ img.emoji {
 
 .mole.up {
     bottom: 5%; /* El topo sale a la superficie */
+}
+
+/* Envoltura Global para asegurar que los recuadros de juegos no se descuadren de la pantalla */
+.game-container-wrapper {
+    width: 100%;
+    max-width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+    box-sizing: border-box;
+    padding: 0 10px;
 }
 
 /* Responsividad para Móviles */
