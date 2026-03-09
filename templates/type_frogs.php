@@ -32,10 +32,11 @@ $reward_stars = $reward_stars ?? ($lesson['reward_stars'] ?? 5);
         border: 4px solid var(--brand-blue, #1E3A8A);
     }
 
+    /* Layout Maestro: Control estricto del río y contención de anchura simétrica */
     .river-board { 
-        position: relative; width: 100%; max-width: 100%; height: 65vh; min-height: 450px; max-height: 800px; 
+        position: relative; width: 100%; max-width: 800px; height: 65vh; min-height: 450px; max-height: 800px; 
         background: linear-gradient(180deg, #38BDF8 0%, #0284C7 100%); border-radius: 24px; 
-        overflow: hidden; border: 4px solid #1E3A8A; margin: 0 auto 20px auto; 
+        overflow: hidden; border: 4px solid var(--brand-blue, #1E3A8A); margin: 0 auto 20px auto; 
         box-shadow: 0 15px 35px rgba(28, 61, 106, 0.2); touch-action: pan-y; box-sizing: border-box;
     }
     
@@ -52,16 +53,20 @@ $reward_stars = $reward_stars ?? ($lesson['reward_stars'] ?? 5);
     .pad-emoji { font-size: clamp(28px, 6vw, 45px); line-height: 1; margin-bottom: 2px; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3)); }
     .pad-word { background: #ffffff; color: #1E3A8A; font-size: clamp(10px, 2.5vw, 15px); font-weight: 900; padding: 2px 10px; border-radius: 20px; box-shadow: 0 2px 5px rgba(0,0,0,0.2); text-transform: uppercase; text-align: center;}
 
-    /* FIX RANA: Altura estabilizada para que coordine con las hojas */
-    .frog-player { position: absolute; width: clamp(50px, 12vw, 80px); height: clamp(50px, 12vw, 80px); display: flex; justify-content: center; align-items: center; font-size: clamp(45px, 11vw, 75px); line-height: 1; transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); z-index: 20; pointer-events: none; filter: drop-shadow(0 10px 10px rgba(0,0,0,0.4)); transform: translate(-50%, -10%); }
+    /* FIX MATEMÁTICO: Centro de masa anclado exactamente al centro (translate -50%, 50%) */
+    .frog-player { position: absolute; width: clamp(50px, 12vw, 80px); height: clamp(50px, 12vw, 80px); display: flex; justify-content: center; align-items: center; font-size: clamp(45px, 11vw, 75px); line-height: 1; transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); z-index: 20; pointer-events: none; filter: drop-shadow(0 10px 10px rgba(0,0,0,0.4)); transform: translate(-50%, 50%); }
     
-    .frog-player.jumping { transform: translate(-50%, -60%) scale(1.3); filter: drop-shadow(0 25px 20px rgba(0,0,0,0.3)); z-index: 30; }
+    .frog-player.jumping { transform: translate(-50%, 50%) scale(1.3); filter: drop-shadow(0 25px 20px rgba(0,0,0,0.3)); z-index: 30; }
     
     .hud-top { position: absolute; top: 15px; left: 0; width: 100%; display: flex; justify-content: center; z-index: 30; pointer-events: none; }
-    .target-display { background: rgba(255,255,255,0.95); backdrop-filter: blur(5px); border: 4px solid #1E3A8A; color: #1E3A8A; padding: 8px 30px; border-radius: 50px; font-weight: 900; font-size: clamp(18px, 5vw, 26px); box-shadow: 0 10px 20px rgba(0,0,0,0.2); text-transform: uppercase; text-align: center; }
+    .target-display { background: rgba(255,255,255,0.95); backdrop-filter: blur(5px); border: 4px solid var(--brand-blue, #1E3A8A); color: var(--brand-blue, #1E3A8A); padding: 8px 30px; border-radius: 50px; font-weight: 900; font-size: clamp(18px, 5vw, 26px); box-shadow: 0 10px 20px rgba(0,0,0,0.2); text-transform: uppercase; text-align: center; }
     
+    /* FIX SPLASH: Anclado igualmente al centro exacto */
     .splash-effect { position: absolute; width: clamp(60px, 15vw, 100px); height: clamp(60px, 15vw, 100px); background: radial-gradient(circle, rgba(255,255,255,0.8) 0%, rgba(255,255,255,0) 70%); border-radius: 50%; z-index: 15; opacity: 0; pointer-events: none; transform: translate(-50%, 50%) scale(0); }
     .splash-anim { animation: splash 0.5s ease-out forwards; }
+
+    /* Encabezado del juego estandarizado (Layout Fase 2) */
+    .game-header-bar { display: flex; justify-content: space-between; align-items: center; margin: 0 auto 20px auto; width: 100%; max-width: 800px; background: #ffffff; border: 2px solid #E2E8F0; border-radius: 16px; padding: 15px 25px; box-sizing: border-box; box-shadow: 0 10px 25px rgba(28, 61, 106, 0.05); }
 
     @keyframes waterFlow { from { background-position: 0 0; } to { background-position: 0 200px; } }
     @keyframes splash { 0% { transform: translate(-50%, 50%) scale(0.5); opacity: 1; } 100% { transform: translate(-50%, 50%) scale(1.8); opacity: 0; } }
@@ -73,10 +78,11 @@ $reward_stars = $reward_stars ?? ($lesson['reward_stars'] ?? 5);
     <p style="font-size: 1.2rem; color: #94A3B8;">Este juego necesita jugarse en formato vertical para una mejor experiencia.</p>
 </div>
 
-<main class="game-wrapper container mx-auto px-4 py-8" style="min-height: 85vh; padding: 10px; box-sizing: border-box; width: 100%;">
-    <div class="game-area text-center mx-auto" style="max-width: 700px; padding: 10px; background: transparent; border: none; box-shadow: none; width: 100%; box-sizing: border-box;">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-            <h3 class="text-2xl font-black text-gray-800" style="margin:0; color:var(--brand-blue); font-size: clamp(20px, 5vw, 26px);">🐸 Salto de Ranita</h3>
+<main class="game-wrapper container mx-auto px-4 py-8" style="min-height: 85vh; padding: 10px; box-sizing: border-box; width: 100%; max-width: 1000px; margin: 0 auto;">
+    <div class="game-area text-center mx-auto" style="width: 100%; box-sizing: border-box; display: flex; flex-direction: column; align-items: center;">
+        
+        <div class="game-header-bar">
+            <h3 class="text-2xl font-black text-gray-800" style="margin:0; color:var(--brand-blue); font-size: clamp(20px, 5vw, 26px); font-weight: 900;">🐸 Salto de Ranita</h3>
             <div id="round-counter" style="background: var(--brand-blue); color: white; padding: 5px 15px; border-radius: 20px; font-weight: 700;">1/1</div>
         </div>
 
@@ -153,7 +159,7 @@ $reward_stars = $reward_stars ?? ($lesson['reward_stars'] ?? 5);
         document.getElementById('round-counter').innerText = `${index + 1}/${roundsData.length}`;
 
         frog.classList.remove('jumping');
-        frog.style.bottom = '12%'; /* FIX: Altura base de la ranita ajustada */
+        frog.style.bottom = '10%'; /* Ajuste de altura inicial */
         frog.style.left = '50%';
         frog.style.opacity = '1';
         
@@ -174,7 +180,6 @@ $reward_stars = $reward_stars ?? ($lesson['reward_stars'] ?? 5);
     }
 
     function createRow(index) {
-        // FIX: La distribución porcentual empieza más arriba para que no queden "muy abajo"
         let bottomPct = 30 + (index * 25); 
         const isCorrectPos = Math.floor(Math.random() * 3); 
         
@@ -211,13 +216,16 @@ $reward_stars = $reward_stars ?? ($lesson['reward_stars'] ?? 5);
         
         if(typeof AudioManager !== 'undefined') AudioManager.playSound('pop');
 
+        // FIX MATEMÁTICO: Calcular el centro absoluto del nenúfar en tiempo real
         const rectBoard = board.getBoundingClientRect();
         const rectPad = element.getBoundingClientRect();
         
-        const targetXPct = ((rectPad.left - rectBoard.left + rectPad.width/2) / rectBoard.width) * 100;
+        // Centro X en porcentaje
+        const targetXPct = ((rectPad.left - rectBoard.left + rectPad.width / 2) / rectBoard.width) * 100;
         
-        const parentRow = element.closest('.row-container');
-        const targetYPct = parseFloat(parentRow.style.bottom);
+        // Centro Y en porcentaje desde abajo (bottom)
+        const padCenterY = rectPad.top - rectBoard.top + rectPad.height / 2;
+        const targetYPct = 100 - ((padCenterY / rectBoard.height) * 100);
 
         frog.classList.add('jumping');
         frog.style.left = targetXPct + '%';
@@ -250,7 +258,7 @@ $reward_stars = $reward_stars ?? ($lesson['reward_stars'] ?? 5);
                 frog.style.opacity = '0';
                 
                 setTimeout(() => {
-                    frog.style.bottom = '12%'; /* FIX: Retorna a la altura base sincronizada */
+                    frog.style.bottom = '10%'; 
                     frog.style.left = '50%'; 
                     frog.style.opacity = '1';
                     isMoving = false; 
@@ -265,6 +273,7 @@ $reward_stars = $reward_stars ?? ($lesson['reward_stars'] ?? 5);
             row.style.bottom = (currentBottom - 25) + '%';
         });
         
+        // Al bajar el río, la rana debe bajar proporcionalmente para seguir anclada a su hoja
         let frogBottom = parseFloat(frog.style.bottom);
         frog.style.bottom = (frogBottom - 25) + '%';
         
@@ -276,7 +285,7 @@ $reward_stars = $reward_stars ?? ($lesson['reward_stars'] ?? 5);
         if(typeof AudioManager !== 'undefined') AudioManager.playSound('win');
         
         frog.classList.add('jumping');
-        frog.style.bottom = '90%'; 
+        frog.style.bottom = '95%'; 
         frog.style.left = '50%';
         
         currentRoundIndex++;

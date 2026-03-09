@@ -5,12 +5,15 @@ $current_stars = $user_info ? $user_info['total_stars'] : 0;
 $child_name = $user_info ? $user_info['child_name'] : 'Explorador';
 ?>
 <style>
-    /* FIX: Navbar con marco visible, bordes definidos y centrada */
+    /* FIX: Navbar con marco visible, bordes definidos y centrada estrictamente */
     .top-navbar-wrapper {
         width: 100%;
+        max-width: 1000px;
         padding: 0;
-        margin-bottom: 25px;
+        margin: 0 auto 25px auto;
         box-sizing: border-box;
+        display: flex;
+        justify-content: center;
     }
 
     .top-navbar { 

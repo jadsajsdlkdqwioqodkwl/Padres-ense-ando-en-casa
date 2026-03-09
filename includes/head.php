@@ -1,5 +1,5 @@
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, shrink-to-fit=no">
 <title><?php echo isset($page_title) ? $page_title . " - My World" : "My World"; ?></title>
 
 <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
@@ -47,6 +47,8 @@
         gap: 30px; padding-bottom: 100px;
         min-height: 100vh;
         line-height: 1.6;
+        width: 100%;
+        box-sizing: border-box;
     }
 
     h1, h2, h3 { 
@@ -60,11 +62,13 @@
         background: var(--card-bg); 
         width: 100%; 
         max-width: 1000px;
+        margin: 0 auto;
         padding: 40px; 
         border-radius: 16px;
         box-shadow: 0 15px 35px rgba(28, 61, 106, 0.05);
         position: relative; 
         border-top: 5px solid var(--brand-green);
+        box-sizing: border-box;
     }
     
     .text-center { text-align: center; }

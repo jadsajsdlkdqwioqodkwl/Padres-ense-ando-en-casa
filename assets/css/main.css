@@ -48,6 +48,7 @@ body {
     background: var(--card-bg);
     width: 100%;
     max-width: 1000px;
+    margin: 0 auto;
     padding: 40px;
     border-radius: 16px;
     box-shadow: 0 15px 35px rgba(28, 61, 106, 0.05);
@@ -265,8 +266,10 @@ img {
     background-color: #ffffff;
     border-radius: 24px;
     padding: 2.5rem;
-    width: 100%; /* Ajuste principal de responsividad */
+    width: 90%; /* Ajuste principal de responsividad: 90% evita desborde horizontal */
     max-width: 500px;
+    max-height: 90vh; /* Ajuste principal de responsividad vertical */
+    overflow-y: auto; /* Permite scroll interno si el contenido es enorme */
     text-align: center;
     box-shadow: 0 15px 35px rgba(0,0,0,0.4);
     transform: scale(0.85);

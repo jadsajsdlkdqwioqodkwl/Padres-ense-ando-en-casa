@@ -15,7 +15,7 @@ try {
     $stmtModules = $pdo->query("SELECT * FROM modules ORDER BY order_num ASC");
     $modules = $stmtModules->fetchAll(PDO::FETCH_ASSOC);
 
- // Obtener el total de estrellas del usuario
+    // Obtener el total de estrellas del usuario
     $stmtStars = $pdo->prepare("SELECT SUM(stars_earned) as total_stars FROM progress WHERE user_id = ? AND is_completed = 1");
     $stmtStars->execute([$_SESSION['user_id']]);
     $user_total_stars = (int)$stmtStars->fetchColumn();
@@ -49,14 +49,17 @@ img.emoji {
     pointer-events: none; /* Evita bugs donde el click cae en el SVG y no en el botón */
 }
 
-/* Optimización Responsiva Extrema */
+/* Optimización Responsiva Extrema: Layout Maestro Centrado */
 .module-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    /* Ajuste para que las tarjetas mantengan una proporción cuadrada y no se estiren al 100% de la pantalla */
+    grid-template-columns: repeat(auto-fit, minmax(280px, 320px));
     gap: 30px;
-    margin-top: 30px;
+    margin: 40px auto;
     padding-bottom: 40px;
     justify-content: center; /* Garantiza que los elementos se centren al hacer zoom out */
+    width: 100%;
+    box-sizing: border-box;
 }
 
 .module-card {
@@ -72,8 +75,9 @@ img.emoji {
     display: block;
     position: relative;
     overflow: hidden;
-    width: 100%; /* Asegura consistencia dimensional */
+    width: 100%; /* Asegura consistencia dimensional dentro del grid */
     box-sizing: border-box;
+    margin: 0 auto;
 }
 
 .module-card:hover:not(.locked-card) {
@@ -105,6 +109,7 @@ img.emoji {
     transition: 0.3s ease;
     display: inline-block;
     box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+    width: 80%;
 }
 
 .module-card:hover:not(.locked-card) .btn-enter {
@@ -117,19 +122,19 @@ img.emoji {
     position: fixed;
     top: 0;
     left: 0;
-    width: 100%; /* Corregido de 100vw para evitar scroll horizontal en Windows/Móviles */
-    height: 100%; /* Corregido de 100vh para asegurar cubrimiento total exacto */
+    width: 100%;
+    height: 100%;
     background: rgba(15, 23, 42, 0.85);
-    backdrop-filter: blur(8px); /* Efecto vidrio (Glassmorphism) */
+    backdrop-filter: blur(8px); /* Efecto vidrio */
     display: flex;
     justify-content: center;
     align-items: center;
     opacity: 0;
     pointer-events: none;
     transition: opacity 0.3s ease;
-    z-index: 9999; /* Garantiza sobreponerse al Navbar */
-    padding: 20px; /* Para que no choque con los bordes en celulares */
-    box-sizing: border-box; /* Fundamental para que el padding no desborde la pantalla */
+    z-index: 9999;
+    padding: 20px;
+    box-sizing: border-box;
 }
 
 .modal-overlay.active {
@@ -148,8 +153,8 @@ img.emoji {
     transform: scale(0.9);
     transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     border: 4px solid var(--brand-blue, #1E3A8A);
-    box-sizing: border-box; /* Asegura que el padding no expanda el div hacia la derecha */
-    margin: 0 auto; /* Asegura centrado perfecto dentro del flex container */
+    box-sizing: border-box;
+    margin: 0 auto;
 }
 
 .modal-overlay.active .modal-content {
@@ -157,7 +162,7 @@ img.emoji {
 }
 
 .modal-title {
-    font-size: clamp(1.8rem, 5vw, 2.2rem); /* Tipografía fluida */
+    font-size: clamp(1.8rem, 5vw, 2.2rem);
     color: var(--brand-blue, #1E3A8A);
     margin-bottom: 20px;
     font-weight: 900;
@@ -215,7 +220,7 @@ img.emoji {
 
 <body>
 
-<div class="container text-center px-4">
+<div class="container text-center px-4" style="max-width: 1000px; margin: 0 auto;">
 
     <?php include 'includes/navbar.php'; ?>
 
@@ -226,7 +231,7 @@ img.emoji {
             <span style="font-size: 20px; font-weight: 900; color: #D97706;"><?php echo $user_total_stars; ?> Estrellas Totales</span>
         </div>
 
-        <h1 style="color:var(--brand-blue, #1E3A8A); font-size: clamp(2rem, 6vw, 3rem); font-weight: 900; margin-bottom: 10px; margin-top: 15px; letter-spacing: -1px;">
+        <h1 style="color:var(--brand-blue, #1E3A8A); font-size: clamp(2rem, 6vw, 3rem); font-weight: 900; margin-bottom: 10px; margin-top: 25px; letter-spacing: -1px;">
             Explora tu Mundo 🌍
         </h1>
         <p style="color:#64748B; font-size: clamp(1rem, 3vw, 1.2rem); font-weight: 500;">

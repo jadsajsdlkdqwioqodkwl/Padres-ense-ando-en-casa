@@ -35,7 +35,8 @@ $reward_stars = $reward_stars ?? ($lesson['reward_stars'] ?? 5);
 
     img.emoji { height: 1.2em; width: 1.2em; margin: 0 .05em 0 .1em; vertical-align: -0.1em; display: inline-block; pointer-events: none; }
     
-    .game-board { position: relative; width: 100%; max-width: 100%; min-height: 350px; background: #F8FAFC; border-radius: 24px; overflow: hidden; border: 4px solid var(--brand-blue); margin: 0 auto 25px auto; box-shadow: 0 10px 25px rgba(28, 61, 106, 0.1); box-sizing: border-box; }
+    /* Layout Maestro: Control estricto de los bordes del tablero de juego */
+    .game-board { position: relative; width: 100%; max-width: 800px; min-height: 350px; background: #F8FAFC; border-radius: 24px; overflow: hidden; border: 4px solid var(--brand-blue); margin: 0 auto 25px auto; box-shadow: 0 10px 25px rgba(28, 61, 106, 0.1); box-sizing: border-box; }
     
     .css-monster { position: absolute; left: 2%; bottom: 20px; width: 80px; height: 80px; background: #EF4444; border: 3px solid var(--brand-blue); border-radius: 40% 60% 70% 30% / 40% 50% 60% 50%; animation: morph 2s linear infinite, wobble 0.5s alternate infinite; transition: left 0.2s linear, transform 0.3s; z-index: 3; box-shadow: inset -5px -5px 0 rgba(0,0,0,0.2); }
     .css-monster::before, .css-monster::after { content: ''; position: absolute; top: 18px; width: 16px; height: 16px; background: white; border-radius: 50%; border: 3px solid var(--brand-blue); }
@@ -48,14 +49,17 @@ $reward_stars = $reward_stars ?? ($lesson['reward_stars'] ?? 5);
     .letter-slot { width: clamp(45px, 12vw, 60px); height: clamp(55px, 15vw, 70px); border: 3px dashed #CBD5E1; border-radius: 16px; display: flex; justify-content: center; align-items: center; font-size: clamp(24px, 6vw, 34px); font-weight: 800; background: #ffffff; box-shadow: inset 0 3px 6px rgba(0,0,0,0.05); transition: 0.3s; color: #94A3B8; }
     .letter-slot.filled { border-style: solid; border-color: #4CAF50; background: #F0FDF4; color: #4CAF50; transform: scale(1.05); box-shadow: 0 4px 10px rgba(76, 175, 80, 0.2); }
     
+    /* FIX TOUCH: Reemplazado el cursor:grab por pointer y touch-action optimizado */
     .bubbles-container { display: flex; justify-content: center; flex-wrap: wrap; gap: 12px; min-height: 80px; padding: 0 10px; position: relative; width: 100%; box-sizing: border-box; }
-    .drag-bubble { width: clamp(50px, 14vw, 60px); height: clamp(50px, 14vw, 60px); background: #F59E0B; color: white; border-radius: 16px; display: flex; justify-content: center; align-items: center; font-size: clamp(24px, 6vw, 30px); font-weight: 800; cursor: grab; box-shadow: 0 6px 0 #D97706, 0 10px 15px rgba(245, 158, 11, 0.3); transition: transform 0.1s, opacity 0.3s; user-select: none; z-index: 10; touch-action: none; }
+    .drag-bubble { width: clamp(50px, 14vw, 60px); height: clamp(50px, 14vw, 60px); background: #F59E0B; color: white; border-radius: 16px; display: flex; justify-content: center; align-items: center; font-size: clamp(24px, 6vw, 30px); font-weight: 800; cursor: pointer; box-shadow: 0 6px 0 #D97706, 0 10px 15px rgba(245, 158, 11, 0.3); transition: transform 0.1s, opacity 0.3s; user-select: none; z-index: 10; touch-action: manipulation; }
     .drag-bubble.hidden { opacity: 0; pointer-events: none; transform: scale(0); }
-    .drag-bubble.dragging { position: fixed; z-index: 99999; transform: scale(1.2); box-shadow: 0 15px 25px rgba(245, 158, 11, 0.5); pointer-events: none; margin: 0 !important; }
     
     .round-indicator { position: absolute; top: 15px; left: 15px; background: var(--brand-blue, #1E3A8A); color: white; font-weight: 700; padding: 6px 18px; border-radius: 50px; font-size: 14px; z-index: 50; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
     .danger-zone { animation: flashRed 1s infinite; }
     
+    /* Encabezado del juego estandarizado */
+    .game-header-bar { display: flex; justify-content: space-between; align-items: center; margin: 0 auto 20px auto; width: 100%; max-width: 800px; background: #ffffff; border: 2px solid #E2E8F0; border-radius: 16px; padding: 15px 25px; box-sizing: border-box; box-shadow: 0 10px 25px rgba(28, 61, 106, 0.05); }
+
     @keyframes morph { 0%, 100% { border-radius: 40% 60% 70% 30% / 40% 50% 60% 50%; } 50% { border-radius: 60% 40% 30% 70% / 60% 50% 40% 50%; } }
     @keyframes wobble { from { transform: translateY(0) rotate(-5deg); } to { transform: translateY(-10px) rotate(5deg); } }
     @keyframes flashRed { 0%, 100% { background: #F8FAFC; } 50% { background: #FEE2E2; } }
@@ -69,9 +73,10 @@ $reward_stars = $reward_stars ?? ($lesson['reward_stars'] ?? 5);
     <p style="font-size: 1.2rem; color: #94A3B8;">Este juego necesita jugarse en formato vertical para una mejor experiencia.</p>
 </div>
 
-<main class="game-wrapper container mx-auto px-4 py-8" style="min-height: 85vh; padding: 10px; box-sizing: border-box; width: 100%;">
-    <div class="game-area text-center mx-auto" style="max-width: 800px; border: none; background: transparent; padding-top: 5px; box-shadow: none; width: 100%; box-sizing: border-box;">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+<main class="game-wrapper container mx-auto px-4 py-8" style="min-height: 85vh; padding: 10px; box-sizing: border-box; width: 100%; max-width: 1000px; margin: 0 auto;">
+    <div class="game-area text-center mx-auto" style="width: 100%; box-sizing: border-box; display: flex; flex-direction: column; align-items: center;">
+        
+        <div class="game-header-bar">
             <h3 style="margin: 0; color: var(--brand-blue); font-size: clamp(20px, 5vw, 26px); font-weight: 900;">🛡️ Word Defender</h3>
             <button onclick="giveHint()" style="background: #FBBF24; border: none; border-radius: 50%; width: 50px; height: 50px; font-size: 24px; cursor: pointer; box-shadow: 0 4px 0 #D97706, 0 4px 10px rgba(245, 158, 11, 0.3); transition: 0.2s;" title="Pedir Pista">💡</button>
         </div>
@@ -102,8 +107,8 @@ $reward_stars = $reward_stars ?? ($lesson['reward_stars'] ?? 5);
             <div class="twemoji-target" id="dynamic-target">🎯</div>
         </div>
 
-        <div class="slot-container" id="slots-container"></div>
-        <div class="bubbles-container" id="bubbles-container"></div>
+        <div class="slot-container" id="slots-container" style="max-width: 800px; margin: 0 auto 25px auto;"></div>
+        <div class="bubbles-container" id="bubbles-container" style="max-width: 800px; margin: 0 auto;"></div>
     </div>
 </main>
 
@@ -203,88 +208,65 @@ $reward_stars = $reward_stars ?? ($lesson['reward_stars'] ?? 5);
         document.getElementById('tutorial-modal').style.opacity = '1';
         
         applyTwemoji(document.body);
-        initDragAndDrop();
+        initTapLogic(); 
     }
 
-    // FIX: Lógica de Drag & Drop estricta para Touch/Mobile
-    let activeBubble = null;
-    let ghostBubble = null;
-
-    function initDragAndDrop() {
+    // FIX: Sistema de toques instantáneos unificado (Mouse/Touch)
+    function initTapLogic() {
         const bubbles = document.querySelectorAll('.drag-bubble');
         bubbles.forEach(bubble => {
-            bubble.addEventListener('touchstart', handleDragStart, {passive: false});
-            bubble.addEventListener('mousedown', handleDragStart);
-            bubble.addEventListener('click', () => {
-                if(!bubble.hasAttribute('data-dragged')) processMove(bubble);
+            bubble.addEventListener('pointerdown', function(e) {
+                e.preventDefault(); 
+                if (!gameActive || this.classList.contains('hidden')) return;
+                
+                // Efecto visual de botón presionado
+                this.style.transform = 'scale(0.9)';
+                setTimeout(() => {
+                    if (!this.classList.contains('hidden')) {
+                        this.style.transform = 'scale(1)';
+                    }
+                }, 100);
+
+                processMove(this);
             });
         });
     }
 
-    function handleDragStart(e) {
-        if (!gameActive || e.target.classList.contains('hidden')) return;
-        if (e.type === 'touchstart') e.preventDefault(); 
+    function processMove(bubbleEl) {
+        if (!bubbleEl || currentCorrect >= wordLength) return;
 
-        activeBubble = e.target;
-        activeBubble.removeAttribute('data-dragged');
+        const tappedChar = bubbleEl.getAttribute('data-char');
+        const currentSlot = document.getElementById('slot-' + currentCorrect);
+        const expectedChar = currentSlot.getAttribute('data-expected');
 
-        let clientX = e.type.includes('touch') ? e.touches[0].clientX : e.clientX;
-        let clientY = e.type.includes('touch') ? e.touches[0].clientY : e.clientY;
+        if (tappedChar === expectedChar) {
+            // Respuesta Correcta
+            if(typeof AudioManager !== 'undefined') AudioManager.playSound('pop');
+            currentSlot.innerText = tappedChar;
+            currentSlot.classList.add('filled');
+            bubbleEl.classList.add('hidden'); // Oculta la burbuja seleccionada
+            currentCorrect++;
+            
+            // Recompensa: El monstruo retrocede
+            monsterPos = Math.max(2, monsterPos - 12); 
+            monster.style.left = monsterPos + '%';
 
-        ghostBubble = activeBubble.cloneNode(true);
-        ghostBubble.classList.add('dragging');
-        document.body.appendChild(ghostBubble);
-
-        activeBubble.style.opacity = '0.3';
-        activeBubble.setAttribute('data-dragged', 'true');
-
-        moveGhost(clientX, clientY);
-
-        document.addEventListener('touchmove', handleDragMove, {passive: false});
-        document.addEventListener('mousemove', handleDragMove);
-        document.addEventListener('touchend', handleDragEnd);
-        document.addEventListener('mouseup', handleDragEnd);
-    }
-
-    function moveGhost(x, y) {
-        if(ghostBubble) {
-            ghostBubble.style.left = (x - ghostBubble.offsetWidth / 2) + 'px';
-            ghostBubble.style.top = (y - ghostBubble.offsetHeight / 2) + 'px';
+            if (currentCorrect === wordLength) checkNextRound();
+        } else {
+            // Respuesta Incorrecta
+            if(typeof AudioManager !== 'undefined') AudioManager.playSound('wrong');
+            gameBoard.classList.add('danger-zone');
+            bubbleEl.style.animation = 'shake 0.3s';
+            setTimeout(() => { 
+                gameBoard.classList.remove('danger-zone'); 
+                bubbleEl.style.animation = 'none'; 
+            }, 300);
+            
+            // Castigo: El monstruo avanza
+            monsterPos += 4; 
+            monster.style.left = monsterPos + '%';
+            if (monsterPos >= targetPos) gameOver(false);
         }
-    }
-
-    function handleDragMove(e) {
-        if(!ghostBubble) return;
-        if (e.type === 'touchmove') e.preventDefault(); 
-
-        let clientX = e.type.includes('touch') ? e.touches[0].clientX : e.clientX;
-        let clientY = e.type.includes('touch') ? e.touches[0].clientY : e.clientY;
-
-        moveGhost(clientX, clientY);
-    }
-
-    function handleDragEnd(e) {
-        document.removeEventListener('touchmove', handleDragMove);
-        document.removeEventListener('mousemove', handleDragMove);
-        document.removeEventListener('touchend', handleDragEnd);
-        document.removeEventListener('mouseup', handleDragEnd);
-
-        if(!ghostBubble || !activeBubble) return;
-
-        let clientX = e.type.includes('touch') ? e.changedTouches[0].clientX : e.clientX;
-        let clientY = e.type.includes('touch') ? e.changedTouches[0].clientY : e.clientY;
-
-        ghostBubble.remove();
-        ghostBubble = null;
-        activeBubble.style.opacity = '1';
-
-        const slotsRect = document.getElementById('slots-container').getBoundingClientRect();
-        if (clientX >= slotsRect.left && clientX <= slotsRect.right &&
-            clientY >= slotsRect.top && clientY <= slotsRect.bottom) {
-            processMove(activeBubble);
-        }
-
-        activeBubble = null;
     }
 
     function startGame() {
@@ -316,31 +298,6 @@ $reward_stars = $reward_stars ?? ($lesson['reward_stars'] ?? 5);
 
             if (monsterPos >= targetPos) gameOver(false);
         }, 100);
-    }
-
-    function processMove(bubbleEl) {
-        if (!bubbleEl || currentCorrect >= wordLength) return;
-
-        const draggedChar = bubbleEl.getAttribute('data-char');
-        const currentSlot = document.getElementById('slot-' + currentCorrect);
-        const expectedChar = currentSlot.getAttribute('data-expected');
-
-        if (draggedChar === expectedChar) {
-            currentSlot.innerText = draggedChar;
-            currentSlot.classList.add('filled');
-            bubbleEl.classList.add('hidden');
-            currentCorrect++;
-            
-            monsterPos = Math.max(2, monsterPos - 12); 
-            monster.style.left = monsterPos + '%';
-
-            if (currentCorrect === wordLength) checkNextRound();
-        } else {
-            gameBoard.classList.add('danger-zone');
-            bubbleEl.style.animation = 'shake 0.3s';
-            setTimeout(() => { gameBoard.classList.remove('danger-zone'); bubbleEl.style.animation = 'none'; }, 300);
-            monsterPos += 2; 
-        }
     }
 
     function giveHint() {
