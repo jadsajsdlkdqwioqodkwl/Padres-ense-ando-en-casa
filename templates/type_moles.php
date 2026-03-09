@@ -1,179 +1,265 @@
+<?php
+// templates/type_moles.php
+session_start();
+require_once '../includes/config.php';
+
+// Ciberseguridad
+if (!isset($_SESSION['user_id'])) {
+    header("Location: ../login.php");
+    exit();
+}
+
+require_once '../includes/head.php';
+require_once '../includes/navbar.php';
+
+$lesson_id = $lesson_id ?? ($lesson['id'] ?? 0);
+$reward_stars = $reward_stars ?? ($lesson['reward_stars'] ?? 5);
+
+// Fallback estructurado para el juego de atrapar la palabra
+$lesson_data = $lesson_data ?? [
+    'target_word' => 'APPLE',
+    'translation' => 'Manzana',
+    'emoji' => '🍎',
+    'distractors' => [
+        ['word' => 'CAR', 'emoji' => '🚗'],
+        ['word' => 'DOG', 'emoji' => '🐶'],
+        ['word' => 'STAR', 'emoji' => '⭐']
+    ],
+    'context_es' => '¡Golpea a la manzana cuando salga de su escondite!'
+];
+?>
+
+<script src="https://unpkg.com/twemoji@latest/dist/twemoji.min.js" crossorigin="anonymous"></script>
+
 <style>
-    /* Altura fluida y flex box asegurado */
-    .game-board { position: relative; width: 100%; min-height: 550px; background: linear-gradient(180deg, #38BDF8 0%, #BAE6FD 40%, #86EFAC 40%, #22C55E 100%); border-radius: 24px; overflow: hidden; border: 4px solid var(--brand-blue); margin-bottom: 20px; box-shadow: 0 15px 35px rgba(28, 61, 106, 0.15); display: flex; flex-direction: column; }
-    
-    .sky-zone { flex: 0.35; display: flex; justify-content: center; align-items: flex-start; padding-top: 20px; position: relative; }
-    .sun { position: absolute; top: 10px; right: 20px; font-size: 50px; animation: spin 10s linear infinite; }
-    .target-board { background: var(--white); border: 4px solid var(--brand-blue); padding: 10px 30px; border-radius: 50px; box-shadow: 0 10px 20px rgba(0,0,0,0.1); text-align: center; z-index: 10; width: max-content; }
-    
-    /* Espacio amplio entre filas de topos para evitar glitch */
-    .ground-zone { flex: 0.65; display: grid; grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(2, 1fr); gap: 15px; row-gap: 50px; padding: 20px 10px; }
-    .hole-container { position: relative; width: 100%; height: 100%; display: flex; justify-content: center; align-items: flex-end; overflow: hidden; }
-    .dirt-hole { position: absolute; bottom: 5px; width: 80%; height: 35px; background: #451A03; border-radius: 50%; box-shadow: inset 0 8px 15px rgba(0,0,0,0.6); z-index: 5; }
-    
-    .mole { position: absolute; bottom: -100px; width: 70px; height: 95px; background: #A16207; border-radius: 40px 40px 10px 10px; transition: bottom 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275); cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; padding-top: 10px; z-index: 4; box-shadow: inset -5px -5px 10px rgba(0,0,0,0.3); touch-action: manipulation; }
-    .mole.active { bottom: 25px; } /* Sale por encima del hueco limpio */
-    .mole-face { font-size: 28px; line-height: 1; margin-bottom: 5px; pointer-events: none; }
-    .mole-sign { background: var(--white); color: var(--brand-blue); padding: 4px 10px; border-radius: 8px; font-weight: 800; border: 2px solid #713F12; font-size: clamp(12px, 3vw, 14px); box-shadow: 0 4px 6px rgba(0,0,0,0.2); pointer-events: none; }
-    
-    .score-stars { font-size: 30px; letter-spacing: 5px; color: #E2E8F0; }
-    .score-stars.s1 { background: linear-gradient(to right, #FBBF24 33%, #E2E8F0 33%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-    .score-stars.s2 { background: linear-gradient(to right, #FBBF24 66%, #E2E8F0 66%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-    .score-stars.s3 { background: #FBBF24; -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-    
-    @keyframes spin { 100% { transform: rotate(360deg); } }
-    @keyframes whack { 0% { transform: scale(1); } 50% { transform: scale(0.8) translateY(20px); filter: brightness(0.5); } 100% { transform: scale(1) translateY(100px); } }
-</style>
+    img.emoji { height: 1.2em; width: 1.2em; margin: 0 .05em 0 .1em; vertical-align: -0.1em; display: inline-block; pointer-events: none; }
 
-<div class="game-area text-center" style="border: none; background: transparent; padding-top: 5px; box-shadow: none;">
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-        <h3 style="margin: 0; color: var(--brand-blue); font-size: 1.8rem;">🔨 Atrapa al Topo</h3>
-        <div id="round-counter" style="background: var(--brand-blue); color: white; padding: 5px 15px; border-radius: 20px; font-weight: 700;">1/1</div>
-    </div>
-
-    <div class="game-board" id="game-board">
-        <div class="mission-modal" id="tutorial-modal">
-            <h2 style="color: var(--brand-blue); margin-top: 0; font-size: 2.2rem;">¡Los topos traviesos!</h2>
-            <p style="color: #64748B; font-size: 18px; margin-bottom: 15px;" id="tut-context">Golpea 3 veces al topo que tenga esta palabra:</p>
-            <div style="font-size: 40px; font-weight: 800; color: var(--brand-orange); letter-spacing: 2px;" id="tut-word">WORD</div>
-            <p style="color: #94A3B8; font-size: 20px; font-weight: 600; margin-bottom: 10px;" id="tut-trans">(Traducción)</p>
-            
-            <div class="modal-actions">
-                <button class="btn btn-action" id="btn-start" onclick="startGame()" style="display: block;">▶️ ¡Jugar Ahora!</button>
-            </div>
-        </div>
-
-        <div class="sky-zone">
-            <div class="sun">☀️</div>
-            <div class="target-board">
-                <div style="font-size: 28px; font-weight: 800; color: var(--brand-blue);" id="hud-word">WORD</div>
-                <div class="score-stars" id="score-display">★★★</div>
-            </div>
-        </div>
-        
-        <div class="ground-zone" id="holes-grid">
-            </div>
-    </div>
-</div>
-
-<script>
-    let roundsData = window.dynamicRoundsData || [];
-    let currentRoundIndex = 0;
-    let roundData = null;
-    let gameActive = false;
-    let score = 0;
-    const maxScore = 3;
-    let moleInterval;
-    let activeHole = -1;
-    let targetWord = "";
-
-    const grid = document.getElementById('holes-grid');
-    for(let i=0; i<6; i++) {
-        grid.innerHTML += `
-            <div class="hole-container">
-                <div class="mole" id="mole-${i}" onclick="whackMole(${i})">
-                    <div class="mole-face">🐹</div>
-                    <div class="mole-sign" id="sign-${i}">...</div>
-                </div>
-                <div class="dirt-hole"></div>
-            </div>
-        `;
+    #landscape-warning {
+        display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+        background: #1E293B; z-index: 10000; color: white; justify-content: center; 
+        align-items: center; flex-direction: column; text-align: center;
+    }
+    @media screen and (max-height: 450px) and (orientation: landscape) {
+        #landscape-warning { display: flex !important; }
+        .game-wrapper { display: none !important; }
     }
 
-    if (roundsData.length > 0) loadRound(currentRoundIndex);
+    .moles-game-container { width: 100%; max-width: 700px; margin: 0 auto; padding: 2rem; background: #8BC34A; border-radius: 24px; box-shadow: inset 0 0 30px rgba(0,0,0,0.15), 0 10px 20px rgba(0,0,0,0.1); border: 4px solid #558B2F; }
 
-    function loadRound(index) {
-        roundData = roundsData[index];
-        targetWord = roundData.target_word || roundData.word;
-        
+    .moles-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; justify-items: center; align-items: center; }
+
+    .mole-hole { width: 100%; max-width: 140px; aspect-ratio: 1; background-color: #3E2723; border-radius: 50%; position: relative; overflow: hidden; border: 8px solid #5D4037; box-shadow: inset 0 15px 15px rgba(0,0,0,0.6); }
+
+    /* Reemplazo del "Topo" por la "Entidad Dinámica" */
+    .word-entity { position: absolute; bottom: -120%; left: 50%; transform: translateX(-50%); transition: bottom 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275); cursor: pointer; user-select: none; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; width: 100%; height: 100%; -webkit-tap-highlight-color: transparent; padding-bottom: 10px; z-index: 5; }
+    
+    .word-entity.up { bottom: 0%; }
+    
+    .entity-emoji { font-size: clamp(45px, 10vw, 65px); filter: drop-shadow(0 5px 5px rgba(0,0,0,0.4)); pointer-events: none; margin-bottom: -5px; }
+    
+    .entity-text { background: white; color: #1E3A8A; font-weight: 900; font-size: clamp(12px, 3vw, 16px); padding: 2px 12px; border-radius: 20px; border: 2px solid #1E3A8A; pointer-events: none; box-shadow: 0 4px 6px rgba(0,0,0,0.2); }
+
+    /* Responsividad Mobile Extrema */
+    @media (max-width: 600px) {
+        .moles-game-container { padding: 1rem; margin-top: 1rem; }
+        .moles-grid { gap: 10px; }
+        .mole-hole { border-width: 5px; }
+    }
+</style>
+
+<div id="landscape-warning">
+    <div style="font-size: 5rem; margin-bottom: 20px;">📱🔄</div>
+    <h2 style="font-size: 2rem; margin-bottom: 10px;">¡Gira tu dispositivo!</h2>
+</div>
+
+<main class="game-wrapper container mx-auto px-4 py-8" style="min-height: 85vh;">
+    
+    <div id="startGameModal" class="modal-overlay active">
+        <div class="modal-content">
+            <h2 class="modal-title">¡Atrapa la Palabra! 🖐️</h2>
+            <p class="modal-text" id="tut-context">Toca rápidamente los agujeros donde aparezca:</p>
+            <div style="font-size: 3rem; margin: 10px 0;" id="tut-emoji"></div>
+            <div style="font-size: 2.5rem; font-weight: 900; color: #38BDF8; margin-bottom: 5px;" id="tut-word"></div>
+            <p style="color: #64748B; font-size: 1.2rem; font-weight: 600; margin-bottom: 25px;" id="tut-trans"></p>
+            <button id="btnStartGame" class="btn-play w-full bg-green-500 hover:bg-green-600">▶️ ¡Comenzar!</button>
+        </div>
+    </div>
+
+    <div class="moles-game-container">
+        <div class="flex justify-between items-center mb-6 px-4">
+            <h3 class="text-2xl font-black text-white drop-shadow-md">Aciertos: <span id="score">0</span>/5 🎯</h3>
+            <h3 class="text-2xl font-black text-white drop-shadow-md">⏱️ <span id="timeLeft">30</span>s</h3>
+        </div>
+
+        <div class="moles-grid" id="molesGrid">
+            <?php for($i=0; $i<9; $i++): ?>
+            <div class="mole-hole">
+                <div class="word-entity" id="hole-<?php echo $i; ?>"></div>
+            </div>
+            <?php endfor; ?>
+        </div>
+    </div>
+</main>
+
+<script>
+    const lessonData = <?php echo json_encode($lesson_data); ?>;
+    const targetWord = lessonData.target_word || lessonData.word;
+    const targetEmoji = lessonData.emoji || '📦';
+    const distractors = lessonData.distractors || [];
+
+    const startModal = document.getElementById('startGameModal');
+    const btnStart = document.getElementById('btnStartGame');
+    const scoreDisplay = document.getElementById('score');
+    const timeDisplay = document.getElementById('timeLeft');
+    const holes = document.querySelectorAll('.word-entity');
+
+    let lastHole;
+    let timeUp = false;
+    let score = 0;
+    const maxScore = 5; // Aciertos necesarios para ganar
+    let timer;
+    let countdown = 30;
+
+    document.addEventListener('DOMContentLoaded', () => {
+        document.getElementById('tut-emoji').innerText = targetEmoji;
         document.getElementById('tut-word').innerText = targetWord;
-        document.getElementById('tut-trans').innerText = `(${roundData.translation})`;
-        document.getElementById('hud-word').innerText = targetWord;
-        if(roundData.context_es) document.getElementById('tut-context').innerText = roundData.context_es;
-        document.getElementById('round-counter').innerText = `${index + 1}/${roundsData.length}`;
+        document.getElementById('tut-trans').innerText = `(${lessonData.translation})`;
+        if(lessonData.context_es) document.getElementById('tut-context').innerText = lessonData.context_es;
         
-        score = 0;
-        document.getElementById('score-display').className = 'score-stars';
-        if(activeHole !== -1) {
-            document.getElementById(`mole-${activeHole}`).classList.remove('active');
-            activeHole = -1;
-        }
+        twemoji.parse(startModal, { folder: 'svg', ext: '.svg' });
+    });
 
-        document.getElementById('tutorial-modal').style.display = 'flex';
-        document.getElementById('tutorial-modal').style.opacity = '1';
+    btnStart.addEventListener('click', () => {
+        startModal.classList.remove('active');
+        setTimeout(startGame, 500);
+    });
+
+    function randomTime(min, max) { return Math.round(Math.random() * (max - min) + min); }
+
+    function randomHole(holesList) {
+        const idx = Math.floor(Math.random() * holesList.length);
+        const hole = holesList[idx];
+        if (hole === lastHole) return randomHole(holesList); 
+        lastHole = hole;
+        return hole;
+    }
+
+    function generateEntityData() {
+        const isTarget = Math.random() > 0.4; // 60% probabilidad de ser el correcto
+        if (isTarget || distractors.length === 0) {
+            return { word: targetWord, emoji: targetEmoji, isCorrect: true };
+        } else {
+            const distractor = distractors[Math.floor(Math.random() * distractors.length)];
+            return { word: distractor.word, emoji: distractor.emoji || '❓', isCorrect: false };
+        }
+    }
+
+    function peep() {
+        const time = randomTime(700, 1400); 
+        const hole = randomHole(holes);
+        const entityData = generateEntityData();
+
+        // Inyectamos el contenido dinámico (emoji + palabra)
+        hole.innerHTML = `
+            <div class="entity-emoji">${entityData.emoji}</div>
+            <div class="entity-text">${entityData.word}</div>
+        `;
+        hole.dataset.isCorrect = entityData.isCorrect;
+        twemoji.parse(hole, { folder: 'svg', ext: '.svg' });
+
+        hole.classList.add('up');
+
+        setTimeout(() => {
+            hole.classList.remove('up');
+            if (!timeUp) peep();
+        }, time);
     }
 
     function startGame() {
-        document.getElementById('tutorial-modal').style.opacity = '0';
-        setTimeout(() => document.getElementById('tutorial-modal').style.display = 'none', 300);
-        gameActive = true;
-        popMoleLoop();
+        scoreDisplay.textContent = 0;
+        timeDisplay.textContent = countdown;
+        timeUp = false;
+        score = 0;
+        peep();
+
+        timer = setInterval(() => {
+            countdown--;
+            timeDisplay.textContent = countdown;
+            if (countdown <= 0) {
+                clearInterval(timer);
+                timeUp = true;
+                if (score < maxScore) gameOver(false);
+            }
+        }, 1000);
     }
 
-    function popMoleLoop() {
-        if(!gameActive) return;
-        
-        if(activeHole !== -1) {
-            let oldMole = document.getElementById(`mole-${activeHole}`);
-            oldMole.classList.remove('active');
-            oldMole.style.animation = 'none';
-        }
+    function bonk(e) {
+        if (!e.isTrusted || !this.classList.contains('up')) return; 
 
-        activeHole = Math.floor(Math.random() * 6);
-        let isCorrect = Math.random() > 0.4;
-        let wordToShow = isCorrect ? targetWord : (roundData.distractors ? roundData.distractors[Math.floor(Math.random() * roundData.distractors.length)] : 'ERR');
-        
-        document.getElementById(`sign-${activeHole}`).innerText = wordToShow;
-        document.getElementById(`sign-${activeHole}`).dataset.correct = isCorrect ? '1' : '0';
-        
-        let moleEl = document.getElementById(`mole-${activeHole}`);
-        moleEl.classList.add('active');
-        moleEl.style.pointerEvents = 'auto';
+        const isCorrect = this.dataset.isCorrect === 'true';
+        this.classList.remove('up');
 
-        let stayTime = Math.random() * 800 + 800;
-        moleInterval = setTimeout(() => {
-            if(gameActive) popMoleLoop();
-        }, stayTime);
-    }
-
-    function whackMole(holeIndex) {
-        if(!gameActive || holeIndex !== activeHole) return;
-        
-        clearTimeout(moleInterval);
-        const sign = document.getElementById(`sign-${holeIndex}`);
-        const moleEl = document.getElementById(`mole-${holeIndex}`);
-        moleEl.style.pointerEvents = 'none';
-
-        if(sign.dataset.correct === '1') {
+        if (isCorrect) {
             score++;
-            moleEl.style.animation = 'whack 0.4s forwards';
-            document.getElementById('score-display').className = `score-stars s${score}`;
+            scoreDisplay.textContent = score;
             
-            if(score >= maxScore) {
-                setTimeout(checkNextRound, 500);
-            } else {
-                setTimeout(popMoleLoop, 400);
+            // Efecto visual de explosión
+            this.innerHTML = `<div class="entity-emoji">💥</div>`;
+            twemoji.parse(this, { folder: 'svg', ext: '.svg' });
+
+            if (score >= maxScore) {
+                timeUp = true;
+                clearInterval(timer);
+                setTimeout(() => gameOver(true), 500);
             }
         } else {
-            document.getElementById('game-board').style.boxShadow = "inset 0 0 50px rgba(239, 68, 68, 0.8)";
-            setTimeout(() => document.getElementById('game-board').style.boxShadow = "0 15px 35px rgba(28, 61, 106, 0.15)", 300);
-            moleEl.classList.remove('active');
-            setTimeout(popMoleLoop, 400);
+            // Penalización visual si se equivoca
+            this.innerHTML = `<div class="entity-emoji">❌</div>`;
+            twemoji.parse(this, { folder: 'svg', ext: '.svg' });
+            countdown = Math.max(0, countdown - 2); // Resta 2 segundos
+            timeDisplay.textContent = countdown;
         }
     }
 
-    function checkNextRound() {
-        gameActive = false;
-        currentRoundIndex++;
-        if (currentRoundIndex < roundsData.length) {
-            loadRound(currentRoundIndex);
+    holes.forEach(hole => hole.addEventListener('pointerdown', bonk));
+
+    function gameOver(isWin) {
+        startModal.classList.add('active');
+        const modalTitle = startModal.querySelector('.modal-title');
+        const modalText = startModal.querySelector('.modal-text');
+        
+        if (isWin) {
+            modalTitle.innerHTML = "¡Excelente Reflejo! 🏆";
+            modalText.innerHTML = `Atrapaste todos los correctos.`;
+            startModal.querySelector('#tut-emoji').style.display = 'none';
+            startModal.querySelector('#tut-word').style.display = 'none';
+            startModal.querySelector('#tut-trans').style.display = 'none';
+            btnStart.innerHTML = "Siguiente Misión ➡️";
+            btnStart.onclick = () => { /* Prevent default reload */ };
+
+            twemoji.parse(startModal, { folder: 'svg', ext: '.svg' });
+            if(typeof fireConfetti !== 'undefined') fireConfetti();
+
+            // GUARDADO EN BD
+            const payload = { lesson_id: <?php echo $lesson_id; ?>, stars: <?php echo $reward_stars; ?> };
+            fetch('../app/save_progress.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            })
+            .then(res => res.json())
+            .then(data => {
+                if(typeof unlockNextButton !== 'undefined') unlockNextButton(payload.lesson_id, payload.stars, <?php echo $lesson['module_id'] ?? 0; ?>);
+            });
+
         } else {
-            executeWin();
+            modalTitle.innerHTML = "¡Tiempo Terminado! ⏳";
+            modalText.innerHTML = `Solo atrapaste ${score} de ${maxScore}. ¡Tú puedes hacerlo mejor!`;
+            btnStart.innerHTML = "Reintentar 🔄";
+            btnStart.onclick = () => location.reload();
+            twemoji.parse(startModal, { folder: 'svg', ext: '.svg' });
         }
-    }
-
-    function executeWin() {
-        if(typeof fireConfetti !== 'undefined') fireConfetti();
-        if(typeof unlockNextButton !== 'undefined') unlockNextButton(<?php echo $lesson_id ?? 0; ?>, 10, <?php echo $lesson['module_id'] ?? 0; ?>);
     }
 </script>
+
+<?php require_once '../includes/footer.php'; ?>

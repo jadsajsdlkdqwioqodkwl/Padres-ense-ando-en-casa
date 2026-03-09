@@ -215,3 +215,166 @@ img {
         border-radius: 8px;
     }
 }
+
+/* =========================================
+   ESTILOS GLOBALES DE MODALES (FIX BUG VISUAL)
+   ========================================= */
+
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(0, 0, 0, 0.75);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999; /* Asegura que cubra el navbar y todo lo demás */
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+    backdrop-filter: blur(5px);
+}
+
+.modal-overlay.active {
+    opacity: 1;
+    visibility: visible;
+}
+
+.modal-content {
+    background-color: #ffffff;
+    border-radius: 24px;
+    padding: 2.5rem;
+    width: 90%;
+    max-width: 500px;
+    text-align: center;
+    box-shadow: 0 15px 35px rgba(0,0,0,0.4);
+    transform: scale(0.85);
+    transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    position: relative;
+    border: 4px solid #f0f0f0;
+}
+
+.modal-overlay.active .modal-content {
+    transform: scale(1);
+}
+
+.modal-title {
+    font-size: 2rem;
+    color: #2d3748;
+    margin-bottom: 1rem;
+    font-weight: 800;
+}
+
+.modal-text {
+    font-size: 1.15rem;
+    color: #4a5568;
+    margin-bottom: 1.5rem;
+    line-height: 1.6;
+}
+
+.btn-play, .btn-primary {
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    padding: 14px 28px;
+    font-size: 1.25rem;
+    border-radius: 50px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: all 0.2s ease;
+    box-shadow: 0 6px 12px rgba(76, 175, 80, 0.3);
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+}
+
+.btn-play:hover, .btn-primary:hover {
+    background-color: #45a049;
+    transform: translateY(-3px);
+    box-shadow: 0 8px 15px rgba(76, 175, 80, 0.4);
+}
+
+.btn-play:active, .btn-primary:active {
+    transform: translateY(1px);
+    box-shadow: 0 3px 6px rgba(76, 175, 80, 0.3);
+}
+
+/* =========================================
+   TWEMOJI GLOBALS
+   ========================================= */
+img.emoji {
+    height: 1.2em;
+    width: 1.2em;
+    margin: 0 .05em 0 .1em;
+    vertical-align: -0.1em;
+    display: inline-block;
+    pointer-events: none; /* Evita que el click se registre en el SVG del emoji en vez del botón */
+}
+
+/* =========================================
+   JUEGO DE TOPOS (FIX CLUMPING / NOCLIP BUG)
+   ========================================= */
+.moles-game-container {
+    width: 100%;
+    max-width: 650px;
+    margin: 2rem auto;
+    padding: 2rem;
+    background: #8BC34A; /* Color pasto */
+    border-radius: 24px;
+    box-shadow: inset 0 0 30px rgba(0,0,0,0.15), 0 10px 20px rgba(0,0,0,0.1);
+}
+
+.moles-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr); /* Crea exactamente 3 columnas parejas */
+    gap: 25px;
+    justify-items: center;
+    align-items: center;
+}
+
+.mole-hole {
+    width: 100%;
+    max-width: 130px;
+    aspect-ratio: 1; /* Mantiene un círculo perfecto */
+    background-color: #3E2723; /* Color tierra profunda */
+    border-radius: 50%;
+    position: relative;
+    overflow: hidden;
+    border: 8px solid #5D4037; /* Borde de tierra exterior */
+    box-shadow: inset 0 15px 15px rgba(0,0,0,0.6);
+}
+
+.mole {
+    font-size: 4.5rem;
+    position: absolute;
+    bottom: -110%; /* Escondido por debajo del div */
+    left: 50%;
+    transform: translateX(-50%);
+    transition: bottom 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    cursor: pointer;
+    user-select: none;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    height: 100%;
+    -webkit-tap-highlight-color: transparent; /* Quita el destello azul en móviles */
+}
+
+.mole.up {
+    bottom: 5%; /* El topo sale a la superficie */
+}
+
+/* Responsividad para Móviles */
+@media (max-width: 600px) {
+    .modal-content { padding: 1.5rem; }
+    .moles-game-container { padding: 1rem; margin: 1rem auto; }
+    .moles-grid { gap: 15px; }
+    .mole-hole { border-width: 5px; }
+    .mole { font-size: 3.5rem; }
+    .btn-play { font-size: 1.1rem; padding: 12px 20px; }
+}

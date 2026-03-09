@@ -1,105 +1,129 @@
 <?php
-$time_limit = $lesson_data['time_limit'] ?? 20; 
-$reward_stars = $lesson['reward_stars'] ?? 5;
+// templates/type_monster.php
+session_start();
+require_once '../includes/config.php';
 
+// Ciberseguridad: Prevenir acceso sin sesión
+if (!isset($_SESSION['user_id'])) {
+    header("Location: ../login.php");
+    exit();
+}
+
+require_once '../includes/head.php';
+require_once '../includes/navbar.php';
+
+$lesson_id = $lesson_id ?? ($lesson['id'] ?? 0);
+$time_limit = $lesson_data['time_limit'] ?? 20; 
+$reward_stars = $reward_stars ?? ($lesson['reward_stars'] ?? 5);
+
+// Fallback de datos simulando la estructura de la BD
 $rounds = $lesson_data['rounds'] ?? [
     [
         'word' => strtoupper($lesson_data['word'] ?? 'APPLE'),
         'phonetic' => $lesson_data['phonetic'] ?? 'ápol',
         'translation' => $lesson_data['translation'] ?? 'Manzana',
+        'emoji' => $lesson_data['emoji'] ?? '🍎', // Nuevo campo para el objetivo dinámico
         'distractors' => $lesson_data['distractors'] ?? ['X', 'Z', 'M'],
-        'context_es' => $lesson_data['context_es'] ?? "El monstruo quiere nuestro pastel. ¡Escribe la palabra mágica!"
+        'context_es' => $lesson_data['context_es'] ?? "El monstruo quiere nuestro objeto. ¡Escribe la palabra mágica!"
     ]
 ];
 ?>
+
+<script src="https://unpkg.com/twemoji@latest/dist/twemoji.min.js" crossorigin="anonymous"></script>
 
 <style>
     /* Estilos globales para Twemoji */
     img.emoji { height: 1.2em; width: 1.2em; margin: 0 .05em 0 .1em; vertical-align: -0.1em; display: inline-block; pointer-events: none; }
     
-    .game-board { position: relative; width: 100%; min-height: 350px; background: var(--bg-light); border-radius: 24px; overflow: hidden; border: 4px solid var(--brand-blue); margin-bottom: 25px; box-shadow: 0 10px 25px rgba(28, 61, 106, 0.1); }
+    /* Seguro de Pantalla Horizontal */
+    #landscape-warning {
+        display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+        background: #1E293B; z-index: 10000; color: white; justify-content: center; 
+        align-items: center; flex-direction: column; text-align: center;
+    }
+    @media screen and (max-height: 450px) and (orientation: landscape) {
+        #landscape-warning { display: flex !important; }
+        .game-wrapper { display: none !important; }
+    }
+
+    .game-board { position: relative; width: 100%; min-height: 350px; background: #F8FAFC; border-radius: 24px; overflow: hidden; border: 4px solid #1E3A8A; margin-bottom: 25px; box-shadow: 0 10px 25px rgba(28, 61, 106, 0.1); }
     
-    /* Posicionamiento fluido con porcentajes */
-    .css-cake { position: absolute; right: 5%; bottom: 20px; width: 65px; height: 55px; background: #F472B6; border-radius: 12px 12px 0 0; border: 3px solid var(--brand-blue); z-index: 2; box-shadow: inset -5px -5px 0 rgba(0,0,0,0.1); }
-    .css-cake::before { content: ''; position: absolute; top: -15px; left: 25px; width: 6px; height: 16px; background: #EF4444; border-radius: 5px; box-shadow: 0 0 5px rgba(239, 68, 68, 0.5); } 
-    
-    .css-monster { position: absolute; left: 2%; bottom: 20px; width: 80px; height: 80px; background: #EF4444; border: 3px solid var(--brand-blue); border-radius: 40% 60% 70% 30% / 40% 50% 60% 50%; animation: morph 2s linear infinite, wobble 0.5s alternate infinite; transition: left 0.2s linear; z-index: 3; box-shadow: inset -5px -5px 0 rgba(0,0,0,0.2); }
-    .css-monster::before, .css-monster::after { content: ''; position: absolute; top: 18px; width: 16px; height: 16px; background: white; border-radius: 50%; border: 3px solid var(--brand-blue); }
+    /* EL MONSTRUO BELLO EN CSS RESTAURADO */
+    .css-monster { position: absolute; left: 2%; bottom: 20px; width: 80px; height: 80px; background: #EF4444; border: 3px solid #1E3A8A; border-radius: 40% 60% 70% 30% / 40% 50% 60% 50%; animation: morph 2s linear infinite, wobble 0.5s alternate infinite; transition: left 0.2s linear, transform 0.3s; z-index: 3; box-shadow: inset -5px -5px 0 rgba(0,0,0,0.2); }
+    .css-monster::before, .css-monster::after { content: ''; position: absolute; top: 18px; width: 16px; height: 16px; background: white; border-radius: 50%; border: 3px solid #1E3A8A; }
     .css-monster::before { left: 16px; } .css-monster::after { right: 16px; }
-    .css-monster-mouth { position: absolute; bottom: 12px; left: 22px; width: 35px; height: 18px; background: var(--brand-blue); border-radius: 0 0 18px 18px; }
+    .css-monster-mouth { position: absolute; bottom: 12px; left: 22px; width: 35px; height: 18px; background: #1E3A8A; border-radius: 0 0 18px 18px; transition: height 0.3s, border-radius 0.3s; }
+    
+    /* OBJETIVO DINÁMICO (Reemplaza al pastel estático) */
+    .twemoji-target { position: absolute; right: 5%; bottom: 10px; font-size: 4.5rem; z-index: 2; filter: drop-shadow(0 10px 10px rgba(0,0,0,0.2)); transition: transform 0.3s; }
     
     .slot-container { display: flex; justify-content: center; gap: 10px; margin-bottom: 25px; flex-wrap: wrap; padding: 0 10px; }
-    .letter-slot { width: clamp(45px, 12vw, 60px); height: clamp(55px, 15vw, 70px); border: 3px dashed #CBD5E1; border-radius: 16px; display: flex; justify-content: center; align-items: center; font-size: clamp(24px, 6vw, 34px); font-weight: 800; background: var(--white); box-shadow: inset 0 3px 6px rgba(0,0,0,0.05); transition: 0.3s; color: var(--text-muted); }
-    .letter-slot.filled { border-style: solid; border-color: var(--brand-green); background: #F0FDF4; color: var(--brand-green); transform: scale(1.05); box-shadow: 0 4px 10px rgba(104, 169, 62, 0.2); }
+    .letter-slot { width: clamp(45px, 12vw, 60px); height: clamp(55px, 15vw, 70px); border: 3px dashed #CBD5E1; border-radius: 16px; display: flex; justify-content: center; align-items: center; font-size: clamp(24px, 6vw, 34px); font-weight: 800; background: #ffffff; box-shadow: inset 0 3px 6px rgba(0,0,0,0.05); transition: 0.3s; color: #94A3B8; }
+    .letter-slot.filled { border-style: solid; border-color: #4CAF50; background: #F0FDF4; color: #4CAF50; transform: scale(1.05); box-shadow: 0 4px 10px rgba(76, 175, 80, 0.2); }
     
     .bubbles-container { display: flex; justify-content: center; flex-wrap: wrap; gap: 12px; min-height: 80px; padding: 0 10px; }
-    .drag-bubble { width: clamp(50px, 14vw, 60px); height: clamp(50px, 14vw, 60px); background: var(--brand-orange); color: white; border-radius: 16px; display: flex; justify-content: center; align-items: center; font-size: clamp(24px, 6vw, 30px); font-weight: 800; cursor: pointer; box-shadow: 0 6px 0 #D97706, 0 10px 15px rgba(242, 156, 56, 0.3); transition: transform 0.1s, opacity 0.3s; user-select: none; touch-action: manipulation; z-index: 10; }
-    .drag-bubble:active { transform: translateY(6px); box-shadow: 0 0px 0 #D97706, 0 2px 5px rgba(242, 156, 56, 0.3); }
+    .drag-bubble { width: clamp(50px, 14vw, 60px); height: clamp(50px, 14vw, 60px); background: #F59E0B; color: white; border-radius: 16px; display: flex; justify-content: center; align-items: center; font-size: clamp(24px, 6vw, 30px); font-weight: 800; cursor: pointer; box-shadow: 0 6px 0 #D97706, 0 10px 15px rgba(245, 158, 11, 0.3); transition: transform 0.1s, opacity 0.3s; user-select: none; touch-action: manipulation; z-index: 10; }
+    .drag-bubble:active { transform: translateY(6px); box-shadow: 0 0px 0 #D97706, 0 2px 5px rgba(245, 158, 11, 0.3); }
     .drag-bubble.hidden { opacity: 0; pointer-events: none; transform: scale(0); }
     
-    .mission-modal { overflow-y: auto; }
-    
-    .round-indicator { position: absolute; top: 15px; left: 15px; background: var(--brand-blue); color: white; font-weight: 700; padding: 6px 18px; border-radius: 50px; font-size: 14px; z-index: 50; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+    .round-indicator { position: absolute; top: 15px; left: 15px; background: #1E3A8A; color: white; font-weight: 700; padding: 6px 18px; border-radius: 50px; font-size: 14px; z-index: 50; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
     .danger-zone { animation: flashRed 1s infinite; }
     
     @keyframes morph { 0%, 100% { border-radius: 40% 60% 70% 30% / 40% 50% 60% 50%; } 50% { border-radius: 60% 40% 30% 70% / 60% 50% 40% 50%; } }
     @keyframes wobble { from { transform: translateY(0) rotate(-5deg); } to { transform: translateY(-10px) rotate(5deg); } }
-    @keyframes flashRed { 0%, 100% { background: var(--bg-light); } 50% { background: #FEE2E2; } }
+    @keyframes flashRed { 0%, 100% { background: #F8FAFC; } 50% { background: #FEE2E2; } }
     @keyframes zap { 0% { transform: scale(1); filter: brightness(1); } 50% { transform: scale(0.2) rotate(180deg); filter: brightness(5); } 100% { transform: scale(0); opacity: 0; } }
     @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-5px); } 50% { transform: translateX(5px); } 75% { transform: translateX(-5px); } }
 </style>
 
-<div class="game-area text-center" style="border: none; background: transparent; padding-top: 5px; box-shadow: none;">
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-        <h3 style="margin: 0; color: var(--brand-blue); font-size: 1.5rem;">🛡️ Word Defender</h3>
-        <button onclick="giveHint()" style="background: #FBBF24; border: none; border-radius: 50%; width: 50px; height: 50px; font-size: 24px; cursor: pointer; box-shadow: 0 4px 0 #D97706, 0 4px 10px rgba(245, 158, 11, 0.3); transition: 0.2s;" title="Pedir Pista">💡</button>
-    </div>
-
-    <div class="game-board" id="game-board">
-        <div class="round-indicator" id="round-indicator">Ronda 1</div>
-
-        <div class="mission-modal" id="tutorial-modal">
-            <h2 style="color: var(--brand-blue); margin-top: 0; margin-bottom: 5px; font-size: 2rem;">📜 Misión</h2>
-            <p style="color: #64748B; font-size: 16px; margin-bottom: 5px;" id="tut-context"></p>
-            <div style="font-size: 35px; font-weight: 800; color: var(--brand-orange); margin: 10px 0; letter-spacing: 5px; text-shadow: 0 2px 4px rgba(0,0,0,0.1);" id="tut-word">WORD</div>
-            <p style="color: #94A3B8; font-size: 18px; margin-bottom: 15px; font-weight: 600;" id="tut-trans">(Traducción)</p>
-            
-            <div class="modal-actions">
-                <button class="btn btn-action" id="btn-start" onclick="startGame()" style="display: block;">▶️ ¡Jugar Ahora!</button>
-            </div>
-        </div>
-
-        <div class="css-monster" id="monster"><div class="css-monster-mouth"></div></div>
-        <div class="css-cake" id="cake"></div>
-    </div>
-
-    <div class="slot-container" id="slots-container"></div>
-    <div class="bubbles-container" id="bubbles-container"></div>
+<div id="landscape-warning">
+    <div style="font-size: 5rem; margin-bottom: 20px;">📱🔄</div>
+    <h2 style="font-size: 2rem; margin-bottom: 10px;">¡Gira tu dispositivo!</h2>
+    <p style="font-size: 1.2rem; color: #94A3B8;">Este juego necesita jugarse en formato vertical para una mejor experiencia.</p>
 </div>
 
-<script>
-    // Inicializador Twemoji Dinámico
-    function applyTwemoji(node) {
-        if (typeof twemoji !== 'undefined') {
-            twemoji.parse(node, { folder: 'svg', ext: '.svg' });
-        } else {
-            const script = document.createElement('script');
-            script.src = "https://cdnjs.cloudflare.com/ajax/libs/twemoji/14.0.2/twemoji.min.js";
-            script.onload = () => twemoji.parse(node, { folder: 'svg', ext: '.svg' });
-            document.head.appendChild(script);
-        }
-    }
+<main class="game-wrapper container mx-auto px-4 py-8" style="min-height: 85vh;">
+    <div class="game-area text-center mx-auto" style="max-width: 800px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <h3 class="text-2xl font-black text-gray-800">🛡️ Word Defender</h3>
+            <button onclick="giveHint()" style="background: #FBBF24; border: none; border-radius: 50%; width: 50px; height: 50px; font-size: 24px; cursor: pointer; box-shadow: 0 4px 0 #D97706, 0 4px 10px rgba(245, 158, 11, 0.3); transition: 0.2s;" title="Pedir Pista">💡</button>
+        </div>
 
+        <div class="game-board" id="game-board">
+            <div class="round-indicator" id="round-indicator">Ronda 1</div>
+
+            <div id="tutorial-modal" class="modal-overlay active">
+                <div class="modal-content">
+                    <h2 class="modal-title">📜 Misión</h2>
+                    <p class="modal-text" id="tut-context"></p>
+                    <div style="font-size: 3rem; margin: 10px 0;" id="tut-emoji-display">🎯</div>
+                    <div style="font-size: 2.5rem; font-weight: 900; color: #F59E0B; margin-bottom: 10px; letter-spacing: 5px; text-shadow: 0 2px 4px rgba(0,0,0,0.1);" id="tut-word">WORD</div>
+                    <p style="color: #64748B; font-size: 1.2rem; margin-bottom: 25px; font-weight: 600;" id="tut-trans">(Traducción)</p>
+                    <button id="btn-start" onclick="startGame()" class="btn-play w-full bg-blue-600 hover:bg-blue-700">▶️ ¡Proteger!</button>
+                </div>
+            </div>
+
+            <div class="css-monster" id="monster"><div class="css-monster-mouth" id="monster-mouth"></div></div>
+            
+            <div class="twemoji-target" id="dynamic-target">🎯</div>
+        </div>
+
+        <div class="slot-container" id="slots-container"></div>
+        <div class="bubbles-container" id="bubbles-container"></div>
+    </div>
+</main>
+
+<script>
     let roundsData = window.dynamicRoundsData || <?php echo json_encode($rounds); ?>;
-    if (window.dynamicRoundsData) {
-        roundsData = roundsData.map(r => ({
-            word: r.target_word || r.word,
-            phonetic: r.target_word || r.word,
-            translation: r.translation,
-            distractors: r.distractors || ['X', 'Z', 'M', 'Q'],
-            context_es: r.context_es || "¡Defiende el pastel escribiendo la palabra!"
-        }));
-    }
+    
+    // Normalizador de datos
+    roundsData = roundsData.map(r => ({
+        word: r.target_word || r.word,
+        translation: r.translation,
+        emoji: r.emoji || r.content || '📦', // Soporta varios formatos de DB
+        distractors: r.distractors || ['X', 'Z', 'M', 'Q'],
+        context_es: r.context_es || "¡Defiende el objeto escribiendo la palabra!"
+    }));
 
     const timeLimit = <?php echo $time_limit; ?>; 
     let currentRoundIndex = 0;
@@ -107,15 +131,20 @@ $rounds = $lesson_data['rounds'] ?? [
     let wordLength = 0;
     
     let gameActive = false;
-    let monsterPos = 2; // Ahora en porcentaje (%)
-    const targetPos = 75; // 75% es cerca del pastel
+    let monsterPos = 2; 
+    const targetPos = 75; 
     const stepAmount = (targetPos - 2) / (timeLimit * 10); 
     let monsterInterval;
     
     const monster = document.getElementById('monster');
+    const monsterMouth = document.getElementById('monster-mouth');
+    const dynamicTarget = document.getElementById('dynamic-target');
     const gameBoard = document.getElementById('game-board');
 
-    loadRound(currentRoundIndex);
+    document.addEventListener('DOMContentLoaded', () => {
+        twemoji.parse(document.body, { folder: 'svg', ext: '.svg' });
+        loadRound(currentRoundIndex);
+    });
 
     function loadRound(index) {
         if (!roundsData || !roundsData[index]) return;
@@ -127,11 +156,18 @@ $rounds = $lesson_data['rounds'] ?? [
         document.getElementById('tut-context').innerText = round.context_es;
         document.getElementById('tut-word').innerText = round.word;
         document.getElementById('tut-trans').innerText = `(${round.translation})`;
+        
+        // Actualizamos el emoji objetivo dinámicamente
+        document.getElementById('tut-emoji-display').innerText = round.emoji;
+        dynamicTarget.innerText = round.emoji;
+        dynamicTarget.style.display = 'block';
+        dynamicTarget.style.transform = 'scale(1)';
 
         monsterPos = 2;
         monster.style.left = monsterPos + '%';
         monster.style.animation = 'morph 2s linear infinite, wobble 0.5s alternate infinite';
         monster.style.transform = 'scale(1)';
+        monsterMouth.style.height = '18px'; // Boca normal
 
         let slotsHTML = '';
         for(let i=0; i<wordLength; i++) {
@@ -148,15 +184,13 @@ $rounds = $lesson_data['rounds'] ?? [
         });
         document.getElementById('bubbles-container').innerHTML = bubblesHTML;
 
-        document.getElementById('tutorial-modal').style.display = 'flex';
-        document.getElementById('tutorial-modal').style.opacity = '1';
-        
-        applyTwemoji(document.body); // Renderizar Emojis UI
+        document.getElementById('tutorial-modal').classList.add('active');
+        twemoji.parse(document.getElementById('tutorial-modal'), { folder: 'svg', ext: '.svg' });
+        twemoji.parse(gameBoard, { folder: 'svg', ext: '.svg' });
     }
 
     function startGame() {
-        document.getElementById('tutorial-modal').style.opacity = '0';
-        setTimeout(() => document.getElementById('tutorial-modal').style.display = 'none', 500);
+        document.getElementById('tutorial-modal').classList.remove('active');
         gameActive = true;
         startMonster();
     }
@@ -167,7 +201,18 @@ $rounds = $lesson_data['rounds'] ?? [
             if (!gameActive) return;
             monsterPos += stepAmount;
             monster.style.left = monsterPos + '%';
-            if (monsterPos > targetPos * 0.7) gameBoard.classList.add('danger-zone');
+            
+            // Si el monstruo se acerca, abre la boca
+            if (monsterPos > targetPos * 0.7) {
+                gameBoard.classList.add('danger-zone');
+                monsterMouth.style.height = '30px'; 
+                monsterMouth.style.borderRadius = '50%';
+            } else {
+                gameBoard.classList.remove('danger-zone');
+                monsterMouth.style.height = '18px';
+                monsterMouth.style.borderRadius = '0 0 18px 18px';
+            }
+
             if (monsterPos >= targetPos) gameOver(false);
         }, 100);
     }
@@ -190,7 +235,7 @@ $rounds = $lesson_data['rounds'] ?? [
             bubbleEl.classList.add('hidden');
             currentCorrect++;
             
-            monsterPos = Math.max(2, monsterPos - 10); // Retrocede 10%
+            monsterPos = Math.max(2, monsterPos - 12); // Retroceso exitoso
             monster.style.left = monsterPos + '%';
 
             if (currentCorrect === wordLength) checkNextRound();
@@ -198,7 +243,7 @@ $rounds = $lesson_data['rounds'] ?? [
             gameBoard.classList.add('danger-zone');
             bubbleEl.style.animation = 'shake 0.3s';
             setTimeout(() => { gameBoard.classList.remove('danger-zone'); bubbleEl.style.animation = 'none'; }, 300);
-            monsterPos += 2; // Penalización avanza 2%
+            monsterPos += 2; 
         }
     }
 
@@ -206,7 +251,7 @@ $rounds = $lesson_data['rounds'] ?? [
         if(!gameActive || currentCorrect >= wordLength) return;
         const expectedChar = document.getElementById('slot-' + currentCorrect).getAttribute('data-expected');
         
-        monsterPos += 4; // Cuesta 4% pedir pista
+        monsterPos += 4; 
         monster.style.left = monsterPos + '%';
         if (monsterPos >= targetPos) gameOver(false);
         
@@ -239,16 +284,41 @@ $rounds = $lesson_data['rounds'] ?? [
         gameBoard.classList.remove('danger-zone');
 
         if (isWin) {
+            const modal = document.getElementById('tutorial-modal');
+            modal.querySelector('.modal-title').innerHTML = "¡Defensa Exitosa! 🛡️";
+            modal.querySelector('.modal-text').innerHTML = "¡Protegiste todos los objetos!";
+            modal.querySelector('#tut-emoji-display').style.display = 'none';
+            modal.querySelector('#tut-word').style.display = 'none';
+            modal.querySelector('#tut-trans').style.display = 'none';
+            modal.querySelector('.btn-play').innerHTML = "Continuar ➡️";
+            modal.classList.add('active');
+            twemoji.parse(modal, { folder: 'svg', ext: '.svg' });
+
             if(typeof fireConfetti !== 'undefined') fireConfetti();
-            if(typeof unlockNextButton !== 'undefined') unlockNextButton(<?php echo $lesson['id'] ?? 0; ?>, <?php echo $reward_stars; ?>, <?php echo $lesson['module_id'] ?? 0; ?>);
+            
+            const payload = { lesson_id: <?php echo $lesson_id; ?>, stars: <?php echo $reward_stars; ?> };
+            fetch('../app/save_progress.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            })
+            .then(res => res.json())
+            .then(data => {
+                if(typeof unlockNextButton !== 'undefined') unlockNextButton(payload.lesson_id, payload.stars, <?php echo $lesson['module_id'] ?? 0; ?>);
+            }).catch(error => console.error(error));
+
         } else {
-            document.getElementById('cake').style.display = 'none';
+            // Animación de comerse el objeto
+            dynamicTarget.style.display = 'none';
             monster.style.transform = 'scale(1.5)';
+            monsterMouth.style.height = '5px'; // Cierra la boca, se lo comió
             
             setTimeout(() => {
-                alert("¡Oh no! El monstruo llegó al pastel. ¡Inténtalo de nuevo!");
+                alert("¡Oh no! El monstruo alcanzó el objeto. ¡Inténtalo de nuevo!");
                 location.reload(); 
-            }, 1000);
+            }, 1200);
         }
     }
 </script>
+
+<?php require_once '../includes/footer.php'; ?>
