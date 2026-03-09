@@ -1,5 +1,20 @@
 <style>
-    .river-board { position: relative; width: 100%; height: 480px; background: linear-gradient(180deg, #38BDF8 0%, #0284C7 100%); border-radius: 24px; overflow: hidden; border: 4px solid var(--brand-blue); margin-bottom: 20px; box-shadow: 0 15px 35px rgba(28, 61, 106, 0.2); touch-action: none; display: flex; flex-direction: column; justify-content: flex-end; }
+    .river-board { 
+        position: relative; 
+        width: 100%; 
+        min-height: 480px; 
+        max-width: 100%; 
+        background: linear-gradient(180deg, #38BDF8 0%, #0284C7 100%); 
+        border-radius: 24px; 
+        overflow: hidden; 
+        border: 4px solid var(--brand-blue); 
+        margin-bottom: 20px; 
+        box-shadow: 0 15px 35px rgba(28, 61, 106, 0.2); 
+        touch-action: pan-y; 
+        display: flex; 
+        flex-direction: column; 
+        justify-content: flex-end; 
+    }
     
     .water-texture { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-image: radial-gradient(circle at 50px 50px, rgba(255,255,255,0.2) 2px, transparent 3px), radial-gradient(circle at 150px 100px, rgba(255,255,255,0.1) 2px, transparent 3px); background-size: 200px 200px; animation: waterFlow 10s linear infinite; pointer-events: none; }
     
@@ -19,7 +34,7 @@
     .hud-top { position: absolute; top: 15px; left: 0; width: 100%; display: flex; justify-content: center; z-index: 30; pointer-events: none; }
     .target-display { background: var(--white); border: 4px solid var(--brand-blue); color: var(--brand-blue); padding: 10px 30px; border-radius: 50px; font-weight: 800; font-size: 24px; box-shadow: 0 10px 20px rgba(0,0,0,0.2); }
     
-    .mission-modal { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.95); backdrop-filter: blur(5px); z-index: 100; display: flex; flex-direction: column; justify-content: center; align-items: center; transition: opacity 0.3s; padding: 20px; text-align: center; }
+    .mission-modal { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.95); backdrop-filter: blur(5px); z-index: 100; display: flex; flex-direction: column; justify-content: center; align-items: center; transition: opacity 0.3s; padding: 20px; text-align: center; overflow-y: auto; }
     .btn-action { background: var(--brand-green); color: white; border: none; padding: 16px 40px; font-size: 18px; font-weight: 700; border-radius: 50px; cursor: pointer; box-shadow: 0 4px 14px rgba(104, 169, 62, 0.3); margin-top: 20px; transition: 0.2s; }
     .btn-action:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(104, 169, 62, 0.4); }
 
@@ -31,14 +46,17 @@
 </style>
 
 <div class="game-area text-center" style="border: none; background: transparent; padding-top: 5px; box-shadow: none;">
-    <h3 style="margin: 0; margin-bottom: 20px; color: var(--brand-blue); font-size: 1.8rem;">🐸 Salto de Ranita</h3>
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+        <h3 style="margin: 0; color: var(--brand-blue); font-size: 1.8rem;">🐸 Salto de Ranita</h3>
+        <div id="round-counter" style="background: var(--brand-blue); color: white; padding: 5px 15px; border-radius: 20px; font-weight: 700;">1/1</div>
+    </div>
 
     <div class="river-board" id="river-board">
         <div class="water-texture"></div>
         
         <div class="mission-modal" id="tutorial-modal">
             <h2 style="color: var(--brand-green); margin-top: 0; font-size: 2.2rem;">¡Cruza el río!</h2>
-            <p style="color: #94A3B8; font-size: 18px; margin-bottom: 15px;">Salta solo en las hojas que tengan esta palabra:</p>
+            <p style="color: #94A3B8; font-size: 18px; margin-bottom: 15px;" id="tut-context">Salta solo en las hojas que tengan esta palabra:</p>
             <div style="font-size: 45px; font-weight: 800; color: var(--white); letter-spacing: 2px;" id="tut-word">WORD</div>
             <p style="color: #64748B; font-size: 20px; font-weight: 600; margin-bottom: 10px;" id="tut-trans">(Traducción)</p>
             
@@ -60,10 +78,12 @@
 </div>
 
 <script>
-    let roundData = window.dynamicRoundsData[0];
+    let roundsData = window.dynamicRoundsData || [];
+    let currentRoundIndex = 0;
+    let roundData = null;
     let gameActive = false;
     let currentStep = 0;
-    const maxSteps = 3;
+    const maxSteps = 3; // Cuantos saltos debe dar para cruzar
     
     const board = document.getElementById('river-board');
     const frog = document.getElementById('frog');
@@ -71,12 +91,40 @@
     const splash = document.getElementById('splash');
     
     let activeRows = [];
+    let targetWord = "";
 
-    // Configuración Inicial
-    const targetWord = roundData.target_word || roundData.word;
-    document.getElementById('tut-word').innerText = targetWord;
-    document.getElementById('tut-trans').innerText = `(${roundData.translation})`;
-    document.getElementById('hud-word').innerText = targetWord;
+    // Iniciar el juego
+    if (roundsData.length > 0) {
+        loadRound(currentRoundIndex);
+    }
+
+    function loadRound(index) {
+        roundData = roundsData[index];
+        targetWord = roundData.target_word || roundData.word;
+        
+        document.getElementById('tut-word').innerText = targetWord;
+        document.getElementById('tut-trans').innerText = `(${roundData.translation})`;
+        document.getElementById('hud-word').innerText = targetWord;
+        
+        if (roundData.context_es) {
+            document.getElementById('tut-context').innerText = roundData.context_es;
+        }
+
+        document.getElementById('round-counter').innerText = `${index + 1}/${roundsData.length}`;
+
+        // Reiniciar estado visual
+        frog.classList.remove('jumping');
+        frog.style.bottom = '10px';
+        frog.style.left = 'calc(50% - 30px)';
+        frog.style.opacity = '1';
+        rowsContainer.innerHTML = '';
+        activeRows = [];
+        currentStep = 0;
+
+        document.getElementById('tutorial-modal').style.display = 'flex';
+        document.getElementById('tutorial-modal').style.opacity = '1';
+        document.getElementById('btn-start').style.display = 'none';
+    }
 
     function playIntroAudio() {
         document.getElementById('btn-start').style.display = 'block';
@@ -85,7 +133,7 @@
 
     function startGame() {
         document.getElementById('tutorial-modal').style.opacity = '0';
-        setTimeout(() => document.getElementById('tutorial-modal').style.display = 'none', 300);
+        setTimeout(() => { document.getElementById('tutorial-modal').style.display = 'none'; }, 300);
         
         // Crear las 3 filas de salto
         for(let i=0; i<maxSteps; i++) {
@@ -198,10 +246,16 @@
         frog.style.bottom = '120%';
         
         if(typeof sfxWin !== 'undefined') sfxWin.play();
-        if(typeof fireConfetti !== 'undefined') fireConfetti();
         
-        setTimeout(() => {
-            if(typeof unlockNextButton !== 'undefined') unlockNextButton(<?php echo $lesson_id; ?>, 10, <?php echo $lesson['module_id']; ?>);
-        }, 1000);
+        // Comprobar si hay más rondas
+        currentRoundIndex++;
+        if (currentRoundIndex < roundsData.length) {
+            setTimeout(() => { loadRound(currentRoundIndex); }, 1500);
+        } else {
+            if(typeof fireConfetti !== 'undefined') fireConfetti();
+            setTimeout(() => {
+                if(typeof unlockNextButton !== 'undefined') unlockNextButton(<?php echo $lesson_id ?? 0; ?>, 10, <?php echo $lesson['module_id'] ?? 0; ?>);
+            }, 1000);
+        }
     }
 </script>

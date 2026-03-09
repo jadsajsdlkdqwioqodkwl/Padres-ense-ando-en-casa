@@ -1,6 +1,5 @@
 <style>
-    .ninja-board { position: relative; width: 100%; height: 450px; background: radial-gradient(circle at center, #1E293B 0%, #0F172A 100%); border-radius: 24px; overflow: hidden; border: 4px solid var(--brand-blue); margin-bottom: 20px; box-shadow: 0 15px 35px rgba(28, 61, 106, 0.15); cursor: crosshair; touch-action: none; }
-    
+    .ninja-board { position: relative; width: 100%; min-height: 500px; max-height: 80vh; max-width: 100%; background: radial-gradient(circle at center, #1E293B 0%, #0F172A 100%); border-radius: 24px; overflow: hidden; border: 4px solid var(--brand-blue); margin-bottom: 20px; box-shadow: 0 15px 35px rgba(28, 61, 106, 0.15); cursor: crosshair; touch-action: none; }    
     .target-hud { position: absolute; top: 20px; left: 50%; transform: translateX(-50%); background: rgba(255,255,255,0.1); border: 2px solid rgba(255,255,255,0.2); backdrop-filter: blur(10px); padding: 10px 40px; border-radius: 50px; text-align: center; z-index: 10; }
     
     .ninja-item { position: absolute; display: flex; flex-direction: column; align-items: center; justify-content: center; user-select: none; z-index: 5; text-shadow: 0 5px 15px rgba(0,0,0,0.5); }
@@ -12,8 +11,7 @@
     .sliced-left { animation: sliceLeft 0.5s forwards; }
     .sliced-right { animation: sliceRight 0.5s forwards; }
     
-    .mission-modal { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.95); backdrop-filter: blur(5px); z-index: 100; display: flex; flex-direction: column; justify-content: center; align-items: center; transition: opacity 0.3s; padding: 20px; text-align: center; }
-    .btn-action { background: var(--brand-orange); color: white; border: none; padding: 16px 35px; font-size: 18px; font-weight: 700; border-radius: 50px; cursor: pointer; box-shadow: 0 4px 14px rgba(242, 156, 56, 0.3); margin-top: 20px; transition: 0.2s; }
+    .mission-modal { overflow-y: auto; max-height: 100%; } /* Evita que el modal se corte en móvil */    .btn-action { background: var(--brand-orange); color: white; border: none; padding: 16px 35px; font-size: 18px; font-weight: 700; border-radius: 50px; cursor: pointer; box-shadow: 0 4px 14px rgba(242, 156, 56, 0.3); margin-top: 20px; transition: 0.2s; }
     .btn-action:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(242, 156, 56, 0.4); }
     
     @keyframes sliceLeft { to { transform: translate(-50px, 50px) rotate(-20deg); opacity: 0; } }
@@ -93,7 +91,7 @@
         // Actualizar posiciones (Gravedad)
         for(let i = activeItems.length - 1; i >= 0; i--) {
             let item = activeItems[i];
-            item.vy += 0.003 * dt; // Gravedad
+            item.vy += 0.002 * dt; // ANTES: 0.003. AHORA caen un poco más lento (gravedad lunar)
             item.x += item.vx * dt;
             item.y += item.vy * dt;
             item.rotation += item.vRot * dt;
@@ -127,12 +125,12 @@
             <div class="ninja-word">${wordDisplay}</div>
         `;
         
-        // Atributos de física
+        // FÍSICAS MEJORADAS: Saltan más alto y más tiempo en pantalla
         let startX = Math.random() * (board.offsetWidth - 100) + 50;
         let startY = board.offsetHeight;
-        let velocityY = -(Math.random() * 0.4 + 0.8); // Impulso hacia arriba
-        let velocityX = (board.offsetWidth / 2 - startX) * 0.001; // Curva hacia el centro
-        
+        let velocityY = -(Math.random() * 0.5 + 1.2); // ANTES: 0.4 + 0.8. AHORA saltan más alto.
+        let velocityX = (board.offsetWidth / 2 - startX) * 0.001;
+
         el.style.transform = `translate(${startX}px, ${startY}px)`;
         board.appendChild(el);
         

@@ -1,5 +1,5 @@
 <style>
-    .space-board { position: relative; width: 100%; height: 480px; background: linear-gradient(180deg, #0F172A 0%, #1E293B 60%, var(--brand-blue) 100%); border-radius: 24px; overflow: hidden; border: 4px solid var(--brand-lblue); margin-bottom: 20px; box-shadow: 0 15px 35px rgba(28, 61, 106, 0.2); touch-action: none; display: flex; }
+    .space-board { touch-action: pan-y; /* Permite scroll vertical pero detecta toques */ }
     
     .starfield { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-image: radial-gradient(2px 2px at 20px 30px, #ffffff, rgba(0,0,0,0)), radial-gradient(2px 2px at 40px 70px, #ffffff, rgba(0,0,0,0)), radial-gradient(2px 2px at 50px 160px, #ffffff, rgba(0,0,0,0)), radial-gradient(2px 2px at 90px 40px, #ffffff, rgba(0,0,0,0)); background-repeat: repeat; animation: spaceScroll 20s linear infinite; opacity: 0.5; pointer-events: none; }
     
@@ -21,7 +21,7 @@
     .fuel-bar-container { width: 120px; height: 25px; background: rgba(0,0,0,0.5); border-radius: 50px; border: 2px solid rgba(255,255,255,0.2); overflow: hidden; position: relative; }
     .fuel-bar-fill { height: 100%; width: 0%; background: linear-gradient(90deg, #F29C38, #68A93E); transition: width 0.3s ease-out; }
     
-    .mission-modal { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.95); backdrop-filter: blur(5px); z-index: 100; display: flex; flex-direction: column; justify-content: center; align-items: center; transition: opacity 0.3s; padding: 20px; text-align: center; }
+    .mission-modal { overflow-y: auto; }
     .btn-action { background: var(--brand-green); color: white; border: none; padding: 16px 40px; font-size: 18px; font-weight: 700; border-radius: 50px; cursor: pointer; box-shadow: 0 4px 14px rgba(104, 169, 62, 0.3); margin-top: 20px; transition: 0.2s; }
     .btn-action:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(104, 169, 62, 0.4); }
 
@@ -58,9 +58,9 @@
             <div class="fuel-bar-container"><div class="fuel-bar-fill" id="fuel-bar"></div></div>
         </div>
 
-        <div class="lane" onclick="moveRocket(0)"></div>
-        <div class="lane" onclick="moveRocket(1)"></div>
-        <div class="lane" onclick="moveRocket(2)"></div>
+        <div class="lane" onpointerdown="moveRocket(0)"></div>
+        <div class="lane" onpointerdown="moveRocket(1)"></div>
+        <div class="lane" onpointerdown="moveRocket(2)"></div>
 
         <div class="rocket-player" id="rocket">
             <div class="rocket-body">🚀</div>

@@ -1,12 +1,10 @@
 <style>
-    .game-board { position: relative; width: 100%; height: 420px; background: linear-gradient(180deg, #38BDF8 0%, #BAE6FD 40%, #86EFAC 40%, #22C55E 100%); border-radius: 24px; overflow: hidden; border: 4px solid var(--brand-blue); margin-bottom: 20px; box-shadow: 0 15px 35px rgba(28, 61, 106, 0.15); display: flex; flex-direction: column; }
-    
+    .game-board { height: 550px; /* ANTES 420px. Más espacio vertical */ }    
     .sky-zone { flex: 0.4; display: flex; justify-content: center; align-items: flex-start; padding-top: 20px; position: relative; }
     .sun { position: absolute; top: 10px; right: 20px; font-size: 50px; animation: spin 10s linear infinite; }
     .target-board { background: var(--white); border: 4px solid var(--brand-blue); padding: 10px 30px; border-radius: 50px; box-shadow: 0 10px 20px rgba(0,0,0,0.1); text-align: center; z-index: 10; }
     
-    .ground-zone { flex: 0.6; display: grid; grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(2, 1fr); gap: 10px; padding: 10px 20px; }
-    .hole-container { position: relative; width: 100%; height: 100%; display: flex; justify-content: center; align-items: flex-end; overflow: hidden; }
+    .ground-zone { flex: 0.6; display: grid; grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(2, 1fr); gap: 15px; row-gap: 40px; padding: 10px 20px; } /* ANTES gap: 10px. AHORA row-gap de 40px evita glitch */    .hole-container { position: relative; width: 100%; height: 100%; display: flex; justify-content: center; align-items: flex-end; overflow: hidden; }
     .dirt-hole { position: absolute; bottom: 10px; width: 80%; height: 35px; background: #451A03; border-radius: 50%; box-shadow: inset 0 8px 15px rgba(0,0,0,0.6); z-index: 5; }
     
     .mole { position: absolute; bottom: -100px; width: 70px; height: 95px; background: #A16207; border-radius: 40px 40px 10px 10px; transition: bottom 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275); cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; padding-top: 10px; z-index: 4; box-shadow: inset -5px -5px 10px rgba(0,0,0,0.3); }
@@ -14,7 +12,7 @@
     .mole-face { font-size: 28px; line-height: 1; margin-bottom: 5px; }
     .mole-sign { background: var(--white); color: var(--brand-blue); padding: 4px 10px; border-radius: 8px; font-weight: 800; border: 2px solid #713F12; font-size: 14px; box-shadow: 0 4px 6px rgba(0,0,0,0.2); transition: 0.2s; }
     
-    .mission-modal { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.95); backdrop-filter: blur(5px); z-index: 100; display: flex; flex-direction: column; justify-content: center; align-items: center; border-radius: 20px; transition: opacity 0.3s; padding: 20px; text-align: center; }
+    .mission-modal { overflow-y: auto; } /* Scroll móvil */
     .btn-action { background: var(--brand-green); color: white; border: none; padding: 16px 35px; font-size: 18px; font-weight: 700; border-radius: 50px; cursor: pointer; box-shadow: 0 4px 14px rgba(104, 169, 62, 0.3); margin-top: 20px; transition: 0.2s; }
     .btn-action:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(104, 169, 62, 0.4); }
     

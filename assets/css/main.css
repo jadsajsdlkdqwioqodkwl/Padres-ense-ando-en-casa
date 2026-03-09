@@ -78,7 +78,7 @@ h1, h2, h3 {
 
 .btn:active { transform: scale(0.98); }
 
-/* Forzar que los modales de misiones cubran toda la pantalla */
+/* Forzar que los modales de misiones cubran toda la pantalla y tengan scroll */
 .mission-modal {
     position: fixed !important;
     top: 0 !important;
@@ -91,4 +91,6 @@ h1, h2, h3 {
     flex-direction: column;
     justify-content: center;
     align-items: center;
+    overflow-y: auto !important; /* AÑADIDO: Permite scroll en pantallas pequeñas */
+    padding: 20px;
 }
