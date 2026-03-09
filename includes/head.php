@@ -1,7 +1,15 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title><?php echo isset($page_title) ? $page_title . " - My World" : "My World"; ?></title>
+
 <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/twemoji/14.0.2/twemoji.min.js"></script>
+<script>
+    // Parsea toda la página para convertir emojis nativos a imágenes HD de Twemoji
+    document.addEventListener("DOMContentLoaded", function() {
+        twemoji.parse(document.body, { folder: 'svg', ext: '.svg' });
+    });
+</script>
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -60,4 +68,14 @@
     }
     
     .text-center { text-align: center; }
+
+    /* FASE 5: Regla CSS global para que los Twemoji no rompan la alineación del texto */
+    img.emoji { 
+        height: 1.2em; 
+        width: 1.2em; 
+        margin: 0 .05em 0 .1em; 
+        vertical-align: -0.1em; 
+        display: inline-block; 
+        pointer-events: none; 
+    }
 </style>

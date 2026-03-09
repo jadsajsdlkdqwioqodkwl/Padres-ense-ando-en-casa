@@ -36,6 +36,40 @@ $page_title = "Mis Módulos";
         .module-card:hover .btn-enter { background: #E2E8F0; }
     </style>
 </head>
+<div id="onboarding-modal" class="mission-modal" style="display: none; background: rgba(255,255,255,0.98) !important;">
+    <h2 style="color: var(--brand-blue); font-size: 2.2rem; margin-top: 0; text-align: center;">¡Bienvenidos a My World! 🌍</h2>
+    
+    <div style="background: #F0F9FF; border-left: 6px solid var(--brand-lblue); padding: 20px; border-radius: 12px; max-width: 500px; text-align: left; margin-bottom: 25px;">
+        <p style="color: #334155; font-size: 1.1rem; margin-top: 0;">
+            Esta plataforma está diseñada para que <strong>tú</strong> seas el mejor maestro de inglés de tu hijo, aunque no sepas el idioma.
+        </p>
+        <ul style="color: #475569; font-size: 1.05rem; padding-left: 20px;">
+            <li style="margin-bottom: 10px;"><strong>Lee la pronunciación:</strong> Todo el inglés tiene debajo cómo se lee en español (ej. Apple = "épol"). ¡Léelo en voz alta!</li>
+            <li style="margin-bottom: 10px;"><strong>Jueguen juntos:</strong> Ayuda a tu hijo a relacionar lo que pronuncias con los elementos en pantalla.</li>
+            <li><strong>¡Cero audios automáticos!</strong> Queremos que tu voz sea la guía de esta aventura.</li>
+        </ul>
+    </div>
+
+    <div class="modal-actions">
+        <button class="btn btn-action" onclick="closeOnboarding()" style="background: var(--brand-green);">¡Entendido, a jugar! ▶️</button>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        // Muestra el modal si nunca lo ha visto
+        if(!localStorage.getItem('onboarding_seen')) {
+            document.getElementById('onboarding-modal').style.display = 'flex';
+        }
+    });
+
+    function closeOnboarding() {
+        document.getElementById('onboarding-modal').style.display = 'none';
+        localStorage.setItem('onboarding_seen', 'true');
+        // Activa la música global al iniciar la primera vez
+        if(typeof toggleMusic === 'function') toggleMusic(); 
+    }
+</script>
 <body>
     <div class="container text-center">
         <?php include 'includes/navbar.php'; ?>

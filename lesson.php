@@ -73,6 +73,42 @@ if ($step > 0 && $step <= 5) {
     $current_word = $saved_words[$step - 1];
     $distractors = ["BIRD", "FISH", "STAR", "SHOE"]; shuffle($distractors);
 
+    // BUCLE DE 1 SOLA RONDA CON LOS NUEVOS NOMBRES OFICIALES
+    for ($i = 0; $i < 1; $i++) {
+        if ($step == 1) {
+            $template_file = 'templates/type_frogs.php'; // Antes Jumper
+            $dynamic_rounds[] = [
+                'target_word' => strtoupper($current_word['en']), 'translation' => $current_word['es'], 'phonetic' => $current_word['phonetic'],
+                'distractors' => [$distractors[0], $distractors[1]], 'context_es' => '¡Cruza el río saltando en la palabra!'
+            ];
+        } elseif ($step == 2) {
+            $template_file = 'templates/type_ninja.php'; // Antes Meteor Strike
+            $dynamic_rounds[] = [
+                'target_word' => strtoupper($current_word['en']), 'translation' => $current_word['es'], 'phonetic' => $current_word['phonetic'],
+                'items' => [['content' => $current_word['emoji'], 'is_correct' => true], ['content' => '⭐', 'is_correct' => false], ['content' => '❓', 'is_correct' => false]]
+            ];
+        } elseif ($step == 3) {
+            $template_file = 'templates/type_monster.php'; // Antes Defender
+            $dynamic_rounds[] = [
+                'word' => strtoupper($current_word['en']), 'translation' => $current_word['es'], 'phonetic' => $current_word['phonetic'],
+                'distractors' => ['X', 'Z', 'M', 'Q']
+            ];
+        } elseif ($step == 4) {
+            $template_file = 'templates/type_moles.php'; // Antes Detective
+            $dynamic_rounds[] = [
+                'target_word' => strtoupper($current_word['en']), 'translation' => $current_word['es'], 'phonetic' => $current_word['phonetic'],
+                'distractors' => [$distractors[0], $distractors[1]]
+            ];
+        } elseif ($step == 5) {
+            $template_file = 'templates/type_rocket.php'; // Antes Potion
+            $dynamic_rounds[] = [
+                'target_word' => strtoupper($current_word['en']), 'translation' => $current_word['es'], 'phonetic' => $current_word['phonetic'],
+                'distractors' => [$distractors[2], $distractors[3]]
+            ];
+        }
+    }
+}
+
     // BUCLE CAMBIADO A 1 SOLA RONDA PARA MÁS AGILIDAD
     for ($i = 0; $i < 1; $i++) {
         $speed = 6 + $i;
