@@ -110,7 +110,7 @@ if (isset($_SESSION['user_id'])) {
                 <div class="product-info">
                     <h3>Inglés: My World</h3>
                     <p style="color: #64748B;">Aprende 5 palabras al día con juegos interactivos, audios nativos y mnemotecnias.</p>
-                    <div class="product-price">S/ 39.00 <span style="font-size: 14px; color: #94A3B8; font-weight: 400;">/mes</span></div>
+                    <div class="product-price">S/ 14.99 <span style="font-size: 14px; color: #94A3B8; font-weight: 400;">/mes</span></div>
                     <button class="btn-cart" onclick="openCheckout('Inglés: My World')">🛒 Comprar Curso</button>
                 </div>
             </div>
