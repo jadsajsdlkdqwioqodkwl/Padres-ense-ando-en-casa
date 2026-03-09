@@ -91,13 +91,18 @@ if ($step > 0 && $step <= 5) {
             $template_file = 'templates/type_monster.php'; // Defender
             $dynamic_rounds[] = [
                 'word' => strtoupper($current_word['en']), 'translation' => $current_word['es'], 'phonetic' => $current_word['phonetic'],
+                'emoji' => $current_word['emoji'],
                 'distractors' => ['X', 'Z', 'M', 'Q']
             ];
         } elseif ($step == 4) {
             $template_file = 'templates/type_moles.php'; // Topos
             $dynamic_rounds[] = [
                 'target_word' => strtoupper($current_word['en']), 'translation' => $current_word['es'], 'phonetic' => $current_word['phonetic'],
-                'distractors' => [$distractors[0], $distractors[1]]
+                'emoji' => $current_word['emoji'],
+                'distractors' => [
+                    ['word' => $distractors[0], 'emoji' => '📦'],
+                    ['word' => $distractors[1], 'emoji' => '❓']
+                ]
             ];
         } elseif ($step == 5) {
             $template_file = 'templates/type_rocket.php'; // Cohete Espacial
@@ -108,13 +113,15 @@ if ($step > 0 && $step <= 5) {
         }
     }
 }
-// El bloque duplicado y la llave extra que rompían el código han sido eliminados.
 ?>
 <!DOCTYPE html>
 <html lang="es">
 <head>
     <?php include 'includes/head.php'; ?>
+    <script src="https://unpkg.com/twemoji@latest/dist/twemoji.min.js" crossorigin="anonymous"></script>
     <style>
+        img.emoji { height: 1.2em; width: 1.2em; margin: 0 .05em 0 .1em; vertical-align: -0.1em; display: inline-block; pointer-events: none; }
+        
         .overlay-fullscreen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(28, 61, 106, 0.95); backdrop-filter: blur(5px); z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; color: white; padding: 20px; }
         .modal-box { 
             background: var(--white); color: var(--text-main); border-radius: 24px; padding: 40px; 
@@ -123,7 +130,7 @@ if ($step > 0 && $step <= 5) {
             max-height: 85vh; overflow-y: auto; border-top: 6px solid var(--brand-blue);
         }
         .word-pool-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 15px; margin: 25px 0; }
-        .pool-word { background: var(--bg-light); border: 2px solid #E2E8F0; border-radius: 12px; padding: 15px; cursor: pointer; transition: 0.3s; font-weight: 700; font-size: 18px; color: var(--brand-blue); }
+        .pool-word { background: var(--bg-light); border: 2px solid #E2E8F0; border-radius: 12px; padding: 15px; cursor: pointer; transition: 0.3s; font-weight: 700; font-size: 18px; color: var(--brand-blue); display: flex; align-items: center; justify-content: center; gap: 8px;}
         .pool-word:hover { border-color: var(--brand-lblue); transform: translateY(-2px); }
         .pool-word.selected { background: #F0FDF4; border-color: var(--brand-green); color: var(--brand-green); transform: scale(1.05); box-shadow: 0 8px 20px rgba(104, 169, 62, 0.2); }
         
@@ -166,7 +173,8 @@ if ($step > 0 && $step <= 5) {
                 <div class="word-pool-grid" id="pool-grid">
                     <?php foreach($pool_palabras as $index => $word): ?>
                         <div class="pool-word" data-en="<?php echo htmlspecialchars($word['en']); ?>" data-es="<?php echo htmlspecialchars($word['es']); ?>" data-phonetic="<?php echo htmlspecialchars($word['phonetic']); ?>" data-emoji="<?php echo htmlspecialchars($word['emoji']); ?>" data-mnemonic="<?php echo htmlspecialchars($word['mnemonic']); ?>" onclick="toggleWordSelection(this)">
-                            <?php echo htmlspecialchars($word['en']); ?>
+                            <span><?php echo htmlspecialchars($word['emoji']); ?></span>
+                            <span><?php echo htmlspecialchars($word['en']); ?></span>
                         </div>
                     <?php endforeach; ?>
                 </div>
@@ -219,6 +227,11 @@ if ($step > 0 && $step <= 5) {
     <?php endif; ?>
 
     <script>
+    // Inicialización de Twemoji a nivel Global para todo el Lesson Selector
+    document.addEventListener('DOMContentLoaded', () => {
+        twemoji.parse(document.body, { folder: 'svg', ext: '.svg' });
+    });
+
     const currentPlayingWord = <?php echo json_encode($current_word ?? null); ?>;
 
     function unlockNextButton(lessonId, stars, moduleId) {
@@ -227,7 +240,11 @@ if ($step > 0 && $step <= 5) {
             document.getElementById('end-word').innerText = currentPlayingWord.en + " = " + currentPlayingWord.es;
             document.getElementById('end-phonetic').innerText = "Se pronuncia: (" + currentPlayingWord.phonetic + ")";
             document.getElementById('end-mnemonic').innerText = "💡 " + currentPlayingWord.mnemonic;
+            
             document.getElementById('end-game-modal').style.display = 'flex';
+            
+            // Forzamos el parseo de Twemoji en el modal inyectado
+            twemoji.parse(document.getElementById('end-game-modal'), { folder: 'svg', ext: '.svg' });
 
             document.getElementById('btn-next-level').onclick = () => {
                 executeNextLevelAdvance(lessonId, stars, moduleId);
@@ -291,6 +308,8 @@ if ($step > 0 && $step <= 5) {
             container.appendChild(card);
         });
         document.getElementById('mnemotecnia-modal').style.display = 'flex';
+        // Parseamos los emojis de las tarjetas inyectadas
+        twemoji.parse(container, { folder: 'svg', ext: '.svg' });
     }
 
     function finalizarMnemotecnias() {
@@ -311,13 +330,14 @@ if ($step > 0 && $step <= 5) {
         if (palabrasAyer && palabrasAyer.length > 0) {
             palabrasAyer.forEach((palabra, i) => {
                 html += `<div style="margin-bottom: 15px; padding: 20px; background: #F8FAFC; border-radius: 12px; border-left: 6px solid var(--brand-blue); border-top: 1px solid #E2E8F0; border-right: 1px solid #E2E8F0; border-bottom: 1px solid #E2E8F0;">
-                    <strong style="font-size: 18px; color: var(--brand-blue); display: block; margin-bottom: 10px;">¿Qué significa '${palabra.en}'?</strong>
+                    <strong style="font-size: 18px; color: var(--brand-blue); display: block; margin-bottom: 10px;">¿Qué significa '${palabra.emoji} ${palabra.en}'?</strong>
                     <label style="cursor: pointer; display: block; margin-bottom: 8px; font-size: 16px;"><input type="radio" name="q${i}" value="correct"> ${palabra.es}</label>
                     <label style="cursor: pointer; display: block; font-size: 16px;"><input type="radio" name="q${i}" value="wrong"> Otra cosa</label>
                 </div>`;
             });
         }
         examContainer.innerHTML = html;
+        twemoji.parse(examContainer, { folder: 'svg', ext: '.svg' });
     });
 
     function evaluarExamen() {

@@ -1,16 +1,6 @@
 <?php
 // templates/type_moles.php
-session_start();
-require_once '../includes/config.php';
-
-// Ciberseguridad
-if (!isset($_SESSION['user_id'])) {
-    header("Location: ../login.php");
-    exit();
-}
-
-require_once '../includes/head.php';
-require_once '../includes/navbar.php';
+// (Sin cabeceras repetidas. Este código es inyectado directamente en lesson.php)
 
 $lesson_id = $lesson_id ?? ($lesson['id'] ?? 0);
 $reward_stars = $reward_stars ?? ($lesson['reward_stars'] ?? 5);
@@ -29,11 +19,8 @@ $lesson_data = $lesson_data ?? [
 ];
 ?>
 
-<script src="https://unpkg.com/twemoji@latest/dist/twemoji.min.js" crossorigin="anonymous"></script>
-
 <style>
-    img.emoji { height: 1.2em; width: 1.2em; margin: 0 .05em 0 .1em; vertical-align: -0.1em; display: inline-block; pointer-events: none; }
-
+    /* Seguro de Pantalla Horizontal */
     #landscape-warning {
         display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
         background: #1E293B; z-index: 10000; color: white; justify-content: center; 
@@ -50,7 +37,6 @@ $lesson_data = $lesson_data ?? [
 
     .mole-hole { width: 100%; max-width: 140px; aspect-ratio: 1; background-color: #3E2723; border-radius: 50%; position: relative; overflow: hidden; border: 8px solid #5D4037; box-shadow: inset 0 15px 15px rgba(0,0,0,0.6); }
 
-    /* Reemplazo del "Topo" por la "Entidad Dinámica" */
     .word-entity { position: absolute; bottom: -120%; left: 50%; transform: translateX(-50%); transition: bottom 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275); cursor: pointer; user-select: none; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; width: 100%; height: 100%; -webkit-tap-highlight-color: transparent; padding-bottom: 10px; z-index: 5; }
     
     .word-entity.up { bottom: 0%; }
@@ -59,7 +45,6 @@ $lesson_data = $lesson_data ?? [
     
     .entity-text { background: white; color: #1E3A8A; font-weight: 900; font-size: clamp(12px, 3vw, 16px); padding: 2px 12px; border-radius: 20px; border: 2px solid #1E3A8A; pointer-events: none; box-shadow: 0 4px 6px rgba(0,0,0,0.2); }
 
-    /* Responsividad Mobile Extrema */
     @media (max-width: 600px) {
         .moles-game-container { padding: 1rem; margin-top: 1rem; }
         .moles-grid { gap: 10px; }
@@ -102,64 +87,63 @@ $lesson_data = $lesson_data ?? [
 </main>
 
 <script>
-    const lessonData = <?php echo json_encode($lesson_data); ?>;
-    const targetWord = lessonData.target_word || lessonData.word;
-    const targetEmoji = lessonData.emoji || '📦';
-    const distractors = lessonData.distractors || [];
+    const lessonDataMoles = <?php echo json_encode($lesson_data); ?>;
+    const targetWordMoles = lessonDataMoles.target_word || lessonDataMoles.word;
+    const targetEmojiMoles = lessonDataMoles.emoji || '📦';
+    const distractorsMoles = lessonDataMoles.distractors || [];
 
-    const startModal = document.getElementById('startGameModal');
-    const btnStart = document.getElementById('btnStartGame');
-    const scoreDisplay = document.getElementById('score');
-    const timeDisplay = document.getElementById('timeLeft');
-    const holes = document.querySelectorAll('.word-entity');
+    const startModalMoles = document.getElementById('startGameModal');
+    const btnStartMoles = document.getElementById('btnStartGame');
+    const scoreDisplayMoles = document.getElementById('score');
+    const timeDisplayMoles = document.getElementById('timeLeft');
+    const holesMoles = document.querySelectorAll('.word-entity');
 
-    let lastHole;
-    let timeUp = false;
-    let score = 0;
-    const maxScore = 5; // Aciertos necesarios para ganar
-    let timer;
-    let countdown = 30;
+    let lastHoleMoles;
+    let timeUpMoles = false;
+    let scoreMoles = 0;
+    const maxScoreMoles = 5; 
+    let timerMoles;
+    let countdownMoles = 30;
 
     document.addEventListener('DOMContentLoaded', () => {
-        document.getElementById('tut-emoji').innerText = targetEmoji;
-        document.getElementById('tut-word').innerText = targetWord;
-        document.getElementById('tut-trans').innerText = `(${lessonData.translation})`;
-        if(lessonData.context_es) document.getElementById('tut-context').innerText = lessonData.context_es;
+        document.getElementById('tut-emoji').innerText = targetEmojiMoles;
+        document.getElementById('tut-word').innerText = targetWordMoles;
+        document.getElementById('tut-trans').innerText = `(${lessonDataMoles.translation})`;
+        if(lessonDataMoles.context_es) document.getElementById('tut-context').innerText = lessonDataMoles.context_es;
         
-        twemoji.parse(startModal, { folder: 'svg', ext: '.svg' });
+        twemoji.parse(startModalMoles, { folder: 'svg', ext: '.svg' });
     });
 
-    btnStart.addEventListener('click', () => {
-        startModal.classList.remove('active');
-        setTimeout(startGame, 500);
+    btnStartMoles.addEventListener('click', () => {
+        startModalMoles.classList.remove('active');
+        setTimeout(startGameMoles, 500);
     });
 
-    function randomTime(min, max) { return Math.round(Math.random() * (max - min) + min); }
+    function randomTimeMoles(min, max) { return Math.round(Math.random() * (max - min) + min); }
 
-    function randomHole(holesList) {
+    function randomHoleMoles(holesList) {
         const idx = Math.floor(Math.random() * holesList.length);
         const hole = holesList[idx];
-        if (hole === lastHole) return randomHole(holesList); 
-        lastHole = hole;
+        if (hole === lastHoleMoles) return randomHoleMoles(holesList); 
+        lastHoleMoles = hole;
         return hole;
     }
 
     function generateEntityData() {
-        const isTarget = Math.random() > 0.4; // 60% probabilidad de ser el correcto
-        if (isTarget || distractors.length === 0) {
-            return { word: targetWord, emoji: targetEmoji, isCorrect: true };
+        const isTarget = Math.random() > 0.4; 
+        if (isTarget || distractorsMoles.length === 0) {
+            return { word: targetWordMoles, emoji: targetEmojiMoles, isCorrect: true };
         } else {
-            const distractor = distractors[Math.floor(Math.random() * distractors.length)];
+            const distractor = distractorsMoles[Math.floor(Math.random() * distractorsMoles.length)];
             return { word: distractor.word, emoji: distractor.emoji || '❓', isCorrect: false };
         }
     }
 
-    function peep() {
-        const time = randomTime(700, 1400); 
-        const hole = randomHole(holes);
+    function peepMoles() {
+        const time = randomTimeMoles(700, 1400); 
+        const hole = randomHoleMoles(holesMoles);
         const entityData = generateEntityData();
 
-        // Inyectamos el contenido dinámico (emoji + palabra)
         hole.innerHTML = `
             <div class="entity-emoji">${entityData.emoji}</div>
             <div class="entity-text">${entityData.word}</div>
@@ -171,95 +155,82 @@ $lesson_data = $lesson_data ?? [
 
         setTimeout(() => {
             hole.classList.remove('up');
-            if (!timeUp) peep();
+            if (!timeUpMoles) peepMoles();
         }, time);
     }
 
-    function startGame() {
-        scoreDisplay.textContent = 0;
-        timeDisplay.textContent = countdown;
-        timeUp = false;
-        score = 0;
-        peep();
+    function startGameMoles() {
+        scoreDisplayMoles.textContent = 0;
+        timeDisplayMoles.textContent = countdownMoles;
+        timeUpMoles = false;
+        scoreMoles = 0;
+        peepMoles();
 
-        timer = setInterval(() => {
-            countdown--;
-            timeDisplay.textContent = countdown;
-            if (countdown <= 0) {
-                clearInterval(timer);
-                timeUp = true;
-                if (score < maxScore) gameOver(false);
+        timerMoles = setInterval(() => {
+            countdownMoles--;
+            timeDisplayMoles.textContent = countdownMoles;
+            if (countdownMoles <= 0) {
+                clearInterval(timerMoles);
+                timeUpMoles = true;
+                if (scoreMoles < maxScoreMoles) gameOverMoles(false);
             }
         }, 1000);
     }
 
-    function bonk(e) {
+    function bonkMoles(e) {
         if (!e.isTrusted || !this.classList.contains('up')) return; 
 
         const isCorrect = this.dataset.isCorrect === 'true';
         this.classList.remove('up');
 
         if (isCorrect) {
-            score++;
-            scoreDisplay.textContent = score;
+            scoreMoles++;
+            scoreDisplayMoles.textContent = scoreMoles;
             
-            // Efecto visual de explosión
             this.innerHTML = `<div class="entity-emoji">💥</div>`;
             twemoji.parse(this, { folder: 'svg', ext: '.svg' });
 
-            if (score >= maxScore) {
-                timeUp = true;
-                clearInterval(timer);
-                setTimeout(() => gameOver(true), 500);
+            if (scoreMoles >= maxScoreMoles) {
+                timeUpMoles = true;
+                clearInterval(timerMoles);
+                setTimeout(() => gameOverMoles(true), 500);
             }
         } else {
-            // Penalización visual si se equivoca
             this.innerHTML = `<div class="entity-emoji">❌</div>`;
             twemoji.parse(this, { folder: 'svg', ext: '.svg' });
-            countdown = Math.max(0, countdown - 2); // Resta 2 segundos
-            timeDisplay.textContent = countdown;
+            countdownMoles = Math.max(0, countdownMoles - 2); 
+            timeDisplayMoles.textContent = countdownMoles;
         }
     }
 
-    holes.forEach(hole => hole.addEventListener('pointerdown', bonk));
+    holesMoles.forEach(hole => hole.addEventListener('pointerdown', bonkMoles));
 
-    function gameOver(isWin) {
-        startModal.classList.add('active');
-        const modalTitle = startModal.querySelector('.modal-title');
-        const modalText = startModal.querySelector('.modal-text');
+    function gameOverMoles(isWin) {
+        startModalMoles.classList.add('active');
+        const modalTitle = startModalMoles.querySelector('.modal-title');
+        const modalText = startModalMoles.querySelector('.modal-text');
         
         if (isWin) {
             modalTitle.innerHTML = "¡Excelente Reflejo! 🏆";
             modalText.innerHTML = `Atrapaste todos los correctos.`;
-            startModal.querySelector('#tut-emoji').style.display = 'none';
-            startModal.querySelector('#tut-word').style.display = 'none';
-            startModal.querySelector('#tut-trans').style.display = 'none';
-            btnStart.innerHTML = "Siguiente Misión ➡️";
-            btnStart.onclick = () => { /* Prevent default reload */ };
+            startModalMoles.querySelector('#tut-emoji').style.display = 'none';
+            startModalMoles.querySelector('#tut-word').style.display = 'none';
+            startModalMoles.querySelector('#tut-trans').style.display = 'none';
+            btnStartMoles.innerHTML = "Siguiente Misión ➡️";
+            btnStartMoles.onclick = () => { /* Prevent default reload */ };
 
-            twemoji.parse(startModal, { folder: 'svg', ext: '.svg' });
+            twemoji.parse(startModalMoles, { folder: 'svg', ext: '.svg' });
             if(typeof fireConfetti !== 'undefined') fireConfetti();
 
-            // GUARDADO EN BD
-            const payload = { lesson_id: <?php echo $lesson_id; ?>, stars: <?php echo $reward_stars; ?> };
-            fetch('../app/save_progress.php', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload)
-            })
-            .then(res => res.json())
-            .then(data => {
-                if(typeof unlockNextButton !== 'undefined') unlockNextButton(payload.lesson_id, payload.stars, <?php echo $lesson['module_id'] ?? 0; ?>);
-            });
+            // Se delega el guardado a la función global de lesson.php
+            if(typeof unlockNextButton !== 'undefined') unlockNextButton(<?php echo $lesson_id; ?>, <?php echo $reward_stars; ?>, <?php echo $lesson['module_id'] ?? 0; ?>);
 
         } else {
             modalTitle.innerHTML = "¡Tiempo Terminado! ⏳";
-            modalText.innerHTML = `Solo atrapaste ${score} de ${maxScore}. ¡Tú puedes hacerlo mejor!`;
-            btnStart.innerHTML = "Reintentar 🔄";
-            btnStart.onclick = () => location.reload();
-            twemoji.parse(startModal, { folder: 'svg', ext: '.svg' });
+            modalText.innerHTML = `Solo atrapaste ${scoreMoles} de ${maxScoreMoles}. ¡Tú puedes hacerlo mejor!`;
+            btnStartMoles.innerHTML = "Reintentar 🔄";
+            btnStartMoles.onclick = () => location.reload();
+            twemoji.parse(startModalMoles, { folder: 'svg', ext: '.svg' });
         }
     }
 </script>
-
-<?php require_once '../includes/footer.php'; ?>

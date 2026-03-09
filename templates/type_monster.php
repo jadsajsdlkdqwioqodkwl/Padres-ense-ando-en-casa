@@ -1,40 +1,12 @@
 <?php
 // templates/type_monster.php
-session_start();
-require_once '../includes/config.php';
-
-// Ciberseguridad: Prevenir acceso sin sesión
-if (!isset($_SESSION['user_id'])) {
-    header("Location: ../login.php");
-    exit();
-}
-
-require_once '../includes/head.php';
-require_once '../includes/navbar.php';
-
+// Carga dinámica limpia para ser inyectada en lesson.php
 $lesson_id = $lesson_id ?? ($lesson['id'] ?? 0);
 $time_limit = $lesson_data['time_limit'] ?? 20; 
 $reward_stars = $reward_stars ?? ($lesson['reward_stars'] ?? 5);
-
-// Fallback de datos simulando la estructura de la BD
-$rounds = $lesson_data['rounds'] ?? [
-    [
-        'word' => strtoupper($lesson_data['word'] ?? 'APPLE'),
-        'phonetic' => $lesson_data['phonetic'] ?? 'ápol',
-        'translation' => $lesson_data['translation'] ?? 'Manzana',
-        'emoji' => $lesson_data['emoji'] ?? '🍎', // Nuevo campo para el objetivo dinámico
-        'distractors' => $lesson_data['distractors'] ?? ['X', 'Z', 'M'],
-        'context_es' => $lesson_data['context_es'] ?? "El monstruo quiere nuestro objeto. ¡Escribe la palabra mágica!"
-    ]
-];
 ?>
 
-<script src="https://unpkg.com/twemoji@latest/dist/twemoji.min.js" crossorigin="anonymous"></script>
-
 <style>
-    /* Estilos globales para Twemoji */
-    img.emoji { height: 1.2em; width: 1.2em; margin: 0 .05em 0 .1em; vertical-align: -0.1em; display: inline-block; pointer-events: none; }
-    
     /* Seguro de Pantalla Horizontal */
     #landscape-warning {
         display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
@@ -46,15 +18,17 @@ $rounds = $lesson_data['rounds'] ?? [
         .game-wrapper { display: none !important; }
     }
 
-    .game-board { position: relative; width: 100%; min-height: 350px; background: #F8FAFC; border-radius: 24px; overflow: hidden; border: 4px solid #1E3A8A; margin-bottom: 25px; box-shadow: 0 10px 25px rgba(28, 61, 106, 0.1); }
+    img.emoji { height: 1.2em; width: 1.2em; margin: 0 .05em 0 .1em; vertical-align: -0.1em; display: inline-block; pointer-events: none; }
     
-    /* EL MONSTRUO BELLO EN CSS RESTAURADO */
-    .css-monster { position: absolute; left: 2%; bottom: 20px; width: 80px; height: 80px; background: #EF4444; border: 3px solid #1E3A8A; border-radius: 40% 60% 70% 30% / 40% 50% 60% 50%; animation: morph 2s linear infinite, wobble 0.5s alternate infinite; transition: left 0.2s linear, transform 0.3s; z-index: 3; box-shadow: inset -5px -5px 0 rgba(0,0,0,0.2); }
-    .css-monster::before, .css-monster::after { content: ''; position: absolute; top: 18px; width: 16px; height: 16px; background: white; border-radius: 50%; border: 3px solid #1E3A8A; }
+    .game-board { position: relative; width: 100%; min-height: 350px; background: #F8FAFC; border-radius: 24px; overflow: hidden; border: 4px solid var(--brand-blue); margin-bottom: 25px; box-shadow: 0 10px 25px rgba(28, 61, 106, 0.1); }
+    
+    /* MONSTRUO CSS */
+    .css-monster { position: absolute; left: 2%; bottom: 20px; width: 80px; height: 80px; background: #EF4444; border: 3px solid var(--brand-blue); border-radius: 40% 60% 70% 30% / 40% 50% 60% 50%; animation: morph 2s linear infinite, wobble 0.5s alternate infinite; transition: left 0.2s linear, transform 0.3s; z-index: 3; box-shadow: inset -5px -5px 0 rgba(0,0,0,0.2); }
+    .css-monster::before, .css-monster::after { content: ''; position: absolute; top: 18px; width: 16px; height: 16px; background: white; border-radius: 50%; border: 3px solid var(--brand-blue); }
     .css-monster::before { left: 16px; } .css-monster::after { right: 16px; }
-    .css-monster-mouth { position: absolute; bottom: 12px; left: 22px; width: 35px; height: 18px; background: #1E3A8A; border-radius: 0 0 18px 18px; transition: height 0.3s, border-radius 0.3s; }
+    .css-monster-mouth { position: absolute; bottom: 12px; left: 22px; width: 35px; height: 18px; background: var(--brand-blue); border-radius: 0 0 18px 18px; transition: height 0.3s, border-radius 0.3s; }
     
-    /* OBJETIVO DINÁMICO (Reemplaza al pastel estático) */
+    /* OBJETIVO DINÁMICO */
     .twemoji-target { position: absolute; right: 5%; bottom: 10px; font-size: 4.5rem; z-index: 2; filter: drop-shadow(0 10px 10px rgba(0,0,0,0.2)); transition: transform 0.3s; }
     
     .slot-container { display: flex; justify-content: center; gap: 10px; margin-bottom: 25px; flex-wrap: wrap; padding: 0 10px; }
@@ -66,7 +40,7 @@ $rounds = $lesson_data['rounds'] ?? [
     .drag-bubble:active { transform: translateY(6px); box-shadow: 0 0px 0 #D97706, 0 2px 5px rgba(245, 158, 11, 0.3); }
     .drag-bubble.hidden { opacity: 0; pointer-events: none; transform: scale(0); }
     
-    .round-indicator { position: absolute; top: 15px; left: 15px; background: #1E3A8A; color: white; font-weight: 700; padding: 6px 18px; border-radius: 50px; font-size: 14px; z-index: 50; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+    .round-indicator { position: absolute; top: 15px; left: 15px; background: var(--brand-blue, #1E3A8A); color: white; font-weight: 700; padding: 6px 18px; border-radius: 50px; font-size: 14px; z-index: 50; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
     .danger-zone { animation: flashRed 1s infinite; }
     
     @keyframes morph { 0%, 100% { border-radius: 40% 60% 70% 30% / 40% 50% 60% 50%; } 50% { border-radius: 60% 40% 30% 70% / 60% 50% 40% 50%; } }
@@ -82,45 +56,52 @@ $rounds = $lesson_data['rounds'] ?? [
     <p style="font-size: 1.2rem; color: #94A3B8;">Este juego necesita jugarse en formato vertical para una mejor experiencia.</p>
 </div>
 
-<main class="game-wrapper container mx-auto px-4 py-8" style="min-height: 85vh;">
-    <div class="game-area text-center mx-auto" style="max-width: 800px;">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-            <h3 class="text-2xl font-black text-gray-800">🛡️ Word Defender</h3>
-            <button onclick="giveHint()" style="background: #FBBF24; border: none; border-radius: 50%; width: 50px; height: 50px; font-size: 24px; cursor: pointer; box-shadow: 0 4px 0 #D97706, 0 4px 10px rgba(245, 158, 11, 0.3); transition: 0.2s;" title="Pedir Pista">💡</button>
-        </div>
-
-        <div class="game-board" id="game-board">
-            <div class="round-indicator" id="round-indicator">Ronda 1</div>
-
-            <div id="tutorial-modal" class="modal-overlay active">
-                <div class="modal-content">
-                    <h2 class="modal-title">📜 Misión</h2>
-                    <p class="modal-text" id="tut-context"></p>
-                    <div style="font-size: 3rem; margin: 10px 0;" id="tut-emoji-display">🎯</div>
-                    <div style="font-size: 2.5rem; font-weight: 900; color: #F59E0B; margin-bottom: 10px; letter-spacing: 5px; text-shadow: 0 2px 4px rgba(0,0,0,0.1);" id="tut-word">WORD</div>
-                    <p style="color: #64748B; font-size: 1.2rem; margin-bottom: 25px; font-weight: 600;" id="tut-trans">(Traducción)</p>
-                    <button id="btn-start" onclick="startGame()" class="btn-play w-full bg-blue-600 hover:bg-blue-700">▶️ ¡Proteger!</button>
-                </div>
-            </div>
-
-            <div class="css-monster" id="monster"><div class="css-monster-mouth" id="monster-mouth"></div></div>
-            
-            <div class="twemoji-target" id="dynamic-target">🎯</div>
-        </div>
-
-        <div class="slot-container" id="slots-container"></div>
-        <div class="bubbles-container" id="bubbles-container"></div>
+<div class="game-area text-center" style="border: none; background: transparent; padding-top: 5px; box-shadow: none;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+        <h3 style="margin: 0; color: var(--brand-blue); font-size: 1.8rem;">🛡️ Word Defender</h3>
+        <button onclick="giveHint()" style="background: #FBBF24; border: none; border-radius: 50%; width: 50px; height: 50px; font-size: 24px; cursor: pointer; box-shadow: 0 4px 0 #D97706, 0 4px 10px rgba(245, 158, 11, 0.3); transition: 0.2s;" title="Pedir Pista">💡</button>
     </div>
-</main>
+
+    <div class="game-board" id="game-board">
+        <div class="round-indicator" id="round-indicator">Ronda 1</div>
+
+        <div class="mission-modal" id="tutorial-modal" style="position: absolute; top:0; left:0; width:100%; height:100%; background:rgba(255,255,255,0.95); z-index:100; display:flex; flex-direction:column; justify-content:center; align-items:center;">
+            <h2 style="color: var(--brand-blue); margin-top: 0; font-size: 2.2rem;">📜 Misión</h2>
+            <p style="color: #64748B; font-size: 18px; margin-bottom: 10px;" id="tut-context"></p>
+            <div style="font-size: 4rem; margin: 10px 0;" id="tut-emoji-display">🎯</div>
+            <div style="font-size: 2.5rem; font-weight: 900; color: var(--brand-orange); margin-bottom: 10px; letter-spacing: 5px; text-shadow: 0 2px 4px rgba(0,0,0,0.1);" id="tut-word">WORD</div>
+            <p style="color: #94A3B8; font-size: 1.2rem; margin-bottom: 25px; font-weight: 600;" id="tut-trans">(Traducción)</p>
+            
+            <button class="btn-large" id="btn-start" onclick="startGame()" style="margin-top: 0;">▶️ ¡Proteger!</button>
+        </div>
+
+        <div class="css-monster" id="monster"><div class="css-monster-mouth" id="monster-mouth"></div></div>
+        <div class="twemoji-target" id="dynamic-target">🎯</div>
+    </div>
+
+    <div class="slot-container" id="slots-container"></div>
+    <div class="bubbles-container" id="bubbles-container"></div>
+</div>
 
 <script>
-    let roundsData = window.dynamicRoundsData || <?php echo json_encode($rounds); ?>;
+    function applyTwemoji(node) {
+        if (typeof twemoji !== 'undefined') {
+            twemoji.parse(node, { folder: 'svg', ext: '.svg' });
+        } else {
+            const script = document.createElement('script');
+            script.src = "https://cdnjs.cloudflare.com/ajax/libs/twemoji/14.0.2/twemoji.min.js";
+            script.onload = () => twemoji.parse(node, { folder: 'svg', ext: '.svg' });
+            document.head.appendChild(script);
+        }
+    }
+
+    let roundsData = window.dynamicRoundsData || [];
     
-    // Normalizador de datos
     roundsData = roundsData.map(r => ({
-        word: r.target_word || r.word,
-        translation: r.translation,
-        emoji: r.emoji || r.content || '📦', // Soporta varios formatos de DB
+        word: r.target_word || r.word || 'APPLE',
+        phonetic: r.phonetic || '',
+        translation: r.translation || 'Manzana',
+        emoji: r.emoji || r.content || '🍎',
         distractors: r.distractors || ['X', 'Z', 'M', 'Q'],
         context_es: r.context_es || "¡Defiende el objeto escribiendo la palabra!"
     }));
@@ -141,10 +122,7 @@ $rounds = $lesson_data['rounds'] ?? [
     const dynamicTarget = document.getElementById('dynamic-target');
     const gameBoard = document.getElementById('game-board');
 
-    document.addEventListener('DOMContentLoaded', () => {
-        twemoji.parse(document.body, { folder: 'svg', ext: '.svg' });
-        loadRound(currentRoundIndex);
-    });
+    if(roundsData.length > 0) loadRound(currentRoundIndex);
 
     function loadRound(index) {
         if (!roundsData || !roundsData[index]) return;
@@ -157,7 +135,6 @@ $rounds = $lesson_data['rounds'] ?? [
         document.getElementById('tut-word').innerText = round.word;
         document.getElementById('tut-trans').innerText = `(${round.translation})`;
         
-        // Actualizamos el emoji objetivo dinámicamente
         document.getElementById('tut-emoji-display').innerText = round.emoji;
         dynamicTarget.innerText = round.emoji;
         dynamicTarget.style.display = 'block';
@@ -167,7 +144,7 @@ $rounds = $lesson_data['rounds'] ?? [
         monster.style.left = monsterPos + '%';
         monster.style.animation = 'morph 2s linear infinite, wobble 0.5s alternate infinite';
         monster.style.transform = 'scale(1)';
-        monsterMouth.style.height = '18px'; // Boca normal
+        monsterMouth.style.height = '18px'; 
 
         let slotsHTML = '';
         for(let i=0; i<wordLength; i++) {
@@ -184,13 +161,15 @@ $rounds = $lesson_data['rounds'] ?? [
         });
         document.getElementById('bubbles-container').innerHTML = bubblesHTML;
 
-        document.getElementById('tutorial-modal').classList.add('active');
-        twemoji.parse(document.getElementById('tutorial-modal'), { folder: 'svg', ext: '.svg' });
-        twemoji.parse(gameBoard, { folder: 'svg', ext: '.svg' });
+        document.getElementById('tutorial-modal').style.display = 'flex';
+        document.getElementById('tutorial-modal').style.opacity = '1';
+        
+        applyTwemoji(document.body);
     }
 
     function startGame() {
-        document.getElementById('tutorial-modal').classList.remove('active');
+        document.getElementById('tutorial-modal').style.opacity = '0';
+        setTimeout(() => { document.getElementById('tutorial-modal').style.display = 'none'; }, 300);
         gameActive = true;
         startMonster();
     }
@@ -202,7 +181,6 @@ $rounds = $lesson_data['rounds'] ?? [
             monsterPos += stepAmount;
             monster.style.left = monsterPos + '%';
             
-            // Si el monstruo se acerca, abre la boca
             if (monsterPos > targetPos * 0.7) {
                 gameBoard.classList.add('danger-zone');
                 monsterMouth.style.height = '30px'; 
@@ -235,7 +213,7 @@ $rounds = $lesson_data['rounds'] ?? [
             bubbleEl.classList.add('hidden');
             currentCorrect++;
             
-            monsterPos = Math.max(2, monsterPos - 12); // Retroceso exitoso
+            monsterPos = Math.max(2, monsterPos - 12); 
             monster.style.left = monsterPos + '%';
 
             if (currentCorrect === wordLength) checkNextRound();
@@ -284,34 +262,14 @@ $rounds = $lesson_data['rounds'] ?? [
         gameBoard.classList.remove('danger-zone');
 
         if (isWin) {
-            const modal = document.getElementById('tutorial-modal');
-            modal.querySelector('.modal-title').innerHTML = "¡Defensa Exitosa! 🛡️";
-            modal.querySelector('.modal-text').innerHTML = "¡Protegiste todos los objetos!";
-            modal.querySelector('#tut-emoji-display').style.display = 'none';
-            modal.querySelector('#tut-word').style.display = 'none';
-            modal.querySelector('#tut-trans').style.display = 'none';
-            modal.querySelector('.btn-play').innerHTML = "Continuar ➡️";
-            modal.classList.add('active');
-            twemoji.parse(modal, { folder: 'svg', ext: '.svg' });
-
             if(typeof fireConfetti !== 'undefined') fireConfetti();
-            
-            const payload = { lesson_id: <?php echo $lesson_id; ?>, stars: <?php echo $reward_stars; ?> };
-            fetch('../app/save_progress.php', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload)
-            })
-            .then(res => res.json())
-            .then(data => {
-                if(typeof unlockNextButton !== 'undefined') unlockNextButton(payload.lesson_id, payload.stars, <?php echo $lesson['module_id'] ?? 0; ?>);
-            }).catch(error => console.error(error));
-
+            if(typeof unlockNextButton !== 'undefined') {
+                unlockNextButton(<?php echo $lesson_id ?? 0; ?>, <?php echo $reward_stars ?? 5; ?>, <?php echo $lesson['module_id'] ?? 0; ?>);
+            }
         } else {
-            // Animación de comerse el objeto
             dynamicTarget.style.display = 'none';
             monster.style.transform = 'scale(1.5)';
-            monsterMouth.style.height = '5px'; // Cierra la boca, se lo comió
+            monsterMouth.style.height = '5px'; 
             
             setTimeout(() => {
                 alert("¡Oh no! El monstruo alcanzó el objeto. ¡Inténtalo de nuevo!");
@@ -320,5 +278,3 @@ $rounds = $lesson_data['rounds'] ?? [
         }
     }
 </script>
-
-<?php require_once '../includes/footer.php'; ?>

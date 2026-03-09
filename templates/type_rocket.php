@@ -1,29 +1,15 @@
 <?php
 // templates/type_rocket.php
-session_start();
-require_once '../includes/config.php';
-
-if (!isset($_SESSION['user_id'])) {
-    header("Location: ../login.php");
-    exit();
-}
-
-require_once '../includes/head.php';
-require_once '../includes/navbar.php';
-
+// Limpio de cabeceras. Inyectado desde lesson.php
 $lesson_id = $lesson_id ?? ($lesson['id'] ?? 0);
 $reward_stars = $reward_stars ?? ($lesson['reward_stars'] ?? 5);
 ?>
 
-<script src="https://unpkg.com/twemoji@latest/dist/twemoji.min.js" crossorigin="anonymous"></script>
-
 <style>
-    img.emoji { height: 1.2em; width: 1.2em; margin: 0 .05em 0 .1em; vertical-align: -0.1em; display: inline-block; pointer-events: none; }
-
-    /* Seguro de Pantalla Horizontal (Landscape Warning) */
+    /* Seguro de Pantalla Horizontal */
     #landscape-warning {
         display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-        background: #0F172A; z-index: 10000; color: white; justify-content: center; 
+        background: #1E293B; z-index: 10000; color: white; justify-content: center; 
         align-items: center; flex-direction: column; text-align: center;
     }
     @media screen and (max-height: 450px) and (orientation: landscape) {
@@ -31,27 +17,29 @@ $reward_stars = $reward_stars ?? ($lesson['reward_stars'] ?? 5);
         .game-wrapper { display: none !important; }
     }
 
-    .space-board { position: relative; width: 100%; height: 65vh; min-height: 500px; max-height: 600px; background: linear-gradient(180deg, #0F172A 0%, #1E293B 60%, #1E3A8A 100%); border-radius: 24px; overflow: hidden; border: 4px solid #38BDF8; margin-bottom: 20px; box-shadow: 0 15px 35px rgba(28, 61, 106, 0.2); touch-action: pan-y; display: flex; }
+    img.emoji { height: 1.2em; width: 1.2em; margin: 0 .05em 0 .1em; vertical-align: -0.1em; display: inline-block; pointer-events: none; }
+
+    .space-board { position: relative; width: 100%; height: 60vh; min-height: 480px; max-height: 750px; background: linear-gradient(180deg, #0F172A 0%, #1E293B 60%, var(--brand-blue) 100%); border-radius: 24px; overflow: hidden; border: 4px solid var(--brand-lblue); margin-bottom: 20px; box-shadow: 0 15px 35px rgba(28, 61, 106, 0.2); touch-action: pan-y; display: flex; }
     
-    .starfield { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-image: radial-gradient(2px 2px at 20px 30px, #ffffff, rgba(0,0,0,0)), radial-gradient(2px 2px at 40px 70px, #ffffff, rgba(0,0,0,0)), radial-gradient(2px 2px at 50px 160px, #ffffff, rgba(0,0,0,0)), radial-gradient(2px 2px at 90px 40px, #ffffff, rgba(0,0,0,0)); background-repeat: repeat; animation: spaceScroll 20s linear infinite; opacity: 0.6; pointer-events: none; }
+    .starfield { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-image: radial-gradient(2px 2px at 20px 30px, #ffffff, rgba(0,0,0,0)), radial-gradient(2px 2px at 40px 70px, #ffffff, rgba(0,0,0,0)), radial-gradient(2px 2px at 50px 160px, #ffffff, rgba(0,0,0,0)), radial-gradient(2px 2px at 90px 40px, #ffffff, rgba(0,0,0,0)); background-repeat: repeat; animation: spaceScroll 20s linear infinite; opacity: 0.5; pointer-events: none; }
     
     .lane { flex: 1; height: 100%; border-right: 1px dashed rgba(255,255,255,0.1); position: relative; cursor: pointer; touch-action: manipulation; }
     .lane:last-child { border-right: none; }
     .lane:active { background: rgba(255,255,255,0.05); }
 
-    .rocket-player { position: absolute; bottom: 20px; width: 80px; height: 100px; left: calc(50% - 40px); transition: left 0.15s cubic-bezier(0.175, 0.885, 0.32, 1.275), bottom 1s ease-in; z-index: 20; display: flex; flex-direction: column; align-items: center; pointer-events: none; }
-    .rocket-body { font-size: clamp(50px, 12vw, 70px); line-height: 1; filter: drop-shadow(0 10px 10px rgba(0,0,0,0.5)); animation: floatRocket 1s infinite alternate; }
-    .rocket-flame { width: 20px; height: 40px; background: #F59E0B; border-radius: 50% 50% 20% 20%; margin-top: -10px; animation: flameFlicker 0.1s infinite alternate; box-shadow: 0 0 20px #F59E0B, 0 0 40px #EF4444; }
+    .rocket-player { position: absolute; bottom: 20px; width: 80px; height: 100px; left: calc(50% - 40px); transition: left 0.15s ease-out, bottom 1s ease-in; z-index: 20; display: flex; flex-direction: column; align-items: center; pointer-events: none; }
+    .rocket-body { font-size: clamp(50px, 12vw, 65px); line-height: 1; filter: drop-shadow(0 10px 10px rgba(0,0,0,0.5)); animation: floatRocket 1s infinite alternate; }
+    .rocket-flame { width: 20px; height: 40px; background: #F29C38; border-radius: 50% 50% 20% 20%; margin-top: -10px; animation: flameFlicker 0.1s infinite alternate; box-shadow: 0 0 20px #F29C38, 0 0 40px #EF4444; }
     
     .falling-item { position: absolute; width: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 10; pointer-events: none; }
-    .item-bubble { background: rgba(255,255,255,0.95); border: 3px solid #38BDF8; border-radius: 20px; padding: 10px 15px; text-align: center; box-shadow: 0 10px 20px rgba(0,0,0,0.3); }
-    .item-emoji { font-size: clamp(35px, 8vw, 45px); margin-bottom: 5px; }
-    .item-word { font-weight: 900; color: #1E3A8A; font-size: clamp(12px, 3vw, 16px); text-transform: uppercase; }
+    .item-bubble { background: rgba(255,255,255,0.9); border: 3px solid var(--brand-lblue); border-radius: 20px; padding: 10px 15px; text-align: center; box-shadow: 0 10px 20px rgba(0,0,0,0.3); }
+    .item-emoji { font-size: clamp(30px, 8vw, 40px); margin-bottom: 5px; }
+    .item-word { font-weight: 800; color: var(--brand-blue); font-size: clamp(12px, 3vw, 16px); text-transform: uppercase; }
     
     .hud-top { position: absolute; top: 15px; left: 0; width: 100%; display: flex; justify-content: space-between; padding: 0 20px; z-index: 30; pointer-events: none; }
-    .target-display { background: rgba(255,255,255,0.15); backdrop-filter: blur(8px); border: 2px solid rgba(255,255,255,0.3); color: white; padding: 8px 25px; border-radius: 50px; font-weight: 900; font-size: clamp(16px, 4vw, 22px); letter-spacing: 2px; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
-    .fuel-bar-container { width: clamp(100px, 25vw, 150px); height: 25px; background: rgba(0,0,0,0.5); border-radius: 50px; border: 2px solid rgba(255,255,255,0.4); overflow: hidden; position: relative; box-shadow: inset 0 2px 5px rgba(0,0,0,0.5); }
-    .fuel-bar-fill { height: 100%; width: 0%; background: linear-gradient(90deg, #F59E0B, #4CAF50); transition: width 0.3s cubic-bezier(0.175, 0.885, 0.32, 1); }
+    .target-display { background: rgba(255,255,255,0.1); backdrop-filter: blur(5px); border: 2px solid rgba(255,255,255,0.2); color: white; padding: 8px 25px; border-radius: 50px; font-weight: 800; font-size: clamp(16px, 4vw, 20px); letter-spacing: 2px; }
+    .fuel-bar-container { width: clamp(80px, 25vw, 120px); height: 25px; background: rgba(0,0,0,0.5); border-radius: 50px; border: 2px solid rgba(255,255,255,0.2); overflow: hidden; position: relative; }
+    .fuel-bar-fill { height: 100%; width: 0%; background: linear-gradient(90deg, #F29C38, #68A93E); transition: width 0.3s ease-out; }
     
     .hit-flash { animation: screenFlash 0.3s; }
     .blast-off { bottom: 120% !important; animation: none !important; }
@@ -60,7 +48,7 @@ $reward_stars = $reward_stars ?? ($lesson['reward_stars'] ?? 5);
     @keyframes floatRocket { from { transform: translateY(0); } to { transform: translateY(-5px); } }
     @keyframes flameFlicker { from { transform: scaleY(1); opacity: 0.8; } to { transform: scaleY(1.3); opacity: 1; } }
     @keyframes screenFlash { 0% { box-shadow: inset 0 0 0 0 rgba(239, 68, 68, 0); } 50% { box-shadow: inset 0 0 50px 20px rgba(239, 68, 68, 0.8); } 100% { box-shadow: inset 0 0 0 0 rgba(239, 68, 68, 0); } }
-    @keyframes fuelFlash { 0%, 100% { filter: brightness(1); } 50% { filter: brightness(1.5) drop-shadow(0 0 10px #4CAF50); } }
+    @keyframes fuelFlash { 0%, 100% { filter: brightness(1); } 50% { filter: brightness(1.5) drop-shadow(0 0 10px #68A93E); } }
 </style>
 
 <div id="landscape-warning">
@@ -69,46 +57,47 @@ $reward_stars = $reward_stars ?? ($lesson['reward_stars'] ?? 5);
     <p style="font-size: 1.2rem; color: #94A3B8;">Este juego espacial necesita jugarse en formato vertical para una mejor experiencia.</p>
 </div>
 
-<main class="game-wrapper container mx-auto px-4 py-8" style="min-height: 85vh;">
-    <div class="game-area text-center mx-auto" style="max-width: 700px;">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-            <h3 class="text-2xl font-black text-gray-800">🚀 Misión Espacial</h3>
-            <div id="round-counter" style="background: #1E3A8A; color: white; padding: 5px 15px; border-radius: 20px; font-weight: 700;">1/1</div>
-        </div>
-
-        <div class="space-board" id="space-board">
-            <div class="starfield"></div>
-            
-            <div id="tutorial-modal" class="modal-overlay active">
-                <div class="modal-content">
-                    <h2 class="modal-title">¡Llena el Tanque! ⛽</h2>
-                    <p class="modal-text" id="tut-context">Atrapa el combustible correcto y esquiva los meteoritos:</p>
-                    <div style="font-size: 3rem; font-weight: 900; color: #38BDF8; letter-spacing: 2px; text-shadow: 0 0 20px rgba(56, 189, 248, 0.3); margin: 10px 0;" id="tut-word">WORD</div>
-                    <p style="color: #64748B; font-size: 1.2rem; font-weight: 600; margin-bottom: 25px;" id="tut-trans">(Traducción)</p>
-                    <button id="btn-start" onclick="startGame()" class="btn-play w-full bg-blue-500 hover:bg-blue-600">▶️ ¡Despegar!</button>
-                </div>
-            </div>
-
-            <div class="hud-top">
-                <div class="target-display" id="hud-word">WORD</div>
-                <div class="fuel-bar-container"><div class="fuel-bar-fill" id="fuel-bar"></div></div>
-            </div>
-
-            <div class="lane" onpointerdown="moveRocket(0)"></div>
-            <div class="lane" onpointerdown="moveRocket(1)"></div>
-            <div class="lane" onpointerdown="moveRocket(2)"></div>
-
-            <div class="rocket-player" id="rocket">
-                <div class="rocket-body">🚀</div>
-                <div class="rocket-flame" id="flame"></div>
-            </div>
-            
-            <div id="items-container"></div>
-        </div>
+<div class="game-area text-center" style="border: none; background: transparent; padding-top: 5px; box-shadow: none;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+        <h3 style="margin: 0; color: var(--brand-blue); font-size: 1.8rem;">🚀 Misión Espacial</h3>
+        <div id="round-counter" style="background: var(--brand-blue); color: white; padding: 5px 15px; border-radius: 20px; font-weight: 700;">1/1</div>
     </div>
-</main>
+
+    <div class="space-board" id="space-board">
+        <div class="starfield"></div>
+        
+        <div id="tutorial-modal" style="position: absolute; top:0; left:0; width:100%; height:100%; background:rgba(15, 23, 42, 0.95); z-index:100; display:flex; flex-direction:column; justify-content:center; align-items:center;">
+            <h2 style="color: var(--white); margin-top: 0; font-size: 2.2rem;">¡Llena el Tanque!</h2>
+            <p style="color: #94A3B8; font-size: 18px; margin-bottom: 15px;" id="tut-context">Atrapa el combustible correcto:</p>
+            <div style="font-size: 45px; font-weight: 800; color: #38BDF8; letter-spacing: 2px; text-shadow: 0 0 20px rgba(56, 189, 248, 0.5);" id="tut-word">WORD</div>
+            <p style="color: #64748B; font-size: 20px; font-weight: 600; margin-bottom: 10px;" id="tut-trans">(Traducción)</p>
+            
+            <button class="btn-large" id="btn-start" onclick="startGame()" style="background: var(--brand-orange); color: white; margin-top: 0;">▶️ ¡Despegar!</button>
+        </div>
+
+        <div class="hud-top">
+            <div class="target-display" id="hud-word">WORD</div>
+            <div class="fuel-bar-container"><div class="fuel-bar-fill" id="fuel-bar"></div></div>
+        </div>
+
+        <div class="lane" onpointerdown="moveRocket(0)"></div>
+        <div class="lane" onpointerdown="moveRocket(1)"></div>
+        <div class="lane" onpointerdown="moveRocket(2)"></div>
+
+        <div class="rocket-player" id="rocket">
+            <div class="rocket-body">🚀</div>
+            <div class="rocket-flame" id="flame"></div>
+        </div>
+        
+        <div id="items-container"></div>
+    </div>
+</div>
 
 <script>
+    function applyTwemoji(node) {
+        if (typeof twemoji !== 'undefined') { twemoji.parse(node, { folder: 'svg', ext: '.svg' }); }
+    }
+
     let roundsData = window.dynamicRoundsData || [];
     let currentRoundIndex = 0;
     let roundData = null;
@@ -127,16 +116,20 @@ $reward_stars = $reward_stars ?? ($lesson['reward_stars'] ?? 5);
     let gameLoopId;
     let lastTime = 0;
     let spawnTimer = 0;
-    const fallSpeed = 0.30; 
+    
+    // FIX DE ESCALADO EXTREMO (IPAD PRO BLINDSPOT)
+    // Queremos que cualquier objeto tarde exactamente 2800ms en cruzar la pantalla completa, 
+    // sin importar si la pantalla mide 400px de alto o 1000px de alto.
+    const timeToCrossScreenMs = 2800; 
+    let dynamicFallSpeed = 0; 
 
-    document.addEventListener('DOMContentLoaded', () => {
-        twemoji.parse(document.body, { folder: 'svg', ext: '.svg' });
-        if(roundsData.length === 0) {
-            roundsData = [{ target_word: 'STAR', translation: 'Estrella', distractors: ['MOON', 'SUN', 'SKY'] }];
-        }
-        window.addEventListener('resize', () => { if(gameActive) updateRocketPosition(); });
-        loadRound(currentRoundIndex);
+    // Al recargar o cambiar de tamaño, actualizamos la velocidad
+    window.addEventListener('resize', () => { 
+        dynamicFallSpeed = board.offsetHeight / timeToCrossScreenMs;
+        if(gameActive) updateRocketPosition(); 
     });
+
+    if (roundsData.length > 0) loadRound(currentRoundIndex);
 
     function loadRound(index) {
         roundData = roundsData[index];
@@ -152,18 +145,24 @@ $reward_stars = $reward_stars ?? ($lesson['reward_stars'] ?? 5);
         fuelBar.style.width = '0%';
         itemsContainer.innerHTML = '';
         fallingItems = [];
+        dynamicFallSpeed = board.offsetHeight / timeToCrossScreenMs; // Calculamos por primera vez
         
         rocket.classList.remove('blast-off');
         document.getElementById('flame').style.transform = 'scaleY(1)';
-        document.getElementById('flame').style.boxShadow = '0 0 20px #F59E0B, 0 0 40px #EF4444';
+        document.getElementById('flame').style.boxShadow = '0 0 20px #F29C38, 0 0 40px #EF4444';
         updateRocketPosition();
 
-        document.getElementById('tutorial-modal').classList.add('active');
-        twemoji.parse(document.getElementById('tutorial-modal'), { folder: 'svg', ext: '.svg' });
+        document.getElementById('tutorial-modal').style.display = 'flex';
+        document.getElementById('tutorial-modal').style.opacity = '1';
+        
+        applyTwemoji(document.body);
     }
 
     function startGame() {
-        document.getElementById('tutorial-modal').classList.remove('active');
+        if(typeof AudioManager !== 'undefined') AudioManager.playSound('pop'); // Sonido UI
+        document.getElementById('tutorial-modal').style.opacity = '0';
+        setTimeout(() => { document.getElementById('tutorial-modal').style.display = 'none'; }, 300);
+        
         gameActive = true;
         lastTime = performance.now();
         requestAnimationFrame(gameLoop);
@@ -187,7 +186,7 @@ $reward_stars = $reward_stars ?? ($lesson['reward_stars'] ?? 5);
         lastTime = timestamp;
         
         spawnTimer += dt;
-        if(spawnTimer > 1500) { 
+        if(spawnTimer > 1800) { 
             spawnItem();
             spawnTimer = 0;
         }
@@ -199,6 +198,7 @@ $reward_stars = $reward_stars ?? ($lesson['reward_stars'] ?? 5);
     function spawnItem() {
         const laneIndex = Math.floor(Math.random() * 3);
         const isCorrect = Math.random() > 0.4;
+        
         let wordDisplay = isCorrect ? targetWord : (roundData.distractors ? roundData.distractors[Math.floor(Math.random() * roundData.distractors.length)] : 'ERR');
         let emojiDisplay = isCorrect ? '⭐' : '☄️';
 
@@ -217,9 +217,15 @@ $reward_stars = $reward_stars ?? ($lesson['reward_stars'] ?? 5);
         el.style.width = laneWidth + 'px';
         
         itemsContainer.appendChild(el);
-        twemoji.parse(el, { folder: 'svg', ext: '.svg' }); 
+        applyTwemoji(el); 
         
-        fallingItems.push({ el: el, y: -100, lane: laneIndex, isCorrect: isCorrect, active: true });
+        fallingItems.push({
+            el: el,
+            y: -100,
+            lane: laneIndex,
+            isCorrect: isCorrect,
+            active: true
+        });
     }
 
     function updateItems(dt) {
@@ -229,10 +235,11 @@ $reward_stars = $reward_stars ?? ($lesson['reward_stars'] ?? 5);
             let item = fallingItems[i];
             if(!item.active) continue;
 
-            item.y += fallSpeed * dt;
+            // FÍSICA PROPORCIONAL: Usa la velocidad dinámica en lugar de una constante
+            item.y += dynamicFallSpeed * dt;
             item.el.style.top = item.y + 'px';
             
-            if(item.y > rocketY && item.y < rocketY + 80 && item.lane === currentLane) {
+            if(item.y > rocketY && item.y < rocketY + 60 && item.lane === currentLane) {
                 handleCollision(item);
                 continue;
             }
@@ -249,6 +256,9 @@ $reward_stars = $reward_stars ?? ($lesson['reward_stars'] ?? 5);
         item.el.remove();
         
         if(item.isCorrect) {
+            // INTEGRACIÓN DE AUDIO EXITOSA
+            if(typeof AudioManager !== 'undefined') AudioManager.playSound('correct');
+
             score++;
             fuelBar.style.width = (score / maxScore * 100) + '%';
             fuelBar.style.animation = 'fuelFlash 0.5s';
@@ -258,6 +268,9 @@ $reward_stars = $reward_stars ?? ($lesson['reward_stars'] ?? 5);
                 setTimeout(checkNextRound, 500);
             }
         } else {
+            // INTEGRACIÓN DE AUDIO FALLIDA
+            if(typeof AudioManager !== 'undefined') AudioManager.playSound('wrong');
+
             board.classList.add('hit-flash');
             setTimeout(() => board.classList.remove('hit-flash'), 300);
             score = Math.max(0, score - 1);
@@ -271,7 +284,7 @@ $reward_stars = $reward_stars ?? ($lesson['reward_stars'] ?? 5);
         itemsContainer.innerHTML = '';
         
         document.getElementById('flame').style.transform = 'scaleY(2.5)';
-        document.getElementById('flame').style.boxShadow = '0 0 50px #F59E0B, 0 0 80px #EF4444';
+        document.getElementById('flame').style.boxShadow = '0 0 50px #F29C38, 0 0 80px #EF4444';
         rocket.classList.add('blast-off');
         
         currentRoundIndex++;
@@ -283,36 +296,11 @@ $reward_stars = $reward_stars ?? ($lesson['reward_stars'] ?? 5);
     }
 
     function executeWin() {
-        const modal = document.getElementById('tutorial-modal');
-        modal.querySelector('.modal-title').innerHTML = "¡Viaje Exitoso! 🌌";
-        modal.querySelector('.modal-text').innerHTML = "¡Llegamos a nuestro destino con el tanque lleno!";
-        modal.querySelector('#tut-word').style.display = 'none';
-        modal.querySelector('#tut-trans').style.display = 'none';
-        modal.querySelector('.btn-play').innerHTML = "Aterrizar 🛬";
-        modal.classList.add('active');
-        twemoji.parse(modal, { folder: 'svg', ext: '.svg' });
-
+        if(typeof AudioManager !== 'undefined') AudioManager.playSound('win');
         if(typeof fireConfetti !== 'undefined') fireConfetti();
-
-        // Guardado real en la Base de Datos
-        const payload = {
-            lesson_id: <?php echo $lesson_id; ?>,
-            stars: <?php echo $reward_stars; ?>
-        };
-
-        fetch('../app/save_progress.php', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(payload)
-        })
-        .then(res => res.json())
-        .then(data => {
-            console.log("Progreso guardado correctamente:", data);
-            if(typeof unlockNextButton !== 'undefined') {
-                unlockNextButton(payload.lesson_id, payload.stars, <?php echo $lesson['module_id'] ?? 0; ?>);
-            }
-        })
-        .catch(error => console.error("Error al guardar en DB:", error));
+        if(typeof unlockNextButton !== 'undefined') {
+            unlockNextButton(<?php echo $lesson_id ?? 0; ?>, <?php echo $reward_stars ?? 5; ?>, <?php echo $lesson['module_id'] ?? 0; ?>);
+        }
     }
     
     document.addEventListener('keydown', (e) => {
@@ -321,5 +309,3 @@ $reward_stars = $reward_stars ?? ($lesson['reward_stars'] ?? 5);
         if(e.key === 'ArrowRight' && currentLane < 2) moveRocket(currentLane + 1);
     });
 </script>
-
-<?php require_once '../includes/footer.php'; ?>

@@ -1,27 +1,12 @@
 <?php
 // templates/type_frogs.php
-session_start();
-require_once '../includes/config.php';
-
-// Ciberseguridad: Prevenir acceso sin sesión
-if (!isset($_SESSION['user_id'])) {
-    header("Location: ../login.php");
-    exit();
-}
-
-require_once '../includes/head.php';
-require_once '../includes/navbar.php';
+// (Sin cabeceras repetidas. Este código es inyectado directamente en lesson.php)
 
 $lesson_id = $lesson_id ?? ($lesson['id'] ?? 0);
 $reward_stars = $reward_stars ?? ($lesson['reward_stars'] ?? 5);
 ?>
 
-<script src="https://unpkg.com/twemoji@latest/dist/twemoji.min.js" crossorigin="anonymous"></script>
-
 <style>
-    /* Estilos Twemoji */
-    img.emoji { height: 1.2em; width: 1.2em; margin: 0 .05em 0 .1em; vertical-align: -0.1em; display: inline-block; pointer-events: none; }
-
     /* Seguro de Pantalla Horizontal (Landscape Warning) */
     #landscape-warning {
         display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
@@ -107,8 +92,6 @@ $reward_stars = $reward_stars ?? ($lesson['reward_stars'] ?? 5);
     let targetWord = "";
 
     document.addEventListener('DOMContentLoaded', () => {
-        twemoji.parse(document.body, { folder: 'svg', ext: '.svg' });
-        
         if(roundsData.length === 0) {
             roundsData = [{
                 target_word: 'FROG', translation: 'Rana', distractors: ['CAT', 'DOG', 'BIRD']
@@ -237,39 +220,10 @@ $reward_stars = $reward_stars ?? ($lesson['reward_stars'] ?? 5);
         if (currentRoundIndex < roundsData.length) {
             setTimeout(() => { loadRound(currentRoundIndex); }, 1500);
         } else {
-            // MOSTRAR MODAL DE VICTORIA Y GUARDAR EN DB
-            const modal = document.getElementById('tutorial-modal');
-            modal.querySelector('.modal-title').innerHTML = "¡Río cruzado! 🏆";
-            modal.querySelector('.modal-text').innerHTML = "¡Eres un experto saltarín!";
-            modal.querySelector('#tut-word').style.display = 'none';
-            modal.querySelector('#tut-trans').style.display = 'none';
-            modal.querySelector('.btn-play').innerHTML = "Siguiente Misión ➡️";
-            modal.classList.add('active');
-            twemoji.parse(modal, { folder: 'svg', ext: '.svg' });
-
-            if(typeof fireConfetti !== 'undefined') fireConfetti();
-
-            // Guardado en Base de Datos (Fetch)
-            const payload = {
-                lesson_id: <?php echo $lesson_id; ?>,
-                stars: <?php echo $reward_stars; ?>
-            };
-
-            fetch('../app/save_progress.php', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload)
-            })
-            .then(res => res.json())
-            .then(data => {
-                console.log("Progreso guardado correctamente:", data);
-                if(typeof unlockNextButton !== 'undefined') {
-                    unlockNextButton(payload.lesson_id, payload.stars, <?php echo $lesson['module_id'] ?? 0; ?>);
-                }
-            })
-            .catch(error => console.error("Error al guardar en DB:", error));
+            // Se invoca la función global de lesson.php
+            if(typeof unlockNextButton !== 'undefined') {
+                unlockNextButton(<?php echo $lesson_id; ?>, <?php echo $reward_stars; ?>, <?php echo $lesson['module_id'] ?? 0; ?>);
+            }
         }
     }
 </script>
-
-<?php require_once '../includes/footer.php'; ?>
