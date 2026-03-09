@@ -65,15 +65,22 @@ $reward_stars = $reward_stars ?? ($lesson['reward_stars'] ?? 5);
     <div class="game-board" id="game-board">
         <div class="round-indicator" id="round-indicator">Ronda 1</div>
 
-        <div class="mission-modal" id="tutorial-modal" style="position: absolute; top:0; left:0; width:100%; height:100%; background:rgba(255,255,255,0.95); z-index:100; display:flex; flex-direction:column; justify-content:center; align-items:center;">
-            <h2 style="color: var(--brand-blue); margin-top: 0; font-size: 2.2rem;">📜 Misión</h2>
-            <p style="color: #64748B; font-size: 18px; margin-bottom: 10px;" id="tut-context"></p>
-            <div style="font-size: 4rem; margin: 10px 0;" id="tut-emoji-display">🎯</div>
-            <div style="font-size: 2.5rem; font-weight: 900; color: var(--brand-orange); margin-bottom: 10px; letter-spacing: 5px; text-shadow: 0 2px 4px rgba(0,0,0,0.1);" id="tut-word">WORD</div>
-            <p style="color: #94A3B8; font-size: 1.2rem; margin-bottom: 25px; font-weight: 600;" id="tut-trans">(Traducción)</p>
-            
-            <button class="btn-large" id="btn-start" onclick="startGame()" style="margin-top: 0;">▶️ ¡Proteger!</button>
-        </div>
+<div id="tutorial-modal" class="modal-overlay active">
+                <div class="modal-content">
+                    <h2 class="modal-title">¡Defiende la Base! 👾</h2>
+                    <p class="modal-text" id="tut-context">Atrapa las letras correctas de:</p>
+                    
+                    <div style="font-size: 3rem; margin: 10px 0;" id="tut-emoji"></div>
+                    <div style="font-size: 2.5rem; font-weight: 900; color: #38BDF8; letter-spacing: 2px; text-shadow: 0 0 20px rgba(56, 189, 248, 0.3);" id="tut-word">WORD</div>
+                    <p style="color: #64748B; font-size: 1.2rem; font-weight: 600; margin-bottom: 15px;" id="tut-trans">(Traducción)</p>
+                    
+                    <div style="display: flex; justify-content: center; margin-bottom: 25px;">
+                        <button class="btn-audio-huge" onclick="playPronunciation(targetWord)" title="Escuchar pronunciación">🔊</button>
+                    </div>
+
+                    <button id="btn-start" onclick="startGame()" class="btn-play bg-orange-500">▶️ ¡Jugar Ahora!</button>
+                </div>
+            </div>
 
         <div class="css-monster" id="monster"><div class="css-monster-mouth" id="monster-mouth"></div></div>
         <div class="twemoji-target" id="dynamic-target">🎯</div>

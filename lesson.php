@@ -72,24 +72,21 @@ if ($step > 0 && $step <= 5) {
     
     $current_word = $saved_words[$step - 1];
 
-    // SISTEMA ESCALABLE: Generación inteligente de distractores usando el Pool Real
     $distractor_pool = array_filter($pool_palabras, function($p) use ($current_word) {
         return strtoupper($p['en']) !== strtoupper($current_word['en']);
     });
     shuffle($distractor_pool);
-    // Extraemos 4 distractores aleatorios del pool global
     $d1 = array_values($distractor_pool)[0];
     $d2 = array_values($distractor_pool)[1];
     $d3 = array_values($distractor_pool)[2];
     $d4 = array_values($distractor_pool)[3];
 
-    // BUCLE DE 1 SOLA RONDA CON LOS NUEVOS NOMBRES OFICIALES
     for ($i = 0; $i < 1; $i++) {
         if ($step == 1) {
             $template_file = 'templates/type_frogs.php'; 
             $dynamic_rounds[] = [
                 'target_word' => strtoupper($current_word['en']), 'translation' => $current_word['es'], 'phonetic' => $current_word['phonetic'],
-                'emoji' => $current_word['emoji'], // ¡Ahora la rana envía su emoji!
+                'emoji' => $current_word['emoji'],
                 'distractors' => [
                     ['word' => strtoupper($d1['en']), 'emoji' => $d1['emoji']],
                     ['word' => strtoupper($d2['en']), 'emoji' => $d2['emoji']]
@@ -141,7 +138,6 @@ if ($step > 0 && $step <= 5) {
     <style>
         img.emoji { height: 1.2em; width: 1.2em; margin: 0 .05em 0 .1em; vertical-align: -0.1em; display: inline-block; pointer-events: none; }
         
-        /* Modal General de lesson.php */
         .overlay-fullscreen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(28, 61, 106, 0.95); backdrop-filter: blur(5px); z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; color: white; padding: 20px; }
         .modal-box { 
             background: var(--white); color: var(--text-main); border-radius: 24px; padding: 40px; 
@@ -150,8 +146,6 @@ if ($step > 0 && $step <= 5) {
             max-height: 85vh; overflow-y: auto; border-top: 6px solid var(--brand-blue);
         }
 
-        /* --- ESTILOS DE MODAL PREMIUM IMPORTADOS DESDE DASHBOARD --- */
-        /* Proveen una UI consistente y hermosa a los tutoriales de los mini-juegos */
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(8px); display: flex; justify-content: center; align-items: center; opacity: 0; pointer-events: none; transition: opacity 0.3s ease; z-index: 9999; padding: 20px; }
         .modal-overlay.active { opacity: 1; pointer-events: auto; }
         .modal-content { background: white; padding: 40px; border-radius: 24px; max-width: 520px; width: 100%; text-align: center; box-shadow: 0 25px 60px rgba(0,0,0,0.4); transform: scale(0.9); transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); border: 4px solid var(--brand-blue, #1E3A8A); }
@@ -163,7 +157,54 @@ if ($step > 0 && $step <= 5) {
         .btn-play:hover { background: #D97706; transform: translateY(-3px); box-shadow: 0 15px 25px rgba(245, 158, 11, 0.4); }
         .btn-play.bg-green-500 { background: var(--brand-green, #10B981); box-shadow: 0 10px 20px rgba(16, 185, 129, 0.3); }
         .btn-play.bg-green-500:hover { background: #059669; }
-        /* ------------------------------------------------------------ */
+
+        /* AÑADIDO: BOTÓN DE AUDIO GIGANTE UX MEJORADO */
+        .btn-audio-huge {
+            font-size: 35px;
+            background: #DBEAFE;
+            color: #1E3A8A;
+            border: 4px solid #3B82F6;
+            border-radius: 50%;
+            width: 75px;
+            height: 75px;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: 0 8px 25px rgba(59, 130, 246, 0.4);
+            flex-shrink: 0;
+            padding: 0;
+        }
+        .btn-audio-huge:hover {
+            transform: scale(1.15) rotate(5deg);
+            background: #BFDBFE;
+            box-shadow: 0 12px 30px rgba(59, 130, 246, 0.5);
+        }
+        .btn-audio-huge:active {
+            transform: scale(0.95);
+        }
+
+        /* AÑADIDO: TAMAÑO DEL BOTÓN DE MÚSICA DEL JUEGO */
+        .btn-music-game {
+            font-size: 32px;
+            background: #F8FAFC;
+            border: 3px solid #E2E8F0;
+            border-radius: 50%;
+            width: 65px;
+            height: 65px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            padding: 0;
+        }
+        .btn-music-game:hover {
+            transform: scale(1.1) rotate(-10deg);
+            border-color: var(--brand-lblue);
+        }
 
         .word-pool-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 15px; margin: 25px 0; }
         .pool-word { background: var(--bg-light); border: 2px solid #E2E8F0; border-radius: 12px; padding: 15px; cursor: pointer; transition: 0.3s; font-weight: 700; font-size: 18px; color: var(--brand-blue); display: flex; align-items: center; justify-content: center; gap: 8px;}
@@ -222,7 +263,7 @@ if ($step > 0 && $step <= 5) {
         <div id="mnemotecnia-modal" class="overlay-fullscreen" style="display: none;">
             <div class="modal-box" style="border-top-color: var(--brand-green);">
                 <h2 style="color: var(--brand-green); font-size: 2.2rem; margin-bottom: 10px;">🧠 Aprende con Mnemotecnias</h2>
-                <p style="font-size: 16px; color: #64748B; margin-bottom: 30px;">Papá/Mamá, enseña estos trucos y pronunciaciones antes de jugar.</p>
+                <p style="font-size: 16px; color: #64748B; margin-bottom: 30px;">Papá/Mamá, presiona el botón de audio para aprender la pronunciación y enséñale estos trucos antes de jugar.</p>
                 <div id="mnemotecnias-container"></div>
                 <button class="btn-large" onclick="finalizarMnemotecnias()">¡A jugar!</button>
             </div>
@@ -233,10 +274,10 @@ if ($step > 0 && $step <= 5) {
         
         <div class="container">
             <?php include 'includes/navbar.php'; ?>
-            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 25px; flex-wrap: wrap; gap: 10px; background: #F0F9FF; padding: 15px 20px; border-radius: 12px; border: 1px solid var(--brand-lblue);">
-                <div style="display: flex; align-items: center; gap: 15px;">
-                    <h1 style="margin: 0; font-size: 22px; color: var(--brand-blue);">🎮 Juego <?php echo $step; ?> de 5</h1>
-                    <button id="music-toggle" onclick="toggleMusic()" style="font-size: 26px; background: none; border: none; cursor: pointer; padding: 0; transition: 0.2s;" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'">🔇</button>
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 25px; flex-wrap: wrap; gap: 10px; background: #F0F9FF; padding: 15px 20px; border-radius: 12px; border: 1px solid var(--brand-lblue); box-shadow: 0 10px 25px rgba(28, 61, 106, 0.05);">
+                <div style="display: flex; align-items: center; gap: 15px; width: 100%; justify-content: space-between;">
+                    <h1 style="margin: 0; font-size: 26px; color: var(--brand-blue); font-weight: 900;">🎮 Juego <?php echo $step; ?> de 5</h1>
+                    <button id="music-toggle" class="btn-music-game" onclick="toggleMusic()" title="Música de fondo">🔇</button>
                 </div>
             </div>
             
@@ -252,8 +293,13 @@ if ($step > 0 && $step <= 5) {
             <div class="modal-box" style="border-top-color: var(--brand-green);">
                 <h2 style="color: var(--brand-green); font-size: 2.2rem; margin-bottom: 20px;">🎉 ¡Nivel Completado! 🎉</h2>
                 <div style="font-size: 70px; margin-bottom: 10px;" id="end-emoji"></div>
-                <h3 style="font-size: 32px; color: var(--brand-blue); margin: 10px 0; font-weight: 800;" id="end-word"></h3>
-                <p style="font-size: 20px; font-weight: 700; color: var(--brand-orange);" id="end-phonetic"></p>
+                
+                <div style="display: flex; justify-content: center; align-items: center; gap: 20px; margin: 15px 0; flex-wrap: wrap;">
+                    <h3 style="font-size: 38px; color: var(--brand-blue); margin: 0; font-weight: 900;" id="end-word"></h3>
+                    <button class="btn-audio-huge" id="btn-end-audio" title="Escuchar pronunciación">🔊</button>
+                </div>
+
+                <p style="font-size: 22px; font-weight: 800; color: var(--brand-orange);" id="end-phonetic"></p>
                 <p style="font-size: 18px; color: #475569; background: #F8FAFC; padding: 20px; border-radius: 12px; font-style: italic; margin-top: 20px; border: 1px solid #E2E8F0;" id="end-mnemonic"></p>
                 <button class="btn-large" id="btn-next-level">Siguiente Reto ➡️</button>
             </div>
@@ -263,8 +309,57 @@ if ($step > 0 && $step <= 5) {
     <?php endif; ?>
 
     <script>
+    // --- LÓGICA DE API DICTIONARY Y FALLBACK CIBERSEGURO ---
+    const audioCache = {};
+
+    async function playPronunciation(word) {
+        if(!word) return;
+        const cleanWord = word.trim().toLowerCase();
+        
+        const fallbackTTS = () => {
+            let utterance = new SpeechSynthesisUtterance(cleanWord);
+            utterance.lang = 'en-US';
+            utterance.rate = 0.85; // Voz pausada para el niño
+            utterance.pitch = 1.1; 
+            window.speechSynthesis.speak(utterance);
+        };
+
+        if (audioCache[cleanWord]) {
+            audioCache[cleanWord].play().catch(fallbackTTS);
+            return;
+        }
+
+        try {
+            const response = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${cleanWord}`);
+            if (!response.ok) throw new Error("Palabra no encontrada en API");
+            const data = await response.json();
+            
+            let audioUrl = "";
+            if(data[0] && data[0].phonetics) {
+                for (let p of data[0].phonetics) {
+                    if (p.audio && p.audio.length > 0) {
+                        audioUrl = p.audio;
+                        break;
+                    }
+                }
+            }
+
+            if (audioUrl) {
+                const audioObj = new Audio(audioUrl);
+                audioCache[cleanWord] = audioObj;
+                audioObj.play().catch(fallbackTTS);
+            } else {
+                fallbackTTS();
+            }
+        } catch (error) {
+            console.warn("API Dictionary falló, usando TTS:", error);
+            fallbackTTS();
+        }
+    }
+    // --------------------------------------------------------
+
     document.addEventListener('DOMContentLoaded', () => {
-        twemoji.parse(document.body, { folder: 'svg', ext: '.svg' });
+        if (typeof twemoji !== 'undefined') twemoji.parse(document.body, { folder: 'svg', ext: '.svg' });
     });
 
     const currentPlayingWord = <?php echo json_encode($current_word ?? null); ?>;
@@ -277,8 +372,11 @@ if ($step > 0 && $step <= 5) {
             document.getElementById('end-mnemonic').innerText = "💡 " + currentPlayingWord.mnemonic;
             
             document.getElementById('end-game-modal').style.display = 'flex';
-            
-            twemoji.parse(document.getElementById('end-game-modal'), { folder: 'svg', ext: '.svg' });
+            if (typeof twemoji !== 'undefined') twemoji.parse(document.getElementById('end-game-modal'), { folder: 'svg', ext: '.svg' });
+
+            // Configuramos el botón gigante del final y auto-reproducimos
+            document.getElementById('btn-end-audio').onclick = () => playPronunciation(currentPlayingWord.en);
+            setTimeout(() => playPronunciation(currentPlayingWord.en), 600);
 
             document.getElementById('btn-next-level').onclick = () => {
                 executeNextLevelAdvance(lessonId, stars, moduleId);
@@ -332,17 +430,21 @@ if ($step > 0 && $step <= 5) {
         palabrasSeleccionadas.forEach((palabra) => {
             const card = document.createElement('div');
             card.className = 'mnemotecnia-card';
+            // EDICIÓN: Añadimos el botón gigante al pool de mnemotecnias
             card.innerHTML = `
-                <div style="margin-bottom: 12px;">
-                    <h3 style="margin: 0; font-size: 26px; color: var(--brand-blue);">${palabra.emoji} ${palabra.en} <span style="color: #64748B;">= ${palabra.es}</span></h3>
-                    <p style="color: var(--brand-orange); font-weight: 700; margin: 5px 0; font-size: 16px;">Se pronuncia: (${palabra.phonetic})</p>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap; gap: 15px;">
+                    <div>
+                        <h3 style="margin: 0; font-size: 28px; color: var(--brand-blue);">${palabra.emoji} ${palabra.en} <span style="color: #64748B; font-size: 22px;">= ${palabra.es}</span></h3>
+                        <p style="color: var(--brand-orange); font-weight: 800; margin: 8px 0 0 0; font-size: 18px;">Se pronuncia: (${palabra.phonetic})</p>
+                    </div>
+                    <button class="btn-audio-huge" onclick="playPronunciation('${palabra.en}')" title="Escuchar pronunciación">🔊</button>
                 </div>
-                <div style="background: var(--white); padding: 15px; border-radius: 10px; font-style: italic; color: #475569; border: 1px solid #E2E8F0;">💡 ${palabra.mnemonic}</div>
+                <div style="background: var(--white); padding: 18px; border-radius: 12px; font-style: italic; color: #475569; border: 1px solid #E2E8F0; font-size: 17px;">💡 ${palabra.mnemonic}</div>
             `;
             container.appendChild(card);
         });
         document.getElementById('mnemotecnia-modal').style.display = 'flex';
-        twemoji.parse(container, { folder: 'svg', ext: '.svg' });
+        if (typeof twemoji !== 'undefined') twemoji.parse(container, { folder: 'svg', ext: '.svg' });
     }
 
     function finalizarMnemotecnias() {
@@ -370,7 +472,7 @@ if ($step > 0 && $step <= 5) {
             });
         }
         examContainer.innerHTML = html;
-        twemoji.parse(examContainer, { folder: 'svg', ext: '.svg' });
+        if (typeof twemoji !== 'undefined') twemoji.parse(examContainer, { folder: 'svg', ext: '.svg' });
     });
 
     function evaluarExamen() {
