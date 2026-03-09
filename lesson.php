@@ -76,31 +76,31 @@ if ($step > 0 && $step <= 5) {
     // BUCLE DE 1 SOLA RONDA CON LOS NUEVOS NOMBRES OFICIALES
     for ($i = 0; $i < 1; $i++) {
         if ($step == 1) {
-            $template_file = 'templates/type_frogs.php'; // Antes Jumper
+            $template_file = 'templates/type_frogs.php'; // Juego de Ranas (Jumper) reintegrado
             $dynamic_rounds[] = [
                 'target_word' => strtoupper($current_word['en']), 'translation' => $current_word['es'], 'phonetic' => $current_word['phonetic'],
                 'distractors' => [$distractors[0], $distractors[1]], 'context_es' => '¡Cruza el río saltando en la palabra!'
             ];
         } elseif ($step == 2) {
-            $template_file = 'templates/type_ninja.php'; // Antes Meteor Strike
+            $template_file = 'templates/type_ninja.php'; // Word Ninja
             $dynamic_rounds[] = [
                 'target_word' => strtoupper($current_word['en']), 'translation' => $current_word['es'], 'phonetic' => $current_word['phonetic'],
                 'items' => [['content' => $current_word['emoji'], 'is_correct' => true], ['content' => '⭐', 'is_correct' => false], ['content' => '❓', 'is_correct' => false]]
             ];
         } elseif ($step == 3) {
-            $template_file = 'templates/type_monster.php'; // Antes Defender
+            $template_file = 'templates/type_monster.php'; // Defender
             $dynamic_rounds[] = [
                 'word' => strtoupper($current_word['en']), 'translation' => $current_word['es'], 'phonetic' => $current_word['phonetic'],
                 'distractors' => ['X', 'Z', 'M', 'Q']
             ];
         } elseif ($step == 4) {
-            $template_file = 'templates/type_moles.php'; // Antes Detective
+            $template_file = 'templates/type_moles.php'; // Topos
             $dynamic_rounds[] = [
                 'target_word' => strtoupper($current_word['en']), 'translation' => $current_word['es'], 'phonetic' => $current_word['phonetic'],
                 'distractors' => [$distractors[0], $distractors[1]]
             ];
         } elseif ($step == 5) {
-            $template_file = 'templates/type_rocket.php'; // Antes Potion
+            $template_file = 'templates/type_rocket.php'; // Cohete Espacial
             $dynamic_rounds[] = [
                 'target_word' => strtoupper($current_word['en']), 'translation' => $current_word['es'], 'phonetic' => $current_word['phonetic'],
                 'distractors' => [$distractors[2], $distractors[3]]
@@ -108,43 +108,7 @@ if ($step > 0 && $step <= 5) {
         }
     }
 }
-
-    // BUCLE CAMBIADO A 1 SOLA RONDA PARA MÁS AGILIDAD
-    for ($i = 0; $i < 1; $i++) {
-        $speed = 6 + $i;
-        if ($step == 1) {
-            $template_file = 'templates/type_meteor_strike.php';
-            $dynamic_rounds[] = [
-                'target_word' => strtoupper($current_word['en']), 'translation' => $current_word['es'], 'speed' => $speed,
-                'items' => [['content' => $current_word['emoji'], 'is_correct' => true], ['content' => '⭐', 'is_correct' => false], ['content' => '❓', 'is_correct' => false]]
-            ];
-        } elseif ($step == 2) {
-            $template_file = 'templates/type_color_rescue.php';
-            $dynamic_rounds[] = [
-                'color_name' => strtoupper($current_word['en']), 'color_hex' => '#000', 'item' => $current_word['emoji'], 'translation' => $current_word['es'],
-                'distractors' => [['name' => 'X', 'hex' => '#333'], ['name' => 'Y', 'hex' => '#777']]
-            ];
-        } elseif ($step == 3) {
-            $template_file = 'templates/type_defender.php';
-            $dynamic_rounds[] = [
-                'word' => strtoupper($current_word['en']), 'translation' => $current_word['es'],
-                'distractors' => ['X', 'Z', 'M', 'Q']
-            ];
-        } elseif ($step == 4) {
-            $template_file = 'templates/type_detective.php';
-            $dynamic_rounds[] = [
-                'target_word' => strtoupper($current_word['en']), 'translation' => $current_word['es'],
-                'distractors' => [$distractors[0], $distractors[1]]
-            ];
-        } elseif ($step == 5) {
-            $template_file = 'templates/type_potion.php';
-            $dynamic_rounds[] = [
-                'target_word' => strtoupper($current_word['en']), 'translation' => $current_word['es'],
-                'distractors' => [$distractors[2], $distractors[3]]
-            ];
-        }
-    }
-}
+// El bloque duplicado y la llave extra que rompían el código han sido eliminados.
 ?>
 <!DOCTYPE html>
 <html lang="es">
