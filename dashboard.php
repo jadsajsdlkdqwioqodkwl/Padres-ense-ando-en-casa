@@ -15,8 +15,8 @@ try {
     $stmtModules = $pdo->query("SELECT * FROM modules ORDER BY order_num ASC");
     $modules = $stmtModules->fetchAll(PDO::FETCH_ASSOC);
 
-    // Obtener el total de estrellas del usuario
-    $stmtStars = $pdo->prepare("SELECT SUM(stars) as total_stars FROM progress WHERE user_id = ? AND is_completed = 1");
+ // Obtener el total de estrellas del usuario
+    $stmtStars = $pdo->prepare("SELECT SUM(stars_earned) as total_stars FROM progress WHERE user_id = ? AND is_completed = 1");
     $stmtStars->execute([$_SESSION['user_id']]);
     $user_total_stars = (int)$stmtStars->fetchColumn();
 
