@@ -17,15 +17,15 @@ $reward_stars = $reward_stars ?? ($lesson['reward_stars'] ?? 5);
         .game-wrapper { display: none !important; }
     }
 
-    /* FIX: Modales seguros absolutos forzados (Evita que caigan abajo a la derecha) */
+    /* FIX CRÍTICO: Modales seguros anclados de forma absoluta dentro de su contenedor, sin !important que bloqueen la pantalla */
     #tutorial-modal.modal-overlay {
-        position: fixed !important; top: 0 !important; left: 0 !important;
-        width: 100% !important; height: 100% !important;
-        box-sizing: border-box !important; padding: 20px !important;
+        position: absolute; top: 0; left: 0;
+        width: 100%; height: 100%;
+        box-sizing: border-box; padding: 20px;
         display: none; justify-content: center; align-items: center;
-        background: rgba(15, 23, 42, 0.85); z-index: 999999 !important;
+        background: rgba(15, 23, 42, 0.85); z-index: 999999;
     }
-    #tutorial-modal.modal-overlay.active { display: flex !important; }
+    #tutorial-modal.modal-overlay.active { display: flex; }
     
     #tutorial-modal .modal-content {
         width: 100% !important; max-width: 480px !important;
@@ -35,9 +35,12 @@ $reward_stars = $reward_stars ?? ($lesson['reward_stars'] ?? 5);
         border: 4px solid var(--brand-blue, #1E3A8A);
     }
 
+    /* Encabezado del juego estandarizado (Layout Fase 2) */
+    .game-header-bar { display: flex; justify-content: space-between; align-items: center; margin: 0 auto 20px auto; width: 100%; max-width: 800px; background: #ffffff; border: 2px solid #E2E8F0; border-radius: 16px; padding: 15px 25px; box-sizing: border-box; box-shadow: 0 10px 25px rgba(28, 61, 106, 0.05); }
+
     /* FIX: Tablero de ninja 100% responsivo y sin sobrepasar márgenes */
     .ninja-board { 
-        position: relative; width: 100%; max-width: 100%; min-height: 450px; height: 60vh; max-height: 600px; 
+        position: relative; width: 100%; max-width: 800px; min-height: 450px; height: 60vh; max-height: 600px; 
         background: radial-gradient(circle at center, #1E293B 0%, #0F172A 100%); 
         border-radius: 24px; overflow: hidden; border: 4px solid #1E3A8A; 
         margin: 0 auto 20px auto; box-shadow: 0 15px 35px rgba(28, 61, 106, 0.15); 
@@ -45,7 +48,7 @@ $reward_stars = $reward_stars ?? ($lesson['reward_stars'] ?? 5);
     }
     .target-hud { position: absolute; top: 20px; left: 50%; transform: translateX(-50%); background: rgba(255,255,255,0.1); border: 2px solid rgba(255,255,255,0.2); backdrop-filter: blur(10px); padding: 10px 40px; border-radius: 50px; text-align: center; z-index: 10; width: max-content; box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
     
-    .ninja-item { position: absolute; display: flex; flex-direction: column; align-items: center; justify-content: center; user-select: none; z-index: 5; text-shadow: 0 5px 15px rgba(0,0,0,0.5); }
+    .ninja-item { position: absolute; display: flex; flex-direction: column; align-items: center; justify-content: center; user-select: none; z-index: 5; text-shadow: 0 5px 15px rgba(0,0,0,0.5); touch-action: none; }
     .ninja-emoji { font-size: clamp(50px, 12vw, 80px); filter: drop-shadow(0 10px 10px rgba(0,0,0,0.4)); pointer-events: none; }
     .ninja-word { background: #ffffff; color: #1E3A8A; font-weight: 900; padding: 4px 16px; border-radius: 50px; font-size: clamp(12px, 3vw, 18px); margin-top: -5px; border: 3px solid #1E3A8A; pointer-events: none; }
     
@@ -70,11 +73,12 @@ $reward_stars = $reward_stars ?? ($lesson['reward_stars'] ?? 5);
     <p style="font-size: 1.2rem; color: #94A3B8;">Conviértete en Ninja jugando en formato vertical.</p>
 </div>
 
-<main class="game-wrapper container mx-auto px-4 py-8" style="min-height: 85vh; padding: 10px; box-sizing: border-box; width: 100%;">
-    <div class="game-area text-center mx-auto" style="max-width: 900px; padding: 15px; width: 100%; box-sizing: border-box;">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-            <h3 class="text-2xl font-black text-gray-800">⚔️ Word Ninja</h3>
-            <div id="round-counter" style="background: #1E3A8A; color: white; padding: 5px 15px; border-radius: 20px; font-weight: 700;">1/1</div>
+<main class="game-wrapper container mx-auto px-4 py-8" style="min-height: 85vh; padding: 10px; box-sizing: border-box; width: 100%; max-width: 1000px; margin: 0 auto;">
+    <div class="game-area text-center mx-auto" style="width: 100%; box-sizing: border-box; display: flex; flex-direction: column; align-items: center;">
+        
+        <div class="game-header-bar">
+            <h3 style="margin: 0; color: var(--brand-blue); font-size: clamp(20px, 5vw, 26px); font-weight: 900;">⚔️ Word Ninja</h3>
+            <div id="round-counter" style="background: var(--brand-blue); color: white; padding: 5px 15px; border-radius: 20px; font-weight: 700;">1/1</div>
         </div>
 
         <div class="ninja-board" id="ninja-board">
@@ -93,7 +97,7 @@ $reward_stars = $reward_stars ?? ($lesson['reward_stars'] ?? 5);
                     <p style="color: #64748B; font-size: 1.2rem; font-weight: 600; margin-bottom: 15px;" id="tut-trans">(Traducción)</p>
                     <p style="font-size: 14px; color: #475569; background: #F8FAFC; padding: 15px; border-radius: 12px; font-style: italic; margin-bottom: 25px; border: 1px solid #E2E8F0; width: 100%; box-sizing: border-box;" id="tut-mnemonic">💡 Cargando consejo...</p>
 
-                    <button id="btn-start" onclick="startGame()" class="btn-play" style="margin-top: 0;">▶️ ¡Jugar Ahora!</button>
+                    <button id="btn-start" onclick="startGame()" class="btn-play bg-orange-500" style="margin-top: 0;">▶️ ¡Jugar Ahora!</button>
                 </div>
             </div>
 
@@ -149,7 +153,6 @@ $reward_stars = $reward_stars ?? ($lesson['reward_stars'] ?? 5);
         document.getElementById('tut-trans').innerText = `(${roundData.translation})`;
         document.getElementById('hud-word').innerText = targetWord;
         
-        // Asignar mnemotecnia y botón de audio
         if(roundData.mnemonic) {
             document.getElementById('tut-mnemonic').innerText = "💡 " + roundData.mnemonic;
         } else {
@@ -165,12 +168,27 @@ $reward_stars = $reward_stars ?? ($lesson['reward_stars'] ?? 5);
         activeItems.forEach(i => i.el.remove());
         activeItems = [];
 
-        document.getElementById('tutorial-modal').classList.add('active');
+        // Restaurar el modal de forma segura (sin bloquear clics fuera)
+        const modal = document.getElementById('tutorial-modal');
+        modal.classList.add('active');
+        modal.style.display = 'flex';
+        modal.style.opacity = '1';
+        modal.style.pointerEvents = 'auto';
+
         if (typeof twemoji !== 'undefined') twemoji.parse(document.getElementById('tutorial-modal'), { folder: 'svg', ext: '.svg' });
     }
 
     function startGame() {
-        document.getElementById('tutorial-modal').classList.remove('active');
+        const modal = document.getElementById('tutorial-modal');
+        modal.classList.remove('active');
+        modal.style.opacity = '0';
+        
+        // Destruir el escudo invisible para dejar pasar los clics
+        setTimeout(() => { 
+            modal.style.display = 'none'; 
+            modal.style.pointerEvents = 'none'; 
+        }, 300);
+
         gameActive = true;
         lastTime = performance.now();
         requestAnimationFrame(gameLoop);
@@ -222,7 +240,6 @@ $reward_stars = $reward_stars ?? ($lesson['reward_stars'] ?? 5);
             <div class="ninja-word">${itemData.word || itemData.content}</div>
         `;
         
-        // Optimización Responsiva X: Restringir márgenes según el ancho del contenedor actual
         let currentBoardWidth = board.offsetWidth;
         let startX = Math.random() * (currentBoardWidth - 100) + 50;
         let startY = board.offsetHeight;
@@ -233,6 +250,7 @@ $reward_stars = $reward_stars ?? ($lesson['reward_stars'] ?? 5);
         board.appendChild(el);
         if (typeof twemoji !== 'undefined') twemoji.parse(el, { folder: 'svg', ext: '.svg' }); 
         
+        // El evento de "corte" del ninja usa pointerdown y pointerenter para simular el deslizamiento
         el.addEventListener('pointerdown', (e) => sliceItem(e, el, isCorrect, itemData.content));
         el.addEventListener('pointerenter', (e) => { if(e.buttons > 0) sliceItem(e, el, isCorrect, itemData.content); });
         
@@ -242,6 +260,9 @@ $reward_stars = $reward_stars ?? ($lesson['reward_stars'] ?? 5);
     function sliceItem(e, el, isCorrect, originalContent) {
         if(!gameActive || el.classList.contains('sliced')) return;
         el.classList.add('sliced'); 
+        
+        // Sonido base al deslizar/cortar
+        if(typeof AudioManager !== 'undefined') AudioManager.playSound('pop');
         
         let rect = board.getBoundingClientRect();
         let x = e.clientX - rect.left;
@@ -263,10 +284,14 @@ $reward_stars = $reward_stars ?? ($lesson['reward_stars'] ?? 5);
         if (typeof twemoji !== 'undefined') twemoji.parse(el, { folder: 'svg', ext: '.svg' });
 
         if(isCorrect) {
+            // Acierto!
+            if(typeof AudioManager !== 'undefined') AudioManager.playSound('correct');
             score++;
             document.getElementById('score-display').innerText = `${score}/3`;
             if(score >= maxScore) setTimeout(checkNextRound, 800);
         } else {
+            // Fallo!
+            if(typeof AudioManager !== 'undefined') AudioManager.playSound('wrong');
             board.style.boxShadow = "inset 0 0 50px rgba(239, 68, 68, 0.8)";
             setTimeout(() => board.style.boxShadow = "0 15px 35px rgba(28, 61, 106, 0.15)", 300);
             score = Math.max(0, score - 1); 
@@ -286,7 +311,8 @@ $reward_stars = $reward_stars ?? ($lesson['reward_stars'] ?? 5);
     }
 
     function executeWin() {
-        // En lugar de inyectar un modal propio, delegamos directamente al global de lesson.php
+        // Victoria!
+        if(typeof AudioManager !== 'undefined') AudioManager.playSound('win');
         if(typeof fireConfetti !== 'undefined') fireConfetti();
         if(typeof unlockNextButton !== 'undefined') {
             unlockNextButton(<?php echo $lesson_id; ?>, <?php echo $reward_stars; ?>, <?php echo $lesson['module_id'] ?? 0; ?>);
