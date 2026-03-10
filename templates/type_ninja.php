@@ -1,7 +1,5 @@
 <?php
 // templates/type_ninja.php
-// IMPORTANTE: Ya no se llama a session_start() ni headers. Este archivo es inyectado en lesson.php
-
 $lesson_id = $lesson_id ?? ($lesson['id'] ?? 0);
 $reward_stars = $reward_stars ?? ($lesson['reward_stars'] ?? 5);
 ?>
@@ -17,22 +15,23 @@ $reward_stars = $reward_stars ?? ($lesson['reward_stars'] ?? 5);
         .game-wrapper { display: none !important; }
     }
 
-    /* FIX CRÍTICO: Modales seguros anclados de forma absoluta dentro de su contenedor, sin !important que bloqueen la pantalla */
-    #tutorial-modal.modal-overlay {
-        position: absolute; top: 0; left: 0;
-        width: 100%; height: 100%;
-        box-sizing: border-box; padding: 20px;
+    /* MODALES GLOBALES FUERA DEL JUEGO */
+    .modal-overlay {
+        position: fixed !important; top: 0 !important; left: 0 !important;
+        width: 100vw !important; height: 100vh !important;
+        box-sizing: border-box !important; padding: 20px !important;
         display: none; justify-content: center; align-items: center;
-        background: rgba(15, 23, 42, 0.85); z-index: 999999;
+        background: rgba(15, 23, 42, 0.85) !important; z-index: 999999 !important;
     }
-    #tutorial-modal.modal-overlay.active { display: flex; }
+    .modal-overlay.active { display: flex !important; }
     
-    #tutorial-modal .modal-content {
+    .modal-overlay .modal-content {
         width: 100% !important; max-width: 480px !important;
         box-sizing: border-box !important; margin: 0 auto !important;
         background: white; padding: clamp(20px, 5vw, 40px); border-radius: 24px;
         text-align: center; box-shadow: 0 25px 60px rgba(0,0,0,0.4);
         border: 4px solid var(--brand-blue, #1E3A8A);
+        pointer-events: auto;
     }
 
     /* Encabezado del juego estandarizado (Layout Fase 2) */
@@ -59,7 +58,6 @@ $reward_stars = $reward_stars ?? ($lesson['reward_stars'] ?? 5);
     @keyframes sliceLeft { to { transform: translate(-60px, 60px) rotate(-25deg); opacity: 0; } }
     @keyframes sliceRight { to { transform: translate(60px, 60px) rotate(25deg); opacity: 0; } }
 
-    /* Ajuste Extra Móvil para el HUD */
     @media (max-width: 480px) {
         .target-hud { padding: 8px 25px; top: 10px; }
         .target-hud > div:first-child { font-size: 20px !important; }
@@ -73,6 +71,37 @@ $reward_stars = $reward_stars ?? ($lesson['reward_stars'] ?? 5);
     <p style="font-size: 1.2rem; color: #94A3B8;">Conviértete en Ninja jugando en formato vertical.</p>
 </div>
 
+<div id="tutorial-modal" class="modal-overlay">
+    <div class="modal-content">
+        <h2 class="modal-title" style="margin-bottom: 10px;">¡Conviértete en Ninja! 🥷</h2>
+        <p class="modal-text" id="tut-context" style="margin-bottom: 10px;">Corta la figura correcta 3 veces:</p>
+        <div style="font-size: 3rem; margin: 10px 0;" id="tut-emoji"></div>
+        
+        <div style="display: flex; justify-content: center; align-items: center; gap: 15px; margin: 15px 0; flex-wrap: wrap;">
+            <div style="font-size: clamp(2.5rem, 8vw, 3.5rem); font-weight: 900; color: #38BDF8; letter-spacing: 2px; text-shadow: 0 0 20px rgba(56, 189, 248, 0.3);" id="tut-word">WORD</div>
+            <button class="btn-audio-huge" id="btn-tut-audio" title="Escuchar pronunciación" style="width: clamp(50px, 10vw, 65px); height: clamp(50px, 10vw, 65px); font-size: clamp(20px, 5vw, 26px); margin: 0;">🔊</button>
+        </div>
+
+        <p style="color: #64748B; font-size: 1.2rem; font-weight: 600; margin-bottom: 15px;" id="tut-trans">(Traducción)</p>
+        <p style="font-size: 14px; color: #475569; background: #F8FAFC; padding: 15px; border-radius: 12px; font-style: italic; margin-bottom: 25px; border: 1px solid #E2E8F0; width: 100%; box-sizing: border-box;" id="tut-mnemonic">💡 Cargando consejo...</p>
+
+        <button id="btn-start" onclick="startGame()" class="btn-play bg-orange-500" style="margin-top: 0;">▶️ ¡Jugar Ahora!</button>
+    </div>
+</div>
+
+<div id="success-modal" class="modal-overlay">
+    <div class="modal-content">
+        <h2 class="modal-title" style="margin-bottom: 10px; color: #10B981;">¡Corte Perfecto! ⚔️</h2>
+        <div style="font-size: 4rem; margin: 10px 0;" id="succ-emoji">🥷</div>
+        <p style="font-size: 1.5rem; font-weight: 800; color: #1E3A8A; margin-bottom: 5px;" id="succ-word">WORD</p>
+        <p style="color: #64748B; font-size: 1.2rem; font-weight: 600; margin-bottom: 15px;" id="succ-trans">(Traducción)</p>
+        
+        <p style="font-size: 15px; color: #065F46; background: #D1FAE5; padding: 15px; border-radius: 12px; font-weight: 600; margin-bottom: 25px; border: 1px solid #34D399; width: 100%; box-sizing: border-box;" id="succ-mnemonic">💡 Cargando recordatorio...</p>
+        
+        <button id="btn-next-round" onclick="goToNextRound()" class="btn-play bg-blue-500" style="margin-top: 0;">Siguiente ➡️</button>
+    </div>
+</div>
+
 <main class="game-wrapper container mx-auto px-4 py-8" style="min-height: 85vh; padding: 10px; box-sizing: border-box; width: 100%; max-width: 1000px; margin: 0 auto;">
     <div class="game-area text-center mx-auto" style="width: 100%; box-sizing: border-box; display: flex; flex-direction: column; align-items: center;">
         
@@ -82,25 +111,6 @@ $reward_stars = $reward_stars ?? ($lesson['reward_stars'] ?? 5);
         </div>
 
         <div class="ninja-board" id="ninja-board">
-            
-            <div id="tutorial-modal" class="modal-overlay active">
-                <div class="modal-content">
-                    <h2 class="modal-title" style="margin-bottom: 10px;">¡Conviértete en Ninja! 🥷</h2>
-                    <p class="modal-text" id="tut-context" style="margin-bottom: 10px;">Corta la figura correcta 3 veces:</p>
-                    <div style="font-size: 3rem; margin: 10px 0;" id="tut-emoji"></div>
-                    
-                    <div style="display: flex; justify-content: center; align-items: center; gap: 15px; margin: 15px 0; flex-wrap: wrap;">
-                        <div style="font-size: clamp(2.5rem, 8vw, 3.5rem); font-weight: 900; color: #38BDF8; letter-spacing: 2px; text-shadow: 0 0 20px rgba(56, 189, 248, 0.3);" id="tut-word">WORD</div>
-                        <button class="btn-audio-huge" id="btn-tut-audio" title="Escuchar pronunciación" style="width: clamp(50px, 10vw, 65px); height: clamp(50px, 10vw, 65px); font-size: clamp(20px, 5vw, 26px); margin: 0;">🔊</button>
-                    </div>
-
-                    <p style="color: #64748B; font-size: 1.2rem; font-weight: 600; margin-bottom: 15px;" id="tut-trans">(Traducción)</p>
-                    <p style="font-size: 14px; color: #475569; background: #F8FAFC; padding: 15px; border-radius: 12px; font-style: italic; margin-bottom: 25px; border: 1px solid #E2E8F0; width: 100%; box-sizing: border-box;" id="tut-mnemonic">💡 Cargando consejo...</p>
-
-                    <button id="btn-start" onclick="startGame()" class="btn-play bg-orange-500" style="margin-top: 0;">▶️ ¡Jugar Ahora!</button>
-                </div>
-            </div>
-
             <div class="target-hud">
                 <div style="font-size: 24px; font-weight: 800; color: #ffffff;" id="hud-word">WORD</div>
                 <div style="color: #FBBF24; font-size: 22px; font-weight: 900; letter-spacing: 5px;" id="score-display">0/3</div>
@@ -132,11 +142,7 @@ $reward_stars = $reward_stars ?? ($lesson['reward_stars'] ?? 5);
         if(roundsData.length === 0) {
             roundsData = [{
                 target_word: 'APPLE', translation: 'Manzana', emoji: '🍎', mnemonic: 'Imagina a un ninja cortando una manzana.',
-                items: [
-                    {word: 'APPLE', content: '🍎', is_correct: true}, 
-                    {word: 'BANANA', content: '🍌', is_correct: false}, 
-                    {word: 'CAR', content: '🚗', is_correct: false}
-                ]
+                items: [{word: 'APPLE', content: '🍎', is_correct: true}, {word: 'BANANA', content: '🍌', is_correct: false}]
             }];
         }
         loadRound(currentRoundIndex);
@@ -148,6 +154,7 @@ $reward_stars = $reward_stars ?? ($lesson['reward_stars'] ?? 5);
         targetEmoji = roundData.emoji || '📦';
         itemsArray = roundData.items || [];
         
+        // Modal Tutorial
         document.getElementById('tut-emoji').innerText = targetEmoji;
         document.getElementById('tut-word').innerText = targetWord;
         document.getElementById('tut-trans').innerText = `(${roundData.translation})`;
@@ -155,6 +162,7 @@ $reward_stars = $reward_stars ?? ($lesson['reward_stars'] ?? 5);
         
         if(roundData.mnemonic) {
             document.getElementById('tut-mnemonic').innerText = "💡 " + roundData.mnemonic;
+            document.getElementById('tut-mnemonic').style.display = 'block';
         } else {
             document.getElementById('tut-mnemonic').style.display = 'none';
         }
@@ -168,27 +176,12 @@ $reward_stars = $reward_stars ?? ($lesson['reward_stars'] ?? 5);
         activeItems.forEach(i => i.el.remove());
         activeItems = [];
 
-        // Restaurar el modal de forma segura (sin bloquear clics fuera)
-        const modal = document.getElementById('tutorial-modal');
-        modal.classList.add('active');
-        modal.style.display = 'flex';
-        modal.style.opacity = '1';
-        modal.style.pointerEvents = 'auto';
-
+        document.getElementById('tutorial-modal').classList.add('active');
         if (typeof twemoji !== 'undefined') twemoji.parse(document.getElementById('tutorial-modal'), { folder: 'svg', ext: '.svg' });
     }
 
     function startGame() {
-        const modal = document.getElementById('tutorial-modal');
-        modal.classList.remove('active');
-        modal.style.opacity = '0';
-        
-        // Destruir el escudo invisible para dejar pasar los clics
-        setTimeout(() => { 
-            modal.style.display = 'none'; 
-            modal.style.pointerEvents = 'none'; 
-        }, 300);
-
+        document.getElementById('tutorial-modal').classList.remove('active');
         gameActive = true;
         lastTime = performance.now();
         requestAnimationFrame(gameLoop);
@@ -232,13 +225,9 @@ $reward_stars = $reward_stars ?? ($lesson['reward_stars'] ?? 5);
         }
         
         let itemData = pool[Math.floor(Math.random() * pool.length)];
-        
         let el = document.createElement('div');
         el.className = 'ninja-item';
-        el.innerHTML = `
-            <div class="ninja-emoji">${itemData.content}</div>
-            <div class="ninja-word">${itemData.word || itemData.content}</div>
-        `;
+        el.innerHTML = `<div class="ninja-emoji">${itemData.content}</div><div class="ninja-word">${itemData.word || itemData.content}</div>`;
         
         let currentBoardWidth = board.offsetWidth;
         let startX = Math.random() * (currentBoardWidth - 100) + 50;
@@ -250,7 +239,6 @@ $reward_stars = $reward_stars ?? ($lesson['reward_stars'] ?? 5);
         board.appendChild(el);
         if (typeof twemoji !== 'undefined') twemoji.parse(el, { folder: 'svg', ext: '.svg' }); 
         
-        // El evento de "corte" del ninja usa pointerdown y pointerenter para simular el deslizamiento
         el.addEventListener('pointerdown', (e) => sliceItem(e, el, isCorrect, itemData.content));
         el.addEventListener('pointerenter', (e) => { if(e.buttons > 0) sliceItem(e, el, isCorrect, itemData.content); });
         
@@ -261,7 +249,6 @@ $reward_stars = $reward_stars ?? ($lesson['reward_stars'] ?? 5);
         if(!gameActive || el.classList.contains('sliced')) return;
         el.classList.add('sliced'); 
         
-        // Sonido base al deslizar/cortar
         if(typeof AudioManager !== 'undefined') AudioManager.playSound('pop');
         
         let rect = board.getBoundingClientRect();
@@ -284,13 +271,11 @@ $reward_stars = $reward_stars ?? ($lesson['reward_stars'] ?? 5);
         if (typeof twemoji !== 'undefined') twemoji.parse(el, { folder: 'svg', ext: '.svg' });
 
         if(isCorrect) {
-            // Acierto!
             if(typeof AudioManager !== 'undefined') AudioManager.playSound('correct');
             score++;
             document.getElementById('score-display').innerText = `${score}/3`;
-            if(score >= maxScore) setTimeout(checkNextRound, 800);
+            if(score >= maxScore) setTimeout(showSuccessModal, 800);
         } else {
-            // Fallo!
             if(typeof AudioManager !== 'undefined') AudioManager.playSound('wrong');
             board.style.boxShadow = "inset 0 0 50px rgba(239, 68, 68, 0.8)";
             setTimeout(() => board.style.boxShadow = "0 15px 35px rgba(28, 61, 106, 0.15)", 300);
@@ -300,19 +285,37 @@ $reward_stars = $reward_stars ?? ($lesson['reward_stars'] ?? 5);
         setTimeout(() => el.remove(), 600);
     }
 
-    function checkNextRound() {
+    function showSuccessModal() {
         gameActive = false;
+        if(typeof AudioManager !== 'undefined') AudioManager.playSound('win');
+
+        document.getElementById('succ-emoji').innerText = targetEmoji || '🥷';
+        document.getElementById('succ-word').innerText = targetWord;
+        document.getElementById('succ-trans').innerText = `(${roundData.translation})`;
+        
+        if(roundData.mnemonic) {
+            document.getElementById('succ-mnemonic').innerText = "💡 Recuerda: " + roundData.mnemonic;
+            document.getElementById('succ-mnemonic').style.display = 'block';
+        } else {
+            document.getElementById('succ-mnemonic').style.display = 'none';
+        }
+
+        const modal = document.getElementById('success-modal');
+        modal.classList.add('active');
+        if (typeof twemoji !== 'undefined') twemoji.parse(modal, { folder: 'svg', ext: '.svg' });
+    }
+
+    function goToNextRound() {
+        document.getElementById('success-modal').classList.remove('active');
         currentRoundIndex++;
         if (currentRoundIndex < roundsData.length) {
             loadRound(currentRoundIndex);
         } else {
-            executeWin();
+            finalWin();
         }
     }
 
-    function executeWin() {
-        // Victoria!
-        if(typeof AudioManager !== 'undefined') AudioManager.playSound('win');
+    function finalWin() {
         if(typeof fireConfetti !== 'undefined') fireConfetti();
         if(typeof unlockNextButton !== 'undefined') {
             unlockNextButton(<?php echo $lesson_id; ?>, <?php echo $reward_stars; ?>, <?php echo $lesson['module_id'] ?? 0; ?>);

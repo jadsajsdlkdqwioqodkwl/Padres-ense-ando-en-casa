@@ -4,13 +4,10 @@ require_once 'includes/config.php';
 $module_id = isset($_GET['module']) ? (int)$_GET['module'] : 1;
 $user_id = $_SESSION['user_id'];
 
-// Obtener título del módulo (Ahora tratado como Semana/Pool temático)
 $stmtMod = $pdo->prepare("SELECT title FROM modules WHERE id = ?");
 $stmtMod->execute([$module_id]);
-// EDICIÓN: Cambiamos el fallback para que refleje la nueva estructura de semanas
 $module_title = $stmtMod->fetchColumn() ?: "Semana de Vocabulario";
 
-// Obtener lecciones y progreso
 $stmtLessons = $pdo->prepare("
     SELECT l.id, l.title, l.reward_stars, l.order_num, p.is_completed, p.stars_earned
     FROM lessons l
@@ -21,14 +18,12 @@ $stmtLessons = $pdo->prepare("
 $stmtLessons->execute([$user_id, $module_id]);
 $lessons = $stmtLessons->fetchAll();
 
-// --- LÓGICA DE LA BARRA DE PROGRESO ---
 $total_lessons = count($lessons);
 $completed_lessons = 0;
 foreach ($lessons as $l) {
     if ($l['is_completed']) $completed_lessons++;
 }
 $progress_percent = $total_lessons > 0 ? round(($completed_lessons / $total_lessons) * 100) : 0;
-// --------------------------------------
 
 $page_title = $module_title;
 ?>
@@ -37,11 +32,9 @@ $page_title = $module_title;
 <head>
     <?php include 'includes/head.php'; ?>
     <link rel="stylesheet" href="assets/css/main.css">
-    
     <script src="https://unpkg.com/twemoji@latest/dist/twemoji.min.js" crossorigin="anonymous"></script>
 
     <style>
-        /* Regla global para Twemoji */
         img.emoji { height: 1.2em; width: 1.2em; margin: 0 .05em 0 .1em; vertical-align: -0.1em; display: inline-block; pointer-events: none; }
 
         .level-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 25px; margin-top: 40px; width: 100%; box-sizing: border-box; }
@@ -55,7 +48,6 @@ $page_title = $module_title;
         .level-card.completed { border-color: var(--brand-green); background: #F0FDF4; }
         .level-icon { font-size: 50px; margin-bottom: 15px; }
         
-        /* Estilos de la Barra de Progreso */
         .progress-container {
             background: #E2E8F0; border-radius: 50px; height: 32px; width: 100%; 
             max-width: 600px; margin: 25px auto; overflow: hidden; position: relative;
@@ -72,7 +64,6 @@ $page_title = $module_title;
             padding: 0 10px; box-sizing: border-box;
         }
 
-        /* CLASES PARA LA RENOVACIÓN DE VOCABULARIO */
         .pool-header {
             background: #FFFBEB; border-left: 6px solid var(--brand-orange); padding: 20px;
             margin-bottom: 30px; border-radius: 12px; font-size: 15px; text-align: left;
@@ -85,6 +76,21 @@ $page_title = $module_title;
             box-shadow: 0 4px 10px rgba(28, 61, 106, 0.2);
         }
         .level-title { font-size: 1.2rem; margin: 10px 0; color: var(--brand-blue); }
+
+        /* FIX MODAL CSS */
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(8px);
+            display: none; justify-content: center; align-items: center; opacity: 0; transition: opacity 0.3s ease; z-index: 9999; padding: 20px; box-sizing: border-box;
+        }
+        .modal-overlay.active { display: flex; opacity: 1; }
+        .modal-content {
+            background: white; padding: 40px; border-radius: 24px; max-width: 520px; width: 100%; text-align: center;
+            box-shadow: 0 25px 60px rgba(0,0,0,0.4); transform: scale(0.9); transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            border: 4px solid var(--brand-blue, #1E3A8A); box-sizing: border-box; margin: 0 auto;
+        }
+        .modal-overlay.active .modal-content { transform: scale(1); }
+        .modal-title { font-size: clamp(1.8rem, 5vw, 2.2rem); color: var(--brand-blue, #1E3A8A); margin-bottom: 20px; font-weight: 900; }
+        .modal-text { color: #475569; font-size: clamp(1rem, 3vw, 1.15rem); line-height: 1.7; margin-bottom: 10px; }
     </style>
 </head>
 <body>
@@ -104,24 +110,19 @@ $page_title = $module_title;
             
             <div class="progress-container">
                 <div class="progress-fill" style="width: <?php echo $progress_percent; ?>%;"></div>
-                <div class="progress-text">
-                    Progreso: <?php echo $progress_percent; ?>% (<?php echo $completed_lessons; ?> de <?php echo $total_lessons; ?>)
-                </div>
+                <div class="progress-text">Progreso: <?php echo $progress_percent; ?>% (<?php echo $completed_lessons; ?> de <?php echo $total_lessons; ?>)</div>
             </div>
         </div>
 
         <div class="level-grid">
-            <?php 
-            foreach ($lessons as $lesson): 
+            <?php foreach ($lessons as $lesson): 
                 $is_completed = $lesson['is_completed'] ? true : false;
                 $stars_display = $is_completed ? "⭐ " . $lesson['stars_earned'] : "🎁 " . $lesson['reward_stars'] . " Estrellas";
-                
                 $completed_class = $is_completed ? 'completed' : '';
                 $icon = $is_completed ? '✅' : '📅'; 
             ?>
                 <a href="lesson.php?id=<?php echo $lesson['id']; ?>" class="level-card <?php echo $completed_class; ?>">
                     <div class="day-badge">Día <?php echo $lesson['order_num']; ?></div>
-                    
                     <div class="level-icon"><?php echo $icon; ?></div>
                     <h3 style="color: #64748B; font-size: 14px; text-transform: uppercase; letter-spacing: 1px;">Día <?php echo $lesson['order_num']; ?></h3>
                     <h2 class="level-title"><?php echo htmlspecialchars($lesson['title']); ?></h2>
@@ -139,7 +140,7 @@ $page_title = $module_title;
                 Antes de jugar, se abrirá la <strong>Pool de Vocabulario</strong>. Cada día les daremos opciones y ustedes elegirán las <strong>5 palabras</strong> que quieran aprender hoy.<br><br>
                 ¡Así aprenderán lo que realmente les interesa!
             </p>
-            <button class="btn btn-large" style="width: 100%; font-size: 1.1rem;" onclick="closeIntroWeekModal()">¡Entendido, vamos! 🚀</button>
+            <button class="btn btn-large" style="width: 100%; font-size: 1.1rem; border-radius: 50px; background: var(--brand-green); color: white; padding: 15px; font-weight: bold; border: none; cursor: pointer;" onclick="closeIntroWeekModal()">¡Entendido, vamos! 🚀</button>
         </div>
     </div>
 
@@ -147,23 +148,21 @@ $page_title = $module_title;
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            if (typeof twemoji !== 'undefined') {
-                twemoji.parse(document.body, { folder: 'svg', ext: '.svg' });
-            }
+            if (typeof twemoji !== 'undefined') twemoji.parse(document.body, { folder: 'svg', ext: '.svg' });
 
-            // Lógica para mostrar el modal solo en la Semana 1 la primera vez
             const isWeek1 = <?php echo $module_id; ?> === 1;
-            if (isWeek1 && !localStorage.getItem('week1IntroShown')) {
-                // Pequeño retraso para que la animación sea fluida al cargar
-                setTimeout(() => {
-                    const introModal = document.getElementById('introWeekModal');
-                    if(introModal) introModal.classList.add('active');
-                }, 500);
+            const introModal = document.getElementById('introWeekModal');
+            
+            if (isWeek1 && introModal && !localStorage.getItem('week1IntroShown')) {
+                introModal.style.display = 'flex';
+                setTimeout(() => { introModal.classList.add('active'); }, 50);
             }
         });
 
         function closeIntroWeekModal() {
-            document.getElementById('introWeekModal').classList.remove('active');
+            const introModal = document.getElementById('introWeekModal');
+            introModal.classList.remove('active');
+            setTimeout(() => { introModal.style.display = 'none'; }, 300);
             localStorage.setItem('week1IntroShown', 'true');
         }
     </script>

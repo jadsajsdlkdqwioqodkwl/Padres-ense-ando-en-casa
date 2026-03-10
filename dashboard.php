@@ -126,11 +126,10 @@ img.emoji {
     height: 100%;
     background: rgba(15, 23, 42, 0.85);
     backdrop-filter: blur(8px); /* Efecto vidrio */
-    display: flex;
+    display: none; /* FIX iOS: cambiado de flex a none inicial */
     justify-content: center;
     align-items: center;
     opacity: 0;
-    pointer-events: none;
     transition: opacity 0.3s ease;
     z-index: 9999;
     padding: 20px;
@@ -138,8 +137,8 @@ img.emoji {
 }
 
 .modal-overlay.active {
+    display: flex; /* FIX iOS: activado al mostrar */
     opacity: 1;
-    pointer-events: auto;
 }
 
 .modal-content {
@@ -353,13 +352,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (modal && closeBtn) {
         if (!localStorage.getItem('parentWelcomeShown')) {
+            modal.style.display = 'flex'; // FIX iOS: Primero mostramos
             setTimeout(() => {
-                modal.classList.add('active');
-            }, 600); // Pequeño delay para que la transición sea visible
+                modal.classList.add('active'); // Luego animamos
+            }, 50); // Delay mínimo para que el navegador procese el display flex
         }
 
         closeBtn.addEventListener('click', () => {
             modal.classList.remove('active');
+            setTimeout(() => {
+                modal.style.display = 'none'; // FIX iOS: Ocultamos tras la animación
+            }, 300);
             localStorage.setItem('parentWelcomeShown', 'true');
         });
     }

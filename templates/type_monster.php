@@ -1,6 +1,5 @@
 <?php
 // templates/type_monster.php
-// Carga dinámica limpia para ser inyectada en lesson.php
 $lesson_id = $lesson_id ?? ($lesson['id'] ?? 0);
 $time_limit = $lesson_data['time_limit'] ?? 20; 
 $reward_stars = $reward_stars ?? ($lesson['reward_stars'] ?? 5);
@@ -16,6 +15,25 @@ $reward_stars = $reward_stars ?? ($lesson['reward_stars'] ?? 5);
     @media screen and (max-height: 450px) and (orientation: landscape) {
         #landscape-warning { display: flex !important; }
         .game-wrapper { display: none !important; }
+    }
+
+    /* MODALES GLOBALES FUERA DEL JUEGO */
+    .modal-overlay {
+        position: fixed !important; top: 0 !important; left: 0 !important;
+        width: 100vw !important; height: 100vh !important;
+        box-sizing: border-box !important; padding: 20px !important;
+        display: none; justify-content: center; align-items: center;
+        background: rgba(15, 23, 42, 0.85) !important; z-index: 999999 !important;
+    }
+    .modal-overlay.active { display: flex !important; }
+    
+    .modal-overlay .modal-content {
+        width: 100% !important; max-width: 480px !important;
+        box-sizing: border-box !important; margin: 0 auto !important;
+        background: white; padding: clamp(20px, 5vw, 40px); border-radius: 24px;
+        text-align: center; box-shadow: 0 25px 60px rgba(0,0,0,0.4);
+        border: 4px solid var(--brand-blue, #1E3A8A);
+        pointer-events: auto;
     }
 
     img.emoji { height: 1.2em; width: 1.2em; margin: 0 .05em 0 .1em; vertical-align: -0.1em; display: inline-block; pointer-events: none; }
@@ -44,7 +62,6 @@ $reward_stars = $reward_stars ?? ($lesson['reward_stars'] ?? 5);
     .round-indicator { position: absolute; top: 15px; left: 15px; background: var(--brand-blue, #1E3A8A); color: white; font-weight: 700; padding: 6px 18px; border-radius: 50px; font-size: 14px; z-index: 50; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
     .danger-zone { animation: flashRed 1s infinite; }
     
-    /* Encabezado del juego estandarizado */
     .game-header-bar { display: flex; justify-content: space-between; align-items: center; margin: 0 auto 20px auto; width: 100%; max-width: 800px; background: #ffffff; border: 2px solid #E2E8F0; border-radius: 16px; padding: 15px 25px; box-sizing: border-box; box-shadow: 0 10px 25px rgba(28, 61, 106, 0.05); }
 
     @keyframes morph { 0%, 100% { border-radius: 40% 60% 70% 30% / 40% 50% 60% 50%; } 50% { border-radius: 60% 40% 30% 70% / 60% 50% 40% 50%; } }
@@ -60,37 +77,55 @@ $reward_stars = $reward_stars ?? ($lesson['reward_stars'] ?? 5);
     <p style="font-size: 1.2rem; color: #94A3B8;">Este juego necesita jugarse en formato vertical para una mejor experiencia.</p>
 </div>
 
-<div class="game-area text-center mx-auto" style="width: 100%; box-sizing: border-box; display: flex; flex-direction: column; align-items: center;">
-    
-    <div class="game-header-bar">
-        <h3 style="margin: 0; color: var(--brand-blue); font-size: clamp(20px, 5vw, 26px); font-weight: 900;">🛡️ Word Defender</h3>
-        <button onclick="giveHint()" style="background: #FBBF24; border: none; border-radius: 50%; width: 50px; height: 50px; font-size: 24px; cursor: pointer; box-shadow: 0 4px 0 #D97706, 0 4px 10px rgba(245, 158, 11, 0.3); transition: 0.2s;" title="Pedir Pista">💡</button>
-    </div>
-
-    <div class="game-board" id="game-board">
-        <div class="round-indicator" id="round-indicator">Ronda 1</div>
-
-        <div class="mission-modal" id="tutorial-modal" style="position: absolute; top:0; left:0; width:100%; height:100%; background:rgba(255,255,255,0.95); z-index:100; display:flex; flex-direction:column; justify-content:center; align-items:center; transition: opacity 0.3s ease;">
-            <h2 style="color: var(--brand-blue); margin-top: 0; font-size: 2.2rem; font-weight: 900;">📜 Misión</h2>
-            <p style="color: #64748B; font-size: 18px; margin-bottom: 10px;" id="tut-context"></p>
-            <div style="font-size: 4rem; margin: 10px 0;" id="tut-emoji-display">🎯</div>
-            
-            <div style="display: flex; justify-content: center; align-items: center; gap: 15px; margin: 10px 0; flex-wrap: wrap;">
-                <div style="font-size: 2.5rem; font-weight: 900; color: var(--brand-orange); letter-spacing: 5px; text-shadow: 0 2px 4px rgba(0,0,0,0.1);" id="tut-word">WORD</div>
-                <button class="btn-audio-huge" id="btn-tut-audio" title="Escuchar pronunciación" style="width: 50px; height: 50px; font-size: 20px; margin: 0;">🔊</button>
-            </div>
-
-            <p style="color: #94A3B8; font-size: 1.2rem; margin-bottom: 25px; font-weight: 600;" id="tut-trans">(Traducción)</p>
-            <button class="btn-play bg-orange-500" id="btn-start" onclick="startGame()" style="margin-top: 0; max-width: 250px;">▶️ ¡Proteger!</button>
+<div id="tutorial-modal" class="modal-overlay">
+    <div class="modal-content">
+        <h2 class="modal-title" style="margin-bottom: 10px;">📜 Misión</h2>
+        <p class="modal-text" id="tut-context" style="margin-bottom: 10px;"></p>
+        <div style="font-size: 4rem; margin: 10px 0;" id="tut-emoji-display">🎯</div>
+        
+        <div style="display: flex; justify-content: center; align-items: center; gap: 15px; margin: 10px 0; flex-wrap: wrap;">
+            <div style="font-size: 2.5rem; font-weight: 900; color: var(--brand-orange); letter-spacing: 5px; text-shadow: 0 2px 4px rgba(0,0,0,0.1);" id="tut-word">WORD</div>
+            <button class="btn-audio-huge" id="btn-tut-audio" title="Escuchar pronunciación" style="width: 50px; height: 50px; font-size: 20px; margin: 0;">🔊</button>
         </div>
 
-        <div class="css-monster" id="monster"><div class="css-monster-mouth" id="monster-mouth"></div></div>
-        <div class="twemoji-target" id="dynamic-target">🎯</div>
-    </div>
+        <p style="color: #94A3B8; font-size: 1.2rem; margin-bottom: 15px; font-weight: 600;" id="tut-trans">(Traducción)</p>
+        <p style="font-size: 14px; color: #475569; background: #F8FAFC; padding: 15px; border-radius: 12px; font-style: italic; margin-bottom: 25px; border: 1px solid #E2E8F0; width: 100%; box-sizing: border-box;" id="tut-mnemonic">💡 Cargando consejo...</p>
 
-    <div class="slot-container" id="slots-container" style="max-width: 800px; margin: 0 auto 25px auto;"></div>
-    <div class="bubbles-container" id="bubbles-container" style="max-width: 800px; margin: 0 auto;"></div>
+        <button class="btn-play bg-orange-500" id="btn-start" onclick="startGame()" style="margin-top: 0;">▶️ ¡Proteger!</button>
+    </div>
 </div>
+
+<div id="success-modal" class="modal-overlay">
+    <div class="modal-content">
+        <h2 class="modal-title" style="margin-bottom: 10px; color: #10B981;">¡A salvo! 🛡️</h2>
+        <div style="font-size: 4rem; margin: 10px 0;" id="succ-emoji">🎯</div>
+        <p style="font-size: 1.5rem; font-weight: 800; color: #1E3A8A; margin-bottom: 5px;" id="succ-word">WORD</p>
+        <p style="color: #64748B; font-size: 1.2rem; font-weight: 600; margin-bottom: 15px;" id="succ-trans">(Traducción)</p>
+        
+        <p style="font-size: 15px; color: #065F46; background: #D1FAE5; padding: 15px; border-radius: 12px; font-weight: 600; margin-bottom: 25px; border: 1px solid #34D399; width: 100%; box-sizing: border-box;" id="succ-mnemonic">💡 Cargando recordatorio...</p>
+        
+        <button id="btn-next-round" onclick="goToNextRound()" class="btn-play bg-blue-500" style="margin-top: 0;">Siguiente ➡️</button>
+    </div>
+</div>
+
+<main class="game-wrapper container mx-auto px-4 py-8" style="min-height: 85vh; padding: 10px; box-sizing: border-box; width: 100%; max-width: 1000px; margin: 0 auto;">
+    <div class="game-area text-center mx-auto" style="width: 100%; box-sizing: border-box; display: flex; flex-direction: column; align-items: center;">
+        
+        <div class="game-header-bar">
+            <h3 style="margin: 0; color: var(--brand-blue); font-size: clamp(20px, 5vw, 26px); font-weight: 900;">🛡️ Word Defender</h3>
+            <button onclick="giveHint()" style="background: #FBBF24; border: none; border-radius: 50%; width: 50px; height: 50px; font-size: 24px; cursor: pointer; box-shadow: 0 4px 0 #D97706, 0 4px 10px rgba(245, 158, 11, 0.3); transition: 0.2s;" title="Pedir Pista">💡</button>
+        </div>
+
+        <div class="game-board" id="game-board">
+            <div class="round-indicator" id="round-indicator">Ronda 1</div>
+            <div class="css-monster" id="monster"><div class="css-monster-mouth" id="monster-mouth"></div></div>
+            <div class="twemoji-target" id="dynamic-target">🎯</div>
+        </div>
+
+        <div class="slot-container" id="slots-container" style="max-width: 800px; margin: 0 auto 25px auto;"></div>
+        <div class="bubbles-container" id="bubbles-container" style="max-width: 800px; margin: 0 auto;"></div>
+    </div>
+</main>
 
 <script>
     function applyTwemoji(node) {
@@ -112,7 +147,8 @@ $reward_stars = $reward_stars ?? ($lesson['reward_stars'] ?? 5);
         translation: r.translation || 'Manzana',
         emoji: r.emoji || r.content || '🍎',
         distractors: r.distractors || ['X', 'Z', 'M', 'Q'],
-        context_es: r.context_es || "¡Defiende el objeto escribiendo la palabra!"
+        context_es: r.context_es || "¡Defiende el objeto escribiendo la palabra!",
+        mnemonic: r.mnemonic || ''
     }));
 
     const timeLimit = <?php echo $time_limit; ?>; 
@@ -146,6 +182,13 @@ $reward_stars = $reward_stars ?? ($lesson['reward_stars'] ?? 5);
         document.getElementById('tut-word').innerText = round.word;
         document.getElementById('tut-trans').innerText = `(${round.translation})`;
         
+        if(round.mnemonic) {
+            document.getElementById('tut-mnemonic').innerText = "💡 " + round.mnemonic;
+            document.getElementById('tut-mnemonic').style.display = 'block';
+        } else {
+            document.getElementById('tut-mnemonic').style.display = 'none';
+        }
+
         document.getElementById('btn-tut-audio').onclick = function() {
             if(typeof playPronunciation === 'function') playPronunciation(currentTargetWord);
         };
@@ -176,27 +219,13 @@ $reward_stars = $reward_stars ?? ($lesson['reward_stars'] ?? 5);
         });
         document.getElementById('bubbles-container').innerHTML = bubblesHTML;
 
-        // Mostrar modal contenido
-        const modal = document.getElementById('tutorial-modal');
-        modal.style.display = 'flex';
-        modal.style.opacity = '1';
-        modal.style.pointerEvents = 'auto'; // Restaurar clicks por si acaso
-        
+        document.getElementById('tutorial-modal').classList.add('active');
         applyTwemoji(document.body);
     }
 
     function startGame() {
-        const modal = document.getElementById('tutorial-modal');
-        modal.style.opacity = '0';
-        
-        // FIX CRÍTICO: Aseguramos que el modal no solo se esconda, sino que deje pasar clicks
-        setTimeout(() => { 
-            modal.style.display = 'none'; 
-            modal.style.pointerEvents = 'none'; 
-        }, 300);
-        
+        document.getElementById('tutorial-modal').classList.remove('active');
         if(typeof attemptAutoplay === 'function') attemptAutoplay();
-        
         gameActive = true;
         startMonster();
     }
@@ -235,7 +264,6 @@ $reward_stars = $reward_stars ?? ($lesson['reward_stars'] ?? 5);
         const expectedChar = currentSlot.getAttribute('data-expected');
 
         if (draggedChar === expectedChar) {
-            // Sonido de Pop habilitado
             if(typeof AudioManager !== 'undefined') AudioManager.playSound('pop');
             currentSlot.innerText = draggedChar;
             currentSlot.classList.add('filled');
@@ -247,7 +275,6 @@ $reward_stars = $reward_stars ?? ($lesson['reward_stars'] ?? 5);
 
             if (currentCorrect === wordLength) checkNextRound();
         } else {
-            // Sonido de Error habilitado
             if(typeof AudioManager !== 'undefined') AudioManager.playSound('wrong');
             gameBoard.classList.add('danger-zone');
             bubbleEl.style.animation = 'shake 0.3s';
@@ -279,11 +306,36 @@ $reward_stars = $reward_stars ?? ($lesson['reward_stars'] ?? 5);
         gameBoard.classList.remove('danger-zone');
         monster.style.animation = 'zap 0.8s forwards'; 
         
+        setTimeout(() => { showSuccessModal(); }, 1000);
+    }
+
+    function showSuccessModal() {
+        if(typeof AudioManager !== 'undefined') AudioManager.playSound('win');
+        
+        const round = roundsData[currentRoundIndex];
+        document.getElementById('succ-emoji').innerText = round.emoji || '🎯';
+        document.getElementById('succ-word').innerText = round.word;
+        document.getElementById('succ-trans').innerText = `(${round.translation})`;
+        
+        if(round.mnemonic) {
+            document.getElementById('succ-mnemonic').innerText = "💡 Recuerda: " + round.mnemonic;
+            document.getElementById('succ-mnemonic').style.display = 'block';
+        } else {
+            document.getElementById('succ-mnemonic').style.display = 'none';
+        }
+
+        const modal = document.getElementById('success-modal');
+        modal.classList.add('active');
+        if (typeof twemoji !== 'undefined') twemoji.parse(modal, { folder: 'svg', ext: '.svg' });
+    }
+
+    function goToNextRound() {
+        document.getElementById('success-modal').classList.remove('active');
         currentRoundIndex++;
         if (currentRoundIndex < roundsData.length) {
-            setTimeout(() => { loadRound(currentRoundIndex); }, 1500);
+            loadRound(currentRoundIndex);
         } else {
-            setTimeout(() => { gameOver(true); }, 1000);
+            gameOver(true);
         }
     }
 
@@ -293,8 +345,6 @@ $reward_stars = $reward_stars ?? ($lesson['reward_stars'] ?? 5);
         gameBoard.classList.remove('danger-zone');
 
         if (isWin) {
-            // Sonido de Victoria habilitado
-            if(typeof AudioManager !== 'undefined') AudioManager.playSound('win');
             if(typeof fireConfetti !== 'undefined') fireConfetti();
             if(typeof unlockNextButton !== 'undefined') {
                 unlockNextButton(<?php echo $lesson_id ?? 0; ?>, <?php echo $reward_stars ?? 5; ?>, <?php echo $lesson['module_id'] ?? 0; ?>);

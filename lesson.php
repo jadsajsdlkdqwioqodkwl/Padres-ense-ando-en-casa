@@ -56,17 +56,20 @@ $pool_palabras = [
     ["en" => "Black", "es" => "Negro", "phonetic" => "blak", "emoji" => "⚫", "mnemonic" => "La BLACkberry (mora) es casi negra."]
 ];
 
-// LÓGICA DE JUEGOS DENTRO DEL CURSO (1 Sola Ronda)
-$dynamic_rounds = [];
-$template_file = '';
+// EXTRAER PALABRAS DE HOY PARA LOS JUEGOS Y EL CUADERNO
+$saved_words = [];
 $current_word = null;
 
+$stmtWords = $pdo->prepare("SELECT selected_words FROM progress WHERE user_id = ? AND lesson_id = ?");
+$stmtWords->execute([$_SESSION['user_id'], $lesson_id]);
+$json_words = $stmtWords->fetchColumn();
+$saved_words = $json_words ? json_decode($json_words, true) : [];
+
+// LÓGICA DE JUEGOS DENTRO DEL CURSO
+$dynamic_rounds = [];
+$template_file = '';
+
 if ($step > 0 && $step <= 5) {
-    $stmtWords = $pdo->prepare("SELECT selected_words FROM progress WHERE user_id = ? AND lesson_id = ?");
-    $stmtWords->execute([$_SESSION['user_id'], $lesson_id]);
-    $json_words = $stmtWords->fetchColumn();
-    $saved_words = $json_words ? json_decode($json_words, true) : [];
-    
     if (empty($saved_words) || !isset($saved_words[$step - 1])) {
         header("Location: lesson.php?id=" . $lesson_id); exit;
     }
@@ -168,13 +171,6 @@ if ($step > 0 && $step <= 5) {
             box-sizing: border-box; 
         }
 
-        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(8px); display: flex; justify-content: center; align-items: center; opacity: 0; pointer-events: none; transition: opacity 0.3s ease; z-index: 9999; padding: 20px; box-sizing: border-box; }
-        .modal-overlay.active { opacity: 1; pointer-events: auto; }
-        .modal-content { background: white; padding: clamp(20px, 5vw, 40px); border-radius: 24px; max-width: 520px; width: 100%; text-align: center; box-shadow: 0 25px 60px rgba(0,0,0,0.4); transform: scale(0.9); transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); border: 4px solid var(--brand-blue, #1E3A8A); box-sizing: border-box; margin: 0 auto; }
-        .modal-overlay.active .modal-content { transform: scale(1); }
-        .modal-title { font-size: clamp(1.8rem, 5vw, 2.2rem); color: var(--brand-blue, #1E3A8A); margin-bottom: 20px; font-weight: 900; }
-        .modal-text { color: #475569; font-size: clamp(1rem, 3vw, 1.15rem); line-height: 1.7; margin-bottom: 10px; }
-        
         .btn-play { margin-top: 30px; padding: 16px 30px; background: var(--brand-orange, #F59E0B); color: white; border-radius: 50px; font-weight: 800; font-size: 1.2rem; border: none; cursor: pointer; transition: 0.3s; width: 100%; box-shadow: 0 10px 20px rgba(245, 158, 11, 0.3); box-sizing: border-box; }
         .btn-play:hover { background: #D97706; transform: translateY(-3px); box-shadow: 0 15px 25px rgba(245, 158, 11, 0.4); }
         .btn-play.bg-green-500 { background: var(--brand-green, #10B981); box-shadow: 0 10px 20px rgba(16, 185, 129, 0.3); }
@@ -223,7 +219,6 @@ if ($step > 0 && $step <= 5) {
         
         .mnemotecnia-card { border: 2px dashed var(--brand-lblue); padding: clamp(15px, 4vw, 25px); border-radius: 16px; margin-bottom: 20px; background: #F0F9FF; text-align: left; width: 100%; box-sizing: border-box; }
 
-        /* Clases para áreas táctiles más amigables en el examen */
         .exam-option-label {
             cursor: pointer; display: block; margin-bottom: 12px; font-size: 16px; 
             padding: 12px; background: #ffffff; border: 2px solid #E2E8F0; 
@@ -318,6 +313,25 @@ if ($step > 0 && $step <= 5) {
                 <button class="btn-large" id="btn-next-level">Siguiente Reto ➡️</button>
             </div>
         </div>
+
+        <div id="cuaderno-modal" class="overlay-fullscreen" style="display: none; z-index: 99999;">
+            <div class="modal-box" style="border-top-color: var(--brand-blue); max-width: 700px;">
+                <h2 style="color: var(--brand-blue); font-size: clamp(1.8rem, 5vw, 2.2rem); margin-bottom: 10px;">📓 ¡Hora de Copiar! 📓</h2>
+                <p style="color: #64748B; font-size: clamp(1rem, 3vw, 1.1rem); margin-bottom: 20px;">Copia estas 5 palabras y sus trucos en tu cuaderno para que no las olvides en el examen de mañana.</p>
+                
+                <div style="text-align: left; background: #F8FAFC; padding: 15px; border-radius: 12px; border: 1px solid #E2E8F0; max-height: 50vh; overflow-y: auto; margin-bottom: 20px;">
+                    <?php if(!empty($saved_words)): foreach($saved_words as $w): ?>
+                        <div style="margin-bottom: 15px; padding-bottom: 15px; border-bottom: 1px dashed #CBD5E1;">
+                            <h3 style="margin: 0; color: var(--brand-blue); font-size: 20px;"><?php echo $w['emoji'] . " " . $w['en']; ?> = <?php echo $w['es']; ?></h3>
+                            <p style="margin: 5px 0 0 0; color: var(--brand-orange); font-weight: bold; font-size: 14px;">Pronunciación: (<?php echo $w['phonetic']; ?>)</p>
+                            <p style="margin: 5px 0 0 0; color: #475569; font-style: italic; font-size: 14px;">💡 <?php echo $w['mnemonic']; ?></p>
+                        </div>
+                    <?php endforeach; endif; ?>
+                </div>
+                
+                <button class="btn-large" onclick="finalizarLeccion()">✅ ¡Ya las copié!</button>
+            </div>
+        </div>
         
         <?php include 'includes/controls.php'; ?>
     <?php endif; ?>
@@ -377,6 +391,7 @@ if ($step > 0 && $step <= 5) {
 
     const currentPlayingWord = <?php echo json_encode($current_word ?? null); ?>;
 
+    // EL SISTEMA AHORA INTEGRA LA LÓGICA DE DIPLOMA DEL CUADERNO
     function unlockNextButton(lessonId, stars, moduleId) {
         if(currentPlayingWord) {
             document.getElementById('end-emoji').innerText = currentPlayingWord.emoji;
@@ -403,14 +418,22 @@ if ($step > 0 && $step <= 5) {
         if (currentStep < 5) {
             window.location.href = 'lesson.php?id=' + lessonId + '&step=' + (currentStep + 1);
         } else {
-            fetch('app/save_progress.php', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ lesson_id: lessonId, stars: <?php echo $lesson['reward_stars']; ?> })
-            }).then(() => {
-                window.location.href = 'course.php?module=' + moduleId;
-            });
+            // Muestra el Cuaderno Modal en vez de ir de golpe a course.php
+            document.getElementById('end-game-modal').style.display = 'none';
+            document.getElementById('cuaderno-modal').style.display = 'flex';
+            if (typeof twemoji !== 'undefined') twemoji.parse(document.getElementById('cuaderno-modal'), { folder: 'svg', ext: '.svg' });
         }
+    }
+
+    // DISPARADO AL PRESIONAR "YA LAS COPIÉ" EN EL CUADERNO
+    function finalizarLeccion() {
+        fetch('app/save_progress.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ lesson_id: <?php echo $lesson_id; ?>, stars: <?php echo $lesson['reward_stars']; ?> })
+        }).then(() => {
+            window.location.href = 'course.php?module=<?php echo $lesson['module_id'] ?? 1; ?>';
+        });
     }
 
     <?php if($step == 0): ?>
@@ -510,11 +533,9 @@ if ($step > 0 && $step <= 5) {
         let html = '';
         if (palabrasAyer && palabrasAyer.length > 0) {
             palabrasAyer.forEach((palabra, i) => {
-                // Generar un distractor aleatorio que no sea la respuesta correcta
                 let distractores = ["Otra cosa", "Algo diferente", "Cualquier cosa"];
                 let distractor = distractores[Math.floor(Math.random() * distractores.length)];
                 
-                // Aleatorizar la posición de la respuesta correcta
                 let esPrimero = Math.random() > 0.5;
                 let opt1 = esPrimero ? `<input type="radio" name="q${i}" value="correct"> ${palabra.es}` : `<input type="radio" name="q${i}" value="wrong"> ${distractor}`;
                 let opt2 = !esPrimero ? `<input type="radio" name="q${i}" value="correct"> ${palabra.es}` : `<input type="radio" name="q${i}" value="wrong"> ${distractor}`;
@@ -530,7 +551,6 @@ if ($step > 0 && $step <= 5) {
         if (typeof twemoji !== 'undefined') twemoji.parse(examContainer, { folder: 'svg', ext: '.svg' });
     });
 
-    // FASE 5: LÓGICA ESTRICTA DE VALIDACIÓN DEL EXAMEN
     function evaluarExamen() {
         let allCorrect = true;
         let totalQuestions = palabrasAyer.length;
@@ -551,32 +571,28 @@ if ($step > 0 && $step <= 5) {
             
             if (!answered || !isCorrect) {
                 allCorrect = false;
-                break; // Rompemos en el primer error
+                break;
             }
         }
 
         if (!allCorrect) {
             alert("¡Oh no! 😟 Algunas respuestas están en blanco o son incorrectas. ¡Revisa con tu hijo e intenten de nuevo!");
-            return; // Bloquea la entrega del diploma
+            return; 
         }
 
-        // Si pasa la validación, procesa el diploma
         document.getElementById('exam-modal').style.display = 'none';
         document.getElementById('diploma-modal').style.display = 'flex';
         
         const canvas = document.getElementById('diploma-canvas');
         const ctx = canvas.getContext('2d');
         
-        // Fondo y Borde
         ctx.fillStyle = "#FFFBEB"; ctx.fillRect(0, 0, canvas.width, canvas.height); 
         ctx.strokeStyle = "#FBBF24"; ctx.lineWidth = 15; ctx.strokeRect(15, 15, canvas.width - 30, canvas.height - 30);
         
-        // Título
         ctx.fillStyle = "#1C3D6A"; ctx.textAlign = "center";
         ctx.font = "bold 36px -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif"; 
         ctx.fillText("🏆 REPORTE DE LOGROS 🏆", canvas.width/2, 80);
         
-        // Lista de palabras
         let startY = 150;
         ctx.font = "bold 26px -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
         if (palabrasAyer && palabrasAyer.length > 0) {
@@ -588,26 +604,22 @@ if ($step > 0 && $step <= 5) {
             });
         }
         
-        // Pie de página
         ctx.fillStyle = "#F29C38"; 
         ctx.font = "bold 24px -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
         ctx.fillText("¡PREGÚNTAME ESTO EN LA CENA!", canvas.width/2, startY + 60);
     }
 
-    // FASE 5: DESCARGA NATIVA A LA GALERÍA CON JAVASCRIPT
     function descargarDiploma() {
         const canvas = document.getElementById('diploma-canvas');
         const dataURL = canvas.toDataURL('image/png');
         
-        // Crear un link temporal seguro y forzar click (soporte iOS/Android)
         const a = document.createElement('a');
         a.href = dataURL;
         a.download = 'Mi_Reporte_Ingles.png';
-        document.body.appendChild(a); // Necesario para Firefox y algunos Safari
+        document.body.appendChild(a); 
         a.click();
         document.body.removeChild(a);
         
-        // Feedback visual
         const btn = document.getElementById('btn-download-diploma');
         const originalText = btn.innerHTML;
         btn.innerHTML = "✅ ¡Descargado!";

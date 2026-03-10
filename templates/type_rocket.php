@@ -1,6 +1,5 @@
 <?php
 // templates/type_rocket.php
-// Limpio de cabeceras. Inyectado desde lesson.php
 $lesson_id = $lesson_id ?? ($lesson['id'] ?? 0);
 $reward_stars = $reward_stars ?? ($lesson['reward_stars'] ?? 5);
 ?>
@@ -17,33 +16,34 @@ $reward_stars = $reward_stars ?? ($lesson['reward_stars'] ?? 5);
         .game-wrapper { display: none !important; }
     }
 
-    /* FIX: Modal Seguro Absoluto para que esté estandarizado */
-    #tutorial-modal.modal-overlay {
+    /* MODALES GLOBALES FUERA DEL JUEGO */
+    .modal-overlay {
         position: fixed !important; top: 0 !important; left: 0 !important;
-        width: 100% !important; height: 100% !important;
+        width: 100vw !important; height: 100vh !important;
         box-sizing: border-box !important; padding: 20px !important;
         display: none; justify-content: center; align-items: center;
-        background: rgba(15, 23, 42, 0.85); z-index: 999999 !important;
+        background: rgba(15, 23, 42, 0.85) !important; z-index: 999999 !important;
     }
-    #tutorial-modal.modal-overlay.active { display: flex !important; }
+    .modal-overlay.active { display: flex !important; }
     
-    #tutorial-modal .modal-content {
+    .modal-overlay .modal-content {
         width: 100% !important; max-width: 480px !important;
         box-sizing: border-box !important; margin: 0 auto !important;
         background: white; padding: clamp(20px, 5vw, 40px); border-radius: 24px;
         text-align: center; box-shadow: 0 25px 60px rgba(0,0,0,0.4);
         border: 4px solid var(--brand-blue, #1E3A8A);
+        pointer-events: auto;
     }
 
     img.emoji { height: 1.2em; width: 1.2em; margin: 0 .05em 0 .1em; vertical-align: -0.1em; display: inline-block; pointer-events: none; }
 
-    .space-board { position: relative; width: 100%; max-width: 100%; height: 60vh; min-height: 480px; max-height: 750px; background: linear-gradient(180deg, #0F172A 0%, #1E293B 60%, var(--brand-blue) 100%); border-radius: 24px; overflow: hidden; border: 4px solid var(--brand-lblue); margin: 0 auto 20px auto; box-shadow: 0 15px 35px rgba(28, 61, 106, 0.2); touch-action: pan-y; display: flex; box-sizing: border-box; }
+    /* touch-action: none; permite deslizar el dedo en móviles sin scrollear la web */
+    .space-board { position: relative; width: 100%; max-width: 100%; height: 60vh; min-height: 480px; max-height: 750px; background: linear-gradient(180deg, #0F172A 0%, #1E293B 60%, var(--brand-blue) 100%); border-radius: 24px; overflow: hidden; border: 4px solid var(--brand-lblue); margin: 0 auto 20px auto; box-shadow: 0 15px 35px rgba(28, 61, 106, 0.2); touch-action: none; display: flex; box-sizing: border-box; cursor: pointer; }
     
     .starfield { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-image: radial-gradient(2px 2px at 20px 30px, #ffffff, rgba(0,0,0,0)), radial-gradient(2px 2px at 40px 70px, #ffffff, rgba(0,0,0,0)), radial-gradient(2px 2px at 50px 160px, #ffffff, rgba(0,0,0,0)), radial-gradient(2px 2px at 90px 40px, #ffffff, rgba(0,0,0,0)); background-repeat: repeat; animation: spaceScroll 20s linear infinite; opacity: 0.5; pointer-events: none; }
     
-    .lane { flex: 1; height: 100%; border-right: 1px dashed rgba(255,255,255,0.1); position: relative; cursor: pointer; touch-action: manipulation; }
+    .lane { flex: 1; height: 100%; border-right: 1px dashed rgba(255,255,255,0.1); position: relative; pointer-events: none; }
     .lane:last-child { border-right: none; }
-    .lane:active { background: rgba(255,255,255,0.05); }
 
     .rocket-player { position: absolute; bottom: 20px; width: 80px; height: 100px; left: calc(50% - 40px); transition: left 0.15s ease-out, bottom 1s ease-in; z-index: 20; display: flex; flex-direction: column; align-items: center; pointer-events: none; }
     .rocket-body { font-size: clamp(50px, 12vw, 65px); line-height: 1; filter: drop-shadow(0 10px 10px rgba(0,0,0,0.5)); animation: floatRocket 1s infinite alternate; }
@@ -75,30 +75,43 @@ $reward_stars = $reward_stars ?? ($lesson['reward_stars'] ?? 5);
     <p style="font-size: 1.2rem; color: #94A3B8;">Este juego espacial necesita jugarse en formato vertical para una mejor experiencia.</p>
 </div>
 
+<div id="tutorial-modal" class="modal-overlay">
+    <div class="modal-content">
+        <h2 class="modal-title" style="margin-bottom: 10px;">¡Llena el Tanque! 🚀</h2>
+        <p class="modal-text" id="tut-context" style="margin-bottom: 10px;">Mueve el cohete para atrapar solo:</p>
+        
+        <div style="font-size: 3rem; margin: 10px 0;" id="tut-emoji-display"></div>
+        
+        <div style="display: flex; justify-content: center; align-items: center; gap: 15px; margin: 15px 0; flex-wrap: wrap;">
+            <div style="font-size: clamp(2.5rem, 8vw, 3.5rem); font-weight: 900; color: #38BDF8; letter-spacing: 2px; text-shadow: 0 0 20px rgba(56, 189, 248, 0.3);" id="tut-word">WORD</div>
+            <button class="btn-audio-huge" id="btn-tut-audio" title="Escuchar pronunciación" style="width: clamp(50px, 10vw, 65px); height: clamp(50px, 10vw, 65px); font-size: clamp(20px, 5vw, 26px); margin: 0;">🔊</button>
+        </div>
+
+        <p style="color: #64748B; font-size: 1.2rem; font-weight: 600; margin-bottom: 15px;" id="tut-trans">(Traducción)</p>
+        <p style="font-size: 14px; color: #475569; background: #F8FAFC; padding: 15px; border-radius: 12px; font-style: italic; margin-bottom: 25px; border: 1px solid #E2E8F0; width: 100%; box-sizing: border-box;" id="tut-mnemonic">💡 Cargando consejo...</p>
+
+        <button id="btn-start" onclick="startGame()" class="btn-play bg-orange-500" style="margin-top: 0;">▶️ ¡Despegar!</button>
+    </div>
+</div>
+
+<div id="success-modal" class="modal-overlay">
+    <div class="modal-content">
+        <h2 class="modal-title" style="margin-bottom: 10px; color: #10B981;">¡Misión Cumplida! 🌌</h2>
+        <div style="font-size: 4rem; margin: 10px 0;" id="succ-emoji">🚀</div>
+        <p style="font-size: 1.5rem; font-weight: 800; color: #1E3A8A; margin-bottom: 5px;" id="succ-word">WORD</p>
+        <p style="color: #64748B; font-size: 1.2rem; font-weight: 600; margin-bottom: 15px;" id="succ-trans">(Traducción)</p>
+        
+        <p style="font-size: 15px; color: #065F46; background: #D1FAE5; padding: 15px; border-radius: 12px; font-weight: 600; margin-bottom: 25px; border: 1px solid #34D399; width: 100%; box-sizing: border-box;" id="succ-mnemonic">💡 Cargando recordatorio...</p>
+        
+        <button id="btn-next-round" onclick="goToNextRound()" class="btn-play bg-blue-500" style="margin-top: 0;">Siguiente ➡️</button>
+    </div>
+</div>
+
 <main class="game-wrapper container mx-auto px-4 py-8" style="min-height: 85vh; padding: 10px; box-sizing: border-box; width: 100%;">
     <div class="game-area text-center mx-auto" style="max-width: 800px; border: none; background: transparent; padding-top: 5px; box-shadow: none; width: 100%; box-sizing: border-box;">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
             <h3 style="margin: 0; color: var(--brand-blue); font-size: clamp(20px, 5vw, 26px); font-weight: 900;">🚀 Misión Espacial</h3>
             <div id="round-counter" style="background: var(--brand-blue); color: white; padding: 5px 15px; border-radius: 20px; font-weight: 700;">1/1</div>
-        </div>
-
-        <div id="tutorial-modal" class="modal-overlay active">
-            <div class="modal-content">
-                <h2 class="modal-title" style="margin-bottom: 10px;">¡Llena el Tanque! 🚀</h2>
-                <p class="modal-text" id="tut-context" style="margin-bottom: 10px;">Mueve el cohete para atrapar solo:</p>
-                
-                <div style="font-size: 3rem; margin: 10px 0;" id="tut-emoji-display"></div>
-                
-                <div style="display: flex; justify-content: center; align-items: center; gap: 15px; margin: 15px 0; flex-wrap: wrap;">
-                    <div style="font-size: clamp(2.5rem, 8vw, 3.5rem); font-weight: 900; color: #38BDF8; letter-spacing: 2px; text-shadow: 0 0 20px rgba(56, 189, 248, 0.3);" id="tut-word">WORD</div>
-                    <button class="btn-audio-huge" id="btn-tut-audio" title="Escuchar pronunciación" style="width: clamp(50px, 10vw, 65px); height: clamp(50px, 10vw, 65px); font-size: clamp(20px, 5vw, 26px); margin: 0;">🔊</button>
-                </div>
-
-                <p style="color: #64748B; font-size: 1.2rem; font-weight: 600; margin-bottom: 15px;" id="tut-trans">(Traducción)</p>
-                <p style="font-size: 14px; color: #475569; background: #F8FAFC; padding: 15px; border-radius: 12px; font-style: italic; margin-bottom: 25px; border: 1px solid #E2E8F0; width: 100%; box-sizing: border-box;" id="tut-mnemonic">💡 Cargando consejo...</p>
-
-                <button id="btn-start" onclick="startGame()" class="btn-play bg-orange-500" style="margin-top: 0;">▶️ ¡Despegar!</button>
-            </div>
         </div>
 
         <div class="space-board" id="space-board">
@@ -109,9 +122,7 @@ $reward_stars = $reward_stars ?? ($lesson['reward_stars'] ?? 5);
                 <div class="fuel-bar-container"><div class="fuel-bar-fill" id="fuel-bar"></div></div>
             </div>
 
-            <div class="lane" onpointerdown="moveRocket(0)"></div>
-            <div class="lane" onpointerdown="moveRocket(1)"></div>
-            <div class="lane" onpointerdown="moveRocket(2)"></div>
+            <div class="lane"></div><div class="lane"></div><div class="lane"></div>
 
             <div class="rocket-player" id="rocket">
                 <div class="rocket-body">🚀</div>
@@ -147,13 +158,32 @@ $reward_stars = $reward_stars ?? ($lesson['reward_stars'] ?? 5);
     let lastTime = 0;
     let spawnTimer = 0;
     
-    // FIX DE ESCALADO EXTREMO (IPAD PRO BLINDSPOT)
     const timeToCrossScreenMs = 2800; 
     let dynamicFallSpeed = 0; 
 
     window.addEventListener('resize', () => { 
         dynamicFallSpeed = board.offsetHeight / timeToCrossScreenMs;
         if(gameActive) updateRocketPosition(); 
+    });
+
+    // LÓGICA TÁCTIL (Deslizar o Tocar)
+    function handleTouchMove(e) {
+        if(!gameActive) return;
+        let clientX = e.touches ? e.touches[0].clientX : e.clientX;
+        const rect = board.getBoundingClientRect();
+        const xPos = clientX - rect.left;
+        const width = rect.width;
+        
+        if (xPos < width / 3) currentLane = 0;
+        else if (xPos < (width * 2) / 3) currentLane = 1;
+        else currentLane = 2;
+        
+        updateRocketPosition();
+    }
+
+    board.addEventListener('pointerdown', handleTouchMove);
+    board.addEventListener('pointermove', (e) => {
+        if (e.buttons > 0 || e.pointerType === 'touch') handleTouchMove(e);
     });
 
     if (roundsData.length > 0) loadRound(currentRoundIndex);
@@ -192,28 +222,19 @@ $reward_stars = $reward_stars ?? ($lesson['reward_stars'] ?? 5);
         document.getElementById('flame').style.boxShadow = '0 0 20px #F29C38, 0 0 40px #EF4444';
         updateRocketPosition();
 
-        document.getElementById('tutorial-modal').style.display = 'flex';
-        document.getElementById('tutorial-modal').style.opacity = '1';
-        
+        document.getElementById('tutorial-modal').classList.add('active');
         applyTwemoji(document.body);
     }
 
     function startGame() {
         if(typeof AudioManager !== 'undefined') AudioManager.playSound('pop'); 
-        document.getElementById('tutorial-modal').style.opacity = '0';
-        setTimeout(() => { document.getElementById('tutorial-modal').style.display = 'none'; }, 300);
+        document.getElementById('tutorial-modal').classList.remove('active');
         
         if(typeof attemptAutoplay === 'function') attemptAutoplay();
 
         gameActive = true;
         lastTime = performance.now();
         requestAnimationFrame(gameLoop);
-    }
-
-    function moveRocket(laneIndex) {
-        if(!gameActive) return;
-        currentLane = laneIndex;
-        updateRocketPosition();
     }
 
     function updateRocketPosition() {
@@ -241,7 +262,6 @@ $reward_stars = $reward_stars ?? ($lesson['reward_stars'] ?? 5);
         const laneIndex = Math.floor(Math.random() * 3);
         const isCorrect = Math.random() > 0.4;
         
-        // FIX: Pool Inteligente implementada
         let wordDisplay = targetWord;
         let emojiDisplay = roundData.emoji || '📦';
 
@@ -339,16 +359,39 @@ $reward_stars = $reward_stars ?? ($lesson['reward_stars'] ?? 5);
         document.getElementById('flame').style.boxShadow = '0 0 50px #F29C38, 0 0 80px #EF4444';
         rocket.classList.add('blast-off');
         
+        setTimeout(showSuccessModal, 1200);
+    }
+
+    function showSuccessModal() {
+        if(typeof AudioManager !== 'undefined') AudioManager.playSound('win');
+        
+        document.getElementById('succ-emoji').innerText = roundData.emoji || '🚀';
+        document.getElementById('succ-word').innerText = targetWord;
+        document.getElementById('succ-trans').innerText = `(${roundData.translation})`;
+        
+        if(roundData.mnemonic) {
+            document.getElementById('succ-mnemonic').innerText = "💡 Recuerda: " + roundData.mnemonic;
+            document.getElementById('succ-mnemonic').style.display = 'block';
+        } else {
+            document.getElementById('succ-mnemonic').style.display = 'none';
+        }
+
+        const modal = document.getElementById('success-modal');
+        modal.classList.add('active');
+        if (typeof twemoji !== 'undefined') twemoji.parse(modal, { folder: 'svg', ext: '.svg' });
+    }
+
+    function goToNextRound() {
+        document.getElementById('success-modal').classList.remove('active');
         currentRoundIndex++;
         if (currentRoundIndex < roundsData.length) {
-            setTimeout(() => { loadRound(currentRoundIndex); }, 1500);
+            loadRound(currentRoundIndex);
         } else {
-            setTimeout(executeWin, 1500);
+            finalWin();
         }
     }
 
-    function executeWin() {
-        if(typeof AudioManager !== 'undefined') AudioManager.playSound('win');
+    function finalWin() {
         if(typeof fireConfetti !== 'undefined') fireConfetti();
         if(typeof unlockNextButton !== 'undefined') {
             unlockNextButton(<?php echo $lesson_id ?? 0; ?>, <?php echo $reward_stars ?? 5; ?>, <?php echo $lesson['module_id'] ?? 0; ?>);
@@ -357,7 +400,7 @@ $reward_stars = $reward_stars ?? ($lesson['reward_stars'] ?? 5);
     
     document.addEventListener('keydown', (e) => {
         if(!gameActive) return;
-        if(e.key === 'ArrowLeft' && currentLane > 0) moveRocket(currentLane - 1);
-        if(e.key === 'ArrowRight' && currentLane < 2) moveRocket(currentLane + 1);
+        if(e.key === 'ArrowLeft' && currentLane > 0) { currentLane--; updateRocketPosition(); }
+        if(e.key === 'ArrowRight' && currentLane < 2) { currentLane++; updateRocketPosition(); }
     });
 </script>
