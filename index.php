@@ -1,13 +1,26 @@
 <?php
-// Seguro para evitar choques de sesión
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-// Si el usuario ya pagó y está logueado, lo mandamos directo a su zona de estudio.
-if (isset($_SESSION['user_id'])) {
-    header("Location: dashboard.php?module=1");
-    exit;
+$is_logged_in = isset($_SESSION['user_id']);
+$has_bump = false; // Se evaluará de la BD si compró el bump
+
+if ($is_logged_in) {
+    require_once 'includes/config.php';
+    try {
+        // Obtenemos los datos del usuario para ver si tiene el beneficio bump
+        // Nota: Asegúrate de tener una columna "has_bump" (TINYINT 1) en tu BD 'users'
+        $stmt = $pdo->prepare("SELECT * FROM users WHERE id = ?");
+        $stmt->execute([$_SESSION['user_id']]);
+        $user = $stmt->fetch();
+        if ($user && isset($user['has_bump']) && $user['has_bump'] == 1) {
+            $has_bump = true;
+        }
+    } catch (Exception $e) {
+        // Failsafe por si la columna aún no se crea en la BD
+        $has_bump = false;
+    }
 }
 ?>
 <!DOCTYPE html>
@@ -21,7 +34,6 @@ if (isset($_SESSION['user_id'])) {
     <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600&family=Outfit:wght@300;700&display=swap" rel="stylesheet">
     <style>
         :root { 
-            /* Nueva Paleta Oficial */
             --brand-blue: #1C3D6A;   
             --brand-green: #68A93E;  
             --brand-orange: #F29C38; 
@@ -30,7 +42,6 @@ if (isset($_SESSION['user_id'])) {
             --text-main: #333333;
             --white: #FFFFFF;
             
-            /* Mapeo de seguridad para retrocompatibilidad */
             --primary: var(--brand-blue); 
             --secondary: var(--brand-orange); 
             --dark: var(--brand-blue); 
@@ -46,8 +57,11 @@ if (isset($_SESSION['user_id'])) {
         /* Navegación */
         .landing-nav { background: var(--white); padding: 15px 5%; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 20px rgba(28, 61, 106, 0.05); position: sticky; top: 0; z-index: 100; border-bottom: 1px solid #E2E8F0; }
         .logo { font-size: 24px; font-weight: 800; color: var(--brand-blue); text-decoration: none; display: flex; align-items: center; gap: 10px;}
+        .nav-actions { display: flex; gap: 10px; align-items: center; }
         .login-btn { background: var(--bg-light); border: 2px solid #E2E8F0; color: var(--brand-blue); padding: 10px 24px; border-radius: 50px; text-decoration: none; font-weight: 700; transition: 0.3s; }
         .login-btn:hover { background: #E2E8F0; transform: translateY(-2px); }
+        .logout-btn { background: #FFF5F5; border: 2px solid #FECACA; color: #DC2626; padding: 10px 24px; border-radius: 50px; text-decoration: none; font-weight: 700; transition: 0.3s; }
+        .logout-btn:hover { background: #FECACA; transform: translateY(-2px); }
 
         /* Hero */
         .hero { text-align: center; padding: 80px 5%; background: linear-gradient(135deg, var(--bg-light) 0%, #E2E8F0 100%); }
@@ -57,18 +71,24 @@ if (isset($_SESSION['user_id'])) {
         /* Grid de Productos */
         .products-section { padding: 60px 5%; text-align: center; }
         .grid-products { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 30px; margin-top: 40px; }
-        .product-card { background: var(--white); border-radius: 16px; overflow: hidden; box-shadow: 0 15px 35px rgba(28, 61, 106, 0.05); text-align: left; transition: transform 0.3s, box-shadow 0.3s; border: 1px solid #E2E8F0; }
+        .product-card { background: var(--white); border-radius: 16px; overflow: hidden; box-shadow: 0 15px 35px rgba(28, 61, 106, 0.05); text-align: left; transition: transform 0.3s, box-shadow 0.3s; border: 1px solid #E2E8F0; display: flex; flex-direction: column; }
         .product-card:hover { transform: translateY(-5px); box-shadow: 0 20px 40px rgba(28, 61, 106, 0.1); }
         .product-img { width: 100%; height: 180px; display: flex; justify-content: center; align-items: center; font-size: 70px; }
-        .product-info { padding: 25px; }
+        .product-info { padding: 25px; flex-grow: 1; display: flex; flex-direction: column; }
         .product-info h3 { color: var(--brand-blue); margin-bottom: 10px; }
-        .product-price { font-size: 1.8rem; font-weight: 800; color: var(--brand-orange); margin: 15px 0; }
+        .product-price { font-size: 1.8rem; font-weight: 800; color: var(--brand-orange); margin: 15px 0; margin-top: auto; }
         
         /* Botones estilo Landing */
         .btn-cart { display: block; width: 100%; text-align: center; background: var(--brand-green); color: white; padding: 14px; border-radius: 50px; text-decoration: none; font-weight: 700; cursor: pointer; border: none; font-size: 16px; transition: 0.3s; box-shadow: 0 4px 14px rgba(104, 169, 62, 0.3); }
         .btn-cart:hover { background: #579232; transform: translateY(-2px); box-shadow: 0 6px 20px rgba(104, 169, 62, 0.4); }
         .btn-disabled { display: block; width: 100%; text-align: center; background: var(--disabled); color: white; padding: 14px; border-radius: 50px; font-weight: 700; border: none; cursor: not-allowed; }
         .badge-soon { background: var(--brand-orange); color: white; padding: 4px 10px; border-radius: 50px; font-size: 12px; vertical-align: middle; margin-left: 10px; font-weight: 700; }
+
+        /* Panel Extra de Descargas para Logueados (Bump Sell) */
+        .premium-downloads { background: #FFFBEB; border: 2px dashed var(--brand-orange); border-radius: 16px; padding: 30px; margin: 40px auto; max-width: 800px; text-align: left; box-shadow: 0 10px 25px rgba(242, 156, 56, 0.15); }
+        .premium-downloads h3 { color: #D97706; margin-bottom: 10px; display: flex; align-items: center; gap: 10px; }
+        .btn-drive { display: inline-block; background: #3B82F6; color: white; padding: 12px 25px; border-radius: 50px; text-decoration: none; font-weight: 700; margin-top: 15px; transition: 0.3s; box-shadow: 0 4px 14px rgba(59, 130, 246, 0.3); }
+        .btn-drive:hover { background: #2563EB; transform: translateY(-2px); }
 
         /* Footer y Legal */
         .footer { background: var(--brand-blue); color: white; padding: 60px 5%; display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 40px; }
@@ -89,20 +109,37 @@ if (isset($_SESSION['user_id'])) {
 <body>
 
     <nav class="landing-nav">
-        <a href="#" class="logo">
+        <a href="index.php" class="logo">
             <img src="assets/logo-myworld.svg" alt="My World" style="height: 40px;" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline';">
             <span style="display:none;">🚀 My World</span>
         </a>
-        <a href="login.php" class="login-btn">Acceso Alumnos</a>
+        <div class="nav-actions">
+            <?php if ($is_logged_in): ?>
+                <a href="dashboard.php" class="login-btn" style="background: var(--brand-blue); color: white;">Ir a mis Clases</a>
+                <a href="logout.php" class="logout-btn">Salir</a>
+            <?php else: ?>
+                <a href="login.php" class="login-btn">Acceso Alumnos</a>
+            <?php endif; ?>
+        </div>
     </nav>
 
     <div class="hero">
         <h1>Educación Interactiva para tus Hijos</h1>
-        <p>Aprende jugando con nuestros cursos especializados. ¡Selecciona un curso y comienza la aventura!</p>
+        <p>Aprende jugando con nuestros cursos especializados. ¡Selecciona un curso, complementa tu aprendizaje y comienza la aventura!</p>
     </div>
 
+    <?php if ($is_logged_in && $has_bump): ?>
+    <section style="padding: 0 5%;">
+        <div class="premium-downloads">
+            <h3>⭐️ Tus Descargas Premium (Pack de Mnemotecnias)</h3>
+            <p style="color: #475569;">Como adquiriste el potenciador de escritura y el Pasaporte de Aventurero, aquí tienes tu enlace exclusivo de acceso de por vida a tu material.</p>
+            <a href="https://drive.google.com/drive/folders/TU_LINK_DE_DRIVE_AQUI" target="_blank" class="btn-drive">📂 Abrir Google Drive</a>
+        </div>
+    </section>
+    <?php endif; ?>
+
     <section class="products-section">
-        <h2>Catálogo de Cursos</h2>
+        <h2>Catálogo de Cursos y Extras</h2>
         <div class="grid-products">
             
             <div class="product-card" style="border: 2px solid var(--success);">
@@ -111,17 +148,27 @@ if (isset($_SESSION['user_id'])) {
                     <h3>Inglés: My World</h3>
                     <p style="color: #64748B;">Aprende 5 palabras al día con juegos interactivos, audios nativos y mnemotecnias.</p>
                     <div class="product-price">S/ 14.99 <span style="font-size: 14px; color: #94A3B8; font-weight: 400;">/mes</span></div>
-                    <button class="btn-cart" onclick="openCheckout('Inglés: My World')">🛒 Comprar Curso</button>
+                    <a href="landing.php" class="btn-cart" style="text-decoration: none;">Ver Detalles y Comprar</a>
                 </div>
             </div>
 
             <div class="product-card">
-                <div class="product-img" style="background: #FEF3C7;">🔢</div>
+                <div class="product-img" style="background: #ECFCCB;">🌿</div>
                 <div class="product-info">
-                    <h3>Matemáticas Lúdicas <span class="badge-soon">Próximamente</span></h3>
-                    <p style="color: #64748B;">Sumas y restas divertidas salvando a los alienígenas en el espacio.</p>
-                    <div class="product-price">S/ 29.00 <span style="font-size: 14px; color: #94A3B8; font-weight: 400;">/mes</span></div>
-                    <button class="btn-disabled" disabled>No Disponible Aún</button>
+                    <h3>150 Actividades sin Pantallas</h3>
+                    <p style="color: #64748B;">Ideas simples para entretener, educar y estimular la creatividad de tu hijo sin usar el celular.</p>
+                    <div class="product-price">S/ 6.90 <span style="font-size: 14px; color: #94A3B8; font-weight: 400;">(PDF)</span></div>
+                    <a href="https://link.mercadopago.com.pe/PON_TU_LINK_690_AQUI" target="_blank" class="btn-cart" style="background: var(--brand-blue);">🛒 Comprar E-book</a>
+                </div>
+            </div>
+
+            <div class="product-card">
+                <div class="product-img" style="background: #FEF3C7;">⭐</div>
+                <div class="product-info">
+                    <h3>Sistema de Hábitos para Niños</h3>
+                    <p style="color: #64748B;">Tablas de hábitos, recompensas y rutinas para ayudar a tu hijo a desarrollar disciplina de forma positiva.</p>
+                    <div class="product-price">S/ 5.90 <span style="font-size: 14px; color: #94A3B8; font-weight: 400;">(PDF)</span></div>
+                    <a href="https://link.mercadopago.com.pe/PON_TU_LINK_590_AQUI" target="_blank" class="btn-cart" style="background: var(--brand-blue);">🛒 Comprar Tablas</a>
                 </div>
             </div>
 
@@ -131,16 +178,6 @@ if (isset($_SESSION['user_id'])) {
                     <h3>Ciencias: Pequeño Genio <span class="badge-soon">Próximamente</span></h3>
                     <p style="color: #64748B;">Experimentos virtuales y el descubrimiento del cuerpo humano.</p>
                     <div class="product-price">S/ 45.00 <span style="font-size: 14px; color: #94A3B8; font-weight: 400;">/mes</span></div>
-                    <button class="btn-disabled" disabled>No Disponible Aún</button>
-                </div>
-            </div>
-
-            <div class="product-card">
-                <div class="product-img" style="background: #FEF08A;">🎨</div>
-                <div class="product-info">
-                    <h3>Arte y Creatividad <span class="badge-soon">Próximamente</span></h3>
-                    <p style="color: #64748B;">Desarrolla habilidades motoras finas coloreando en nuestra pizarra digital.</p>
-                    <div class="product-price">S/ 25.00 <span style="font-size: 14px; color: #94A3B8; font-weight: 400;">/mes</span></div>
                     <button class="btn-disabled" disabled>No Disponible Aún</button>
                 </div>
             </div>
@@ -180,14 +217,8 @@ if (isset($_SESSION['user_id'])) {
         <div class="modal-box">
             <button class="close-modal" onclick="closeModal('modal-checkout')">&times;</button>
             <h3 style="margin-bottom: 10px; color: var(--brand-blue);" id="checkout-title">Comprar Curso</h3>
-            <p style="margin-bottom: 25px; font-size: 14px; color: #64748B;">Crea la cuenta de tu hijo/a para acceder a la plataforma.</p>
-            
-            <form id="checkout-form">
-                <input type="text" id="child_name" class="form-control" placeholder="Nombre de tu hijo/a" required>
-                <input type="tel" id="parent_phone" class="form-control" placeholder="Tu número de WhatsApp (Ej: 999888777)" required pattern="^9\d{8}$" minlength="9" maxlength="9" title="Debe empezar con 9 y tener exactamente 9 dígitos">
-                
-                <button type="submit" class="btn-cart" id="btn-comprar">Pagar S/ 39.00 (Simulador)</button>
-            </form>
+            <p style="margin-bottom: 25px; font-size: 14px; color: #64748B;">Serás redirigido a nuestra página segura de oferta.</p>
+            <a href="landing.php" class="btn-cart" style="text-decoration: none;">Ir a Ver Oferta</a>
         </div>
     </div>
 
@@ -211,7 +242,7 @@ if (isset($_SESSION['user_id'])) {
             <div style="font-size: 14px; color: #475569; max-height: 300px; overflow-y: auto; padding-right: 15px; line-height: 1.8;">
                 <p>1. <strong>Aceptación:</strong> Al adquirir nuestros servicios, el usuario acepta estos términos.</p><br>
                 <p>2. <strong>Acceso:</strong> El acceso a la plataforma es personal e intransferible. Está prohibido compartir credenciales.</p><br>
-                <p>3. <strong>Suscripción:</strong> El servicio se brinda bajo una modalidad de suscripción recurrente mensual.</p><br>
+                <p>3. <strong>Suscripción:</strong> El servicio se brinda bajo una modalidad de suscripción recurrente o pago único según el plan seleccionado.</p><br>
                 <p>4. <strong>Responsabilidad:</strong> No garantizamos el aprendizaje fluido del idioma sin la supervisión constante y el involucramiento activo del padre o apoderado en el uso de la herramienta.</p>
             </div>
         </div>
@@ -233,8 +264,7 @@ if (isset($_SESSION['user_id'])) {
 
     <script>
         function openCheckout(curso) {
-            document.getElementById('checkout-title').innerText = "Comprar " + curso;
-            document.getElementById('modal-checkout').style.display = 'flex';
+            window.location.href = "landing.php"; // Ahora centralizamos la venta del curso en landing
         }
         function openModal(id) { document.getElementById(id).style.display = 'flex'; }
         function closeModal(id) { document.getElementById(id).style.display = 'none'; }
@@ -243,53 +273,6 @@ if (isset($_SESSION['user_id'])) {
             if (event.target.classList.contains('modal-overlay')) {
                 event.target.style.display = "none";
             }
-        }
-
-        document.getElementById('checkout-form').addEventListener('submit', function (e) {
-            e.preventDefault();
-            const childName = document.getElementById('child_name').value.trim();
-            const parentPhone = document.getElementById('parent_phone').value.trim();
-
-            // FIX: Verificación JS adicional por seguridad por si el navegador omite el pattern de HTML
-            const phoneRegex = /^9\d{8}$/;
-            if (!phoneRegex.test(parentPhone)) {
-                alert("El número de WhatsApp debe empezar con 9 y tener exactamente 9 dígitos.");
-                return;
-            }
-
-            const btn = document.getElementById('btn-comprar');
-            btn.innerText = "Procesando pago..."; 
-            btn.disabled = true;
-            btn.style.background = "#94A3B8";
-            btn.style.boxShadow = "none";
-
-            fetch('app/process_payment.php', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ token: "simulacion_aprobada", child_name: childName, parent_phone: parentPhone })
-            })
-            .then(res => res.json())
-            .then(data => {
-                if(data.success) {
-                    alert("¡Pago exitoso! Cuenta creada. Redirigiendo a tus cursos..."); 
-                    window.location.href = 'dashboard.php'; 
-                } else {
-                    alert("Error en el pago: " + data.message);
-                    resetBtn(btn);
-                }
-            })
-            .catch(err => {
-                console.error(err);
-                alert("Hubo un error de conexión con el servidor.");
-                resetBtn(btn);
-            });
-        });
-
-        function resetBtn(btn) {
-            btn.innerText = "Pagar S/ 39.00 (Simulador)"; 
-            btn.disabled = false;
-            btn.style.background = "var(--brand-green)";
-            btn.style.boxShadow = "0 4px 14px rgba(104, 169, 62, 0.3)";
         }
     </script>
 </body>

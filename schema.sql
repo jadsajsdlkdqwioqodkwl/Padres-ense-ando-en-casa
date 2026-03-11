@@ -2,11 +2,19 @@ SET NAMES utf8mb4;
 SET CHARACTER SET utf8mb4;
 SET FOREIGN_KEY_CHECKS = 0;
 
+-- BORRÓN Y CUENTA NUEVA: Eliminamos las tablas que cambian su estructura
+DROP TABLE IF EXISTS progress;
+DROP TABLE IF EXISTS users;
+
+-- CREACIÓN DE TABLAS ACTUALIZADAS
 CREATE TABLE IF NOT EXISTS users (
     id INT AUTO_INCREMENT PRIMARY KEY, 
     child_name VARCHAR(50) NOT NULL, 
-    parent_phone VARCHAR(20) UNIQUE, 
-    total_stars INT DEFAULT 0, -- <== ¡AQUÍ FALTABA ESTA COMA!
+    parent_phone VARCHAR(20) UNIQUE NOT NULL, 
+    password VARCHAR(255) NOT NULL, 
+    has_bump TINYINT(1) DEFAULT 0,  
+    payment_id VARCHAR(100) NULL UNIQUE, -- NUEVO: Blindaje Anti-Duplicación
+    total_stars INT DEFAULT 0,
     subscription_expires_at DATETIME NULL 
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
@@ -34,26 +42,25 @@ CREATE TABLE IF NOT EXISTS progress (
     is_completed BOOLEAN DEFAULT FALSE, 
     stars_earned INT DEFAULT 0, 
     completed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, 
-    -- AÑADIDO: Columna para guardar las 5 palabras elegidas y sus mnemotecnias
     selected_words JSON NULL, 
     PRIMARY KEY (user_id, lesson_id), 
-    FOREIGN KEY (user_id) REFERENCES users(id), 
-    FOREIGN KEY (lesson_id) REFERENCES lessons(id)
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE, 
+    FOREIGN KEY (lesson_id) REFERENCES lessons(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- Limpiamos las lecciones base antiguas para actualizarlas a la nueva versión de semanas
-DELETE FROM progress WHERE lesson_id IN (1,2,3,4,5,6,7,8,9,10,11,12,13,14);
 DELETE FROM lessons WHERE id IN (1,2,3,4,5,6,7,8,9,10,11,12,13,14);
 DELETE FROM modules WHERE id IN (1,2);
 
--- DATA INICIAL
-INSERT IGNORE INTO users (id, child_name, parent_phone, total_stars) VALUES (1, 'Explorador', '+51928529656', 0);
+-- DATA INICIAL (Usuario de prueba con contraseña "123456" encriptada y Bump activo)
+INSERT IGNORE INTO users (id, child_name, parent_phone, password, has_bump, total_stars) 
+VALUES (1, 'Explorador', '+51928529656', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 1, 0);
 
--- AÑADIDO Y EDITADO: Reestructuración a Semanas (Módulos 1 y 2)
+-- MÓDULOS
 INSERT IGNORE INTO modules (id, title, color_theme, order_num) VALUES (1, 'Semana 1: Mi Entorno', '#FF9F43', 1);
 INSERT IGNORE INTO modules (id, title, color_theme, order_num) VALUES (2, 'Semana 2: La Naturaleza', '#10AC84', 2);
 
--- SEMANA 1 (7 Días enfocados en vocabulario, sin gramática)
+-- SEMANA 1
 INSERT INTO lessons (id, module_id, title, template_type, content_data, reward_stars, order_num) VALUES 
 (1, 1, 'Vocabulario Básico', 'meteor_strike', '{"guide": {"intro": "Toca el meteorito correcto"}, "rounds": [{"target_word": "APPLE", "phonetic": "ápol", "translation": "Manzana", "items": [{"id": 1, "content": "🍎", "is_correct": true}, {"id": 2, "content": "🍌", "is_correct": false}]}], "speed": 6}', 5, 1),
 (2, 1, 'Cosas de Casa', 'color_rescue', '{"guide": {"intro": "Lanza la pintura correcta"}, "rounds": [{"color_name": "Red", "phonetic": "red", "color_hex": "#ff4757", "item": "🏠", "translation": "Casa Roja"}]}', 5, 2),
@@ -63,7 +70,7 @@ INSERT INTO lessons (id, module_id, title, template_type, content_data, reward_s
 (6, 1, 'Ropa', 'color_rescue', '{"guide": {"intro": "Lanza la pintura"}, "rounds": [{"color_name": "Yellow", "phonetic": "iélou", "color_hex": "#f1c40f", "item": "👕", "translation": "Polo Amarillo"}]}', 5, 6),
 (7, 1, 'Día de Repaso', 'meteor_strike', '{"guide": {"intro": "Día final de la semana"}, "rounds": [{"target_word": "SHOES", "phonetic": "shus", "translation": "Zapatos", "items": [{"id": 1, "content": "👟", "is_correct": true}, {"id": 2, "content": "🧢", "is_correct": false}]}], "speed": 8}', 10, 7);
 
--- SEMANA 2 (7 Días enfocados en vocabulario, sin gramática)
+-- SEMANA 2
 INSERT INTO lessons (id, module_id, title, template_type, content_data, reward_stars, order_num) VALUES 
 (8, 2, 'Animales', 'meteor_strike', '{"guide": {"intro": "Toca el meteorito correcto"}, "rounds": [{"target_word": "DOG", "phonetic": "dog", "translation": "Perro", "items": [{"id": 1, "content": "🐶", "is_correct": true}, {"id": 2, "content": "🐱", "is_correct": false}]}], "speed": 6}', 5, 1),
 (9, 2, 'Colores del Bosque', 'color_rescue', '{"guide": {"intro": "Lanza la pintura correcta"}, "rounds": [{"color_name": "Green", "phonetic": "grin", "color_hex": "#2ed573", "item": "🌳", "translation": "Árbol Verde"}]}', 5, 2),

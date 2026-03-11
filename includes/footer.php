@@ -30,6 +30,10 @@
         <span class="footer-mascot-msg">🐶 "¡Sigue practicando, lo estás haciendo genial!"</span>
         <p>&copy; <?php echo date('Y'); ?> <strong>My World</strong> - Plataforma de Aprendizaje Interactivo</p>
         <p>Lección: <?php echo isset($page_title) ? htmlspecialchars($page_title) : 'App Interactiva'; ?></p>
+        
+        <div style="margin-top: 20px;">
+            <a href="creditos.php" style="font-size: 11px; color: #CBD5E1; text-decoration: none; transition: 0.2s;">Créditos Creative Commons</a>
+        </div>
     </footer>
 
     <script src="assets/js/engine.js"></script>

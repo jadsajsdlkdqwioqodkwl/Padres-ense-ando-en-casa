@@ -5,7 +5,6 @@ $current_stars = $user_info ? $user_info['total_stars'] : 0;
 $child_name = $user_info ? $user_info['child_name'] : 'Explorador';
 ?>
 <style>
-    /* FIX: Navbar con marco visible, bordes definidos y centrada estrictamente */
     .top-navbar-wrapper {
         width: 100%;
         max-width: 1000px;
@@ -19,8 +18,8 @@ $child_name = $user_info ? $user_info['child_name'] : 'Explorador';
     .top-navbar { 
         display: flex; justify-content: space-between; align-items: center; 
         background: #ffffff;
-        border: 2px solid #E2E8F0; /* Bordes visibles */
-        border-radius: 16px; /* Bordes redondeados */
+        border: 2px solid #E2E8F0; 
+        border-radius: 16px; 
         padding: 15px 25px; 
         flex-wrap: wrap; gap: 15px; 
         width: 100%; max-width: 100%; 
@@ -28,9 +27,7 @@ $child_name = $user_info ? $user_info['child_name'] : 'Explorador';
         box-shadow: 0 10px 25px rgba(28, 61, 106, 0.05);
     }
     
-    .nav-brand { 
-        flex-shrink: 0; max-width: 100%;
-    }
+    .nav-brand { flex-shrink: 0; max-width: 100%; }
     .nav-brand a { 
         font-size: clamp(20px, 5vw, 24px); font-weight: 800; color: var(--brand-blue); 
         text-decoration: none; display: flex; align-items: center; gap: 10px; 
@@ -82,7 +79,7 @@ $child_name = $user_info ? $user_info['child_name'] : 'Explorador';
 <div class="top-navbar-wrapper">
     <div class="top-navbar">
         <div class="nav-brand">
-            <a href="dashboard.php">
+            <a href="index.php">
                 <img src="assets/logo-myworld.svg" alt="My World" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline';">
                 <span style="display:none;">🚀 My World</span>
             </a>

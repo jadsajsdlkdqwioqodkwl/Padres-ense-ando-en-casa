@@ -2,13 +2,19 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My World - Inglés para Niños</title>
-    <meta name="description" content="La app donde tu hijo aprende inglés escribiendo y jugando. Acceso de por vida.">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>My World - El Inglés que Asegura el Futuro de tu Hijo</title>
+    <meta name="description" content="Asegura sus oportunidades futuras con inglés fluido sin pagar mensualidades.">
     
-    <link rel="preload" as="image" href="assets/hero-app.webp">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self' https: 'unsafe-inline' 'unsafe-eval' data: blob:; img-src 'self' https: data:;">
+    <meta http-equiv="X-XSS-Protection" content="1; mode=block">
+    <meta http-equiv="X-Content-Type-Options" content="nosniff">
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/twemoji/14.0.2/twemoji.min.js"></script>
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com">
+    <link rel="dns-prefetch" href="https://connect.facebook.net">
+    <link rel="preload" as="image" href="assets/hero-app.webp" fetchpriority="high">
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/twemoji/14.0.2/twemoji.min.js" defer></script>
 
     <script>
     !function(f,b,e,v,n,t,s)
@@ -23,7 +29,7 @@
     fbq('track', 'PageView');
     </script>
     <noscript><img height="1" width="1" style="display:none" src="https://www.facebook.com/tr?id=TU_PIXEL_ID&ev=PageView&noscript=1"/></noscript>
-
+    
     <style>
         :root {
             --brand-blue: #1C3D6A;   
@@ -32,14 +38,16 @@
             --brand-lblue: #5CB2E4;  
             --bg-light: #F8FAFC;     
             --text-main: #333333;
-            --text-muted: #64748B;
+            --text-muted: #475569;
             --white: #FFFFFF;
+            --red-alert: #E53E3E;
+            --wave-color: #E8EEF2; 
         }
 
-        /* FASE 5: Reset & Tipografía Fluida */
+        /* Reset & Tipografía Fluida */
         * { box-sizing: border-box; margin: 0; padding: 0; }
-        html, body { overflow-x: hidden; width: 100%; }
-        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; color: var(--text-main); line-height: 1.6; background-color: var(--white); }
+        html, body { overflow-x: hidden; width: 100%; scroll-behavior: smooth; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; color: var(--text-main); line-height: 1.6; background-color: var(--white); position: relative; }
         img { max-width: 100%; height: auto; display: block; }
         a { text-decoration: none; }
         img.emoji { height: 1.2em; width: 1.2em; margin: 0 .05em 0 .1em; vertical-align: -0.1em; display: inline-block; pointer-events: none; }
@@ -50,276 +58,316 @@
         .flex-container { display: flex; flex-wrap: wrap; gap: 20px; align-items: center; }
         .text-center { text-align: center; }
         
-        /* Botón Fluido */
-        .btn { display: inline-block; background: var(--brand-green); color: var(--white); font-weight: 700; padding: clamp(12px, 2vw, 16px) clamp(20px, 4vw, 32px); border-radius: 50px; text-align: center; transition: background 0.3s, transform 0.2s; border: none; cursor: pointer; font-size: clamp(0.95rem, 2vw, 1.1rem); box-shadow: 0 4px 14px rgba(104, 169, 62, 0.3); word-wrap: break-word; max-width: 100%; box-sizing: border-box; }
-        .btn:hover { background: #579232; transform: translateY(-2px); box-shadow: 0 6px 20px rgba(104, 169, 62, 0.4); }
+        /* Header Principal Simétrico */
+        .main-header { display: flex; justify-content: center; align-items: center; padding: 20px 5%; background-color: var(--white); box-shadow: 0 4px 15px rgba(28, 61, 106, 0.05); position: relative; z-index: 10; width: 100%; }
+        .main-header img { height: clamp(45px, 6vw, 65px); width: auto; max-width: 100%; }
+
+        /* Botones Persuasivos */
+        .btn { display: inline-flex; flex-direction: column; align-items: center; justify-content: center; background: var(--brand-green); color: var(--white); font-weight: 800; padding: clamp(14px, 2vw, 18px) clamp(24px, 4vw, 36px); border-radius: 50px; text-align: center; transition: all 0.3s ease; border: none; cursor: pointer; font-size: clamp(1rem, 2vw, 1.15rem); box-shadow: 0 4px 14px rgba(104, 169, 62, 0.4); word-wrap: break-word; max-width: 100%; box-sizing: border-box; text-transform: uppercase; letter-spacing: 0.5px; }
+        .btn:hover { background: #579232; transform: translateY(-3px); box-shadow: 0 8px 25px rgba(104, 169, 62, 0.5); }
+        .btn-subtext { display: block; font-size: 0.75rem; font-weight: 500; text-transform: none; margin-top: 5px; opacity: 0.9; letter-spacing: 0; }
         
+        /* Botón No Gracias */
+        .btn-no-thanks { background: transparent; border: none; color: var(--text-muted); width: 100%; padding: 12px; margin-top: 10px; cursor: pointer; text-decoration: underline; font-size: 0.95rem; transition: color 0.3s, transform 0.2s; font-weight: 500; }
+        .btn-no-thanks:hover { color: var(--text-main); transform: scale(1.02); }
+
         .underline { position: relative; white-space: nowrap; z-index: 1; }
         .underline::after { content: ''; position: absolute; left: 0; bottom: 8%; width: 100%; height: 35%; background-color: var(--brand-orange); z-index: -1; opacity: 0.6; }
+        .highlight { color: var(--brand-orange); }
 
-        /* Navbar */
-        header { padding: 15px 0; background: var(--white); position: relative; z-index: 10; box-shadow: 0 1px 10px rgba(0,0,0,0.03); }
-        .nav-inner { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px; }
-        .logo img { height: clamp(35px, 5vw, 45px); width: auto; max-width: 100%; }
-        .nav-links { display: flex; align-items: center; gap: clamp(10px, 3vw, 20px); flex-wrap: wrap; justify-content: center; }
-        .login-link { color: var(--brand-blue); font-weight: 700; font-size: 0.95rem; }
+        /* Componentes Escalables: Sistema de Olas (Waves) */
+        .wave-container-top { position: absolute; top: 0; left: 0; width: 100%; height: clamp(150px, 25vw, 350px); overflow: hidden; z-index: 0; pointer-events: none; }
+        .wave-container-top svg { width: 100%; height: 100%; display: block; }
+        .wave-container-bottom { width: 100%; overflow: hidden; line-height: 0; margin-top: -5px; background: var(--white); pointer-events: none; }
+        .wave-container-bottom svg { width: 100%; height: auto; display: block; }
 
-        /* Hero Section */
-        .hero { background: var(--bg-light); padding: clamp(40px, 8vw, 70px) 0 clamp(50px, 10vw, 90px); overflow: hidden; }
-        .hero-text h1 { font-size: clamp(2rem, 6vw, 3.5rem); font-weight: 800; line-height: 1.1; color: var(--brand-blue); margin-bottom: 20px; letter-spacing: -1px; }
-        .hero-text p { font-size: clamp(1rem, 2.5vw, 1.25rem); color: var(--text-muted); margin-bottom: 30px; }
-        .hero-price { font-size: clamp(0.9rem, 2vw, 1.1rem); font-weight: 600; color: var(--brand-blue); margin-top: 15px; display: block; }
-        .hero-image-wrapper img { border-radius: 20px; box-shadow: 0 20px 40px rgba(28, 61, 106, 0.1); transform: rotate(2deg); transition: transform 0.5s; width: 100%; max-width: 100%; }
-        .hero-image-wrapper img:hover { transform: rotate(0deg); }
+        /* Hero Section Persuasivo */
+        .hero { position: relative; background: var(--white); padding: clamp(60px, 12vw, 100px) 0 clamp(60px, 10vw, 100px); overflow: hidden; }
+        .hero-text h1 { font-size: clamp(2.2rem, 5vw, 3.8rem); font-weight: 800; line-height: 1.1; color: var(--brand-blue); margin-bottom: 25px; letter-spacing: -1px; }
+        .hero-text p { font-size: clamp(1.1rem, 2.5vw, 1.3rem); color: var(--text-muted); margin-bottom: 20px; font-weight: 500; }
+        
+        /* Video Facade UI */
+        .video-wrapper { position: relative; width: 100%; max-width: 600px; margin: 0 auto; border-radius: 20px; overflow: hidden; box-shadow: 0 25px 50px rgba(28, 61, 106, 0.2); background: #000; border: 4px solid var(--white); transform: rotate(1deg); transition: transform 0.4s; aspect-ratio: 16/9; z-index: 2; }
+        .video-wrapper:hover { transform: rotate(0deg); }
+        .video-thumbnail { width: 100%; height: 100%; object-fit: cover; opacity: 1; display: block; }
 
-        /* Agitation & Benefits - Padding ajustado para asegurar margenes */
-        .agitation, .features { padding: clamp(50px, 8vw, 80px) 5%; background: var(--white); }
-        .section-title { font-size: clamp(1.8rem, 4vw, 2.2rem); color: var(--brand-blue); margin-bottom: 40px; font-weight: 800; letter-spacing: -0.5px; }
-        .card-simple { padding: clamp(20px, 4vw, 30px); text-align: center; border: 1px solid #E2E8F0; border-radius: 12px; height: 100%; }
-        .card-simple h4 { color: #E53E3E; margin-bottom: 15px; font-size: clamp(1.1rem, 2vw, 1.2rem); }
-        .card-simple p { font-size: clamp(0.95rem, 2vw, 1rem); }
+        /* Estructura Base de Secciones (Marketing Copy) */
+        .section-padding { padding: clamp(60px, 8vw, 90px) 5%; }
+        .section-title { font-size: clamp(2rem, 4vw, 2.5rem); color: var(--brand-blue); margin-bottom: 20px; font-weight: 800; letter-spacing: -0.5px; text-align: center; }
+        .section-subtitle { text-align: center; font-size: 1.2rem; color: var(--text-muted); max-width: 800px; margin: 0 auto 50px; }
 
-        .benefits { background: var(--brand-blue); color: var(--white); padding: clamp(50px, 8vw, 80px) 5%; }
-        .benefits .section-title { color: var(--white); }
-        .benefit-item { text-align: center; }
-        .benefit-icon { width: 64px; height: 64px; margin: 0 auto 20px; background: rgba(255,255,255,0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; }
-        .benefit-item h3 { font-size: clamp(1.1rem, 2.5vw, 1.3rem); margin-bottom: 10px; color: var(--brand-lblue); }
-        .benefit-item p { font-size: clamp(0.9rem, 2vw, 0.95rem); color: rgba(255,255,255,0.9); }
+        /* 2. ¿Qué voy a obtener? */
+        .what-you-get { background: var(--brand-blue); color: var(--white); }
+        .what-you-get .section-title { color: var(--white); }
+        .what-you-get .section-subtitle { color: rgba(255,255,255,0.8); }
+        .get-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 30px; }
+        .get-card { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 16px; padding: 45px 30px 30px; position: relative; overflow: hidden; transition: transform 0.3s; }
+        .get-card:hover { transform: translateY(-5px); background: rgba(255,255,255,0.08); }
+        .get-card h4 { color: var(--brand-orange); font-size: 1.2rem; margin-bottom: 15px; display: flex; align-items: center; gap: 10px; line-height: 1.4; }
+        .get-card p { font-size: 0.95rem; color: rgba(255,255,255,0.9); }
+        .get-badge { position: absolute; top: 12px; right: 15px; background: var(--brand-green); color: white; font-size: 0.7rem; font-weight: bold; padding: 4px 10px; border-radius: 50px; text-transform: uppercase; z-index: 2; }
 
-        /* Features Zig-Zag */
-        .feature-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: clamp(30px, 5vw, 50px); align-items: center; margin-bottom: clamp(40px, 8vw, 80px); }
+        /* 3. ¿Cómo me veré? (Transformación) */
+        .how-you-look { background: var(--bg-light); }
+        .feature-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: clamp(30px, 5vw, 60px); align-items: center; margin-bottom: clamp(50px, 8vw, 80px); }
         .feature-row:nth-child(even) .feature-text { order: -1; }
-        .feature-text h2 { font-size: clamp(1.6rem, 4vw, 2rem); color: var(--brand-blue); margin-bottom: 20px; }
-        .feature-image img { border-radius: 12px; box-shadow: 0 10px 30px rgba(28, 61, 106, 0.08); width: 100%; }
+        .feature-text h2 { font-size: clamp(1.8rem, 4vw, 2.2rem); color: var(--brand-blue); margin-bottom: 20px; line-height: 1.2; }
+        .feature-text p { font-size: 1.1rem; margin-bottom: 20px; color: var(--text-muted); }
+        .feature-image img { border-radius: 16px; box-shadow: 0 20px 40px rgba(28, 61, 106, 0.12); width: 100%; border: 1px solid #E2E8F0; }
+        .diploma-badge { display: inline-flex; align-items: center; gap: 10px; background: #FEF3C7; color: #D97706; padding: 10px 20px; border-radius: 50px; font-weight: 700; font-size: 0.95rem; margin-top: 10px; }
 
-        /* Checkout */
-        .checkout-section { background: var(--bg-light); padding: clamp(50px, 8vw, 80px) 5%; text-align: center; }
-        .checkout-script-font { font-family: "Georgia", serif; font-style: italic; font-size: clamp(1.8rem, 5vw, 2.5rem); color: var(--brand-blue); margin-bottom: 30px; }
-        .checkout-box { max-width: 500px; margin: 0 auto; background: var(--white); padding: clamp(20px, 5vw, 40px); border-radius: 16px; box-shadow: 0 15px 35px rgba(28, 61, 106, 0.05); text-align: center; border-top: 5px solid var(--brand-green); width: 100%; box-sizing: border-box; }
-        .price-tag { text-align: center; font-size: clamp(2rem, 6vw, 2.5rem); font-weight: 800; color: var(--brand-blue); margin-bottom: 25px; }
-        .price-tag span { font-size: clamp(0.9rem, 2vw, 1rem); color: var(--text-muted); font-weight: normal; display: block; }
-        .btn-pay { width: 100%; font-size: clamp(1rem, 2.5vw, 1.1rem); padding: 16px; margin-top: 10px; }
-
+        /* Checkout Centralizado */
+        .checkout-section { background: var(--white); padding: clamp(60px, 8vw, 80px) 5% 20px; text-align: center; position: relative; }
+        .checkout-box { max-width: 550px; margin: 0 auto; background: var(--white); padding: clamp(30px, 5vw, 50px); border-radius: 24px; box-shadow: 0 25px 60px rgba(28, 61, 106, 0.1); text-align: center; border-top: 6px solid var(--brand-green); width: 100%; box-sizing: border-box; position: relative; z-index: 1; border: 1px solid #E2E8F0; border-top: 6px solid var(--brand-green); }
+        
+        .price-tag { text-align: center; font-size: clamp(2.5rem, 6vw, 3.5rem); font-weight: 900; color: var(--brand-blue); margin-bottom: 15px; line-height: 1; }
+        .price-tag .badge-container { margin-top: 10px; margin-bottom: 15px; }
+        .price-tag span.badge { display: inline-block; font-size: 0.85rem; background: var(--brand-orange); color: white; padding: 8px 16px; border-radius: 50px; text-transform: uppercase; letter-spacing: 1px; box-shadow: 0 4px 10px rgba(242, 156, 56, 0.3); }
+        .price-tag p.desc { font-size: clamp(1rem, 2vw, 1.1rem); color: var(--text-muted); font-weight: 500; display: block; margin-top: 15px; }
+        
         /* Forms */
         .form-group { margin-bottom: 20px; text-align: left; }
-        .form-group label { display: block; font-size: 0.9rem; font-weight: 600; margin-bottom: 8px; color: var(--brand-blue); }
-        .form-control { width: 100%; padding: 14px; border: 2px solid #E2E8F0; border-radius: 8px; font-size: 16px; transition: border-color 0.3s; box-sizing: border-box; max-width: 100%; }
-        .form-control:focus { border-color: var(--brand-lblue); outline: none; box-shadow: 0 0 0 3px rgba(92, 178, 228, 0.2); }
+        .form-group label { display: block; font-size: 0.95rem; font-weight: 700; margin-bottom: 8px; color: var(--brand-blue); }
+        .form-control { width: 100%; padding: 16px; border: 2px solid #CBD5E1; border-radius: 12px; font-size: 16px; transition: all 0.3s; box-sizing: border-box; max-width: 100%; background: #F8FAFC; }
+        .form-control:focus { border-color: var(--brand-blue); outline: none; box-shadow: 0 0 0 4px rgba(28, 61, 106, 0.1); background: var(--white); }
+        .btn-pay { width: 100%; font-size: 1.2rem; padding: 18px; margin-top: 15px; box-shadow: 0 10px 25px rgba(104, 169, 62, 0.3); }
         
-        /* Modal Fluido */
-        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(28, 61, 106, 0.7); z-index: 1000; justify-content: center; align-items: center; padding: 15px; opacity: 0; transition: opacity 0.3s ease; overflow-y: auto; box-sizing: border-box; }
+        /* Modales Fluidos */
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.8); z-index: 1000; justify-content: center; align-items: center; padding: 15px; opacity: 0; transition: opacity 0.3s ease; overflow-y: auto; backdrop-filter: blur(5px); box-sizing: border-box; }
         .modal-overlay.active { display: flex; opacity: 1; }
-        .modal-content { background: var(--white); width: 100%; max-width: 450px; padding: clamp(20px, 5vw, 40px); border-radius: 16px; position: relative; box-shadow: 0 25px 50px rgba(0,0,0,0.25); border-top: 5px solid var(--brand-green); margin: auto; box-sizing: border-box; }
-        .modal-close { position: absolute; top: 10px; right: 15px; font-size: 2rem; color: var(--text-muted); cursor: pointer; border: none; background: none; }
+        .modal-content { background: var(--white); width: 100%; max-width: 500px; padding: clamp(25px, 5vw, 40px); border-radius: 20px; position: relative; box-shadow: 0 25px 50px rgba(0,0,0,0.3); border-top: 6px solid var(--brand-green); margin: auto; box-sizing: border-box; }
+        .modal-close { position: absolute; top: 15px; right: 20px; font-size: 2.5rem; color: #94A3B8; cursor: pointer; border: none; background: none; line-height: 1; transition: color 0.2s; }
+        .modal-close:hover { color: var(--text-main); }
 
-        /* Parches Responsivos Extra para Tostadoras */
-        @media (max-width: 768px) {
-            .feature-row:nth-child(even) .feature-text { order: 0; }
-            .hero-image-wrapper img { transform: none; }
-        }
+        /* Trust Badges */
+        .trust-badges { display: flex; justify-content: center; gap: 20px; margin-top: 25px; opacity: 0.7; }
+        .trust-badges img { height: 25px; filter: grayscale(100%); transition: filter 0.3s; }
+        .trust-badges img:hover { filter: grayscale(0%); }
+
+        /* Estilos Añadidos: Yape/Tarjeta en el Modal Pre-Redirect */
+        .pay-method-label { flex: 1; text-align: center; border: 2px solid #CBD5E1; border-radius: 10px; padding: 12px 5px; cursor: pointer; font-weight: 700; color: var(--text-muted); transition: all 0.2s; background: #F8FAFC; font-size: 0.95rem; }
+        .pay-method-label:hover { border-color: var(--brand-blue); }
+        .pay-method-input:checked + .pay-method-label { border-color: var(--brand-green) !important; background: rgba(104, 169, 62, 0.05) !important; color: var(--brand-green) !important; box-shadow: 0 0 0 2px rgba(104, 169, 62, 0.2); }
+
         @media (max-width: 480px) {
-            .nav-inner { flex-direction: column; justify-content: center; text-align: center; }
-            .nav-links { width: 100%; justify-content: center; flex-direction: column; gap: 15px; }
+            .nav-inner { flex-direction: column; text-align: center; }
+            .nav-links { width: 100%; flex-direction: column; gap: 15px; }
             .btn { width: 100%; }
-            .logo img { max-width: 200px; }
-            
-            /* Solución al borde cortado para textos finales */
-            .checkout-script-font { padding: 0 15px; }
-            .guarantee { padding: 0 15px; }
         }
     </style>
 </head>
 <body>
 
-    <header>
-        <div class="container nav-inner">
-            <a href="#" class="logo" aria-label="Inicio">
-                <img src="assets/logo-myworld.svg" alt="My World Logo" width="240" height="60">
-            </a>
-            <div class="nav-links">
-                <a href="login.php" class="login-link">LOG IN</a>
-                <a href="#" class="btn trigger-modal">Empezar Ahora</a>
-            </div>
-        </div>
+    <header class="main-header">
+        <a href="#" aria-label="Inicio">
+            <img src="assets/logo-myworld.svg" alt="My World Logo" width="240" height="60" onerror="this.style.display='none'">
+        </a>
     </header>
 
     <section class="hero">
-        <div class="container grid-container" style="align-items: center;">
-            <div class="hero-text text-center">
-                <h1>Aprende inglés jugando, pero aprendiendo de <span class="underline">verdad</span>.</h1>
-                <p>La app donde los niños deben escribir antes de jugar. Olvídate de los pagos mensuales y las suscripciones escondidas.</p>
-                <button class="btn trigger-modal">Crear cuenta para tu hijo</button>
-                <span class="hero-price">Un solo pago de S/14.99. Acceso de por vida.</span>
+        <div class="wave-container-top">
+            <svg viewBox="0 0 1440 320" preserveAspectRatio="none">
+                <path fill="var(--wave-color)" d="M0,0 L1440,0 L1440,160 C1000,320 400,0 0,160 Z"></path>
+            </svg>
+        </div>
+
+        <div class="container grid-container" style="align-items: center; position: relative; z-index: 1;">
+            <div class="hero-text text-center" style="text-align: left;">
+                <h1><span class="highlight">El orgullo de ser el</span> Padre Héroe 🦸‍♂️</h1>
+                <p>En 15 minutos al día, My World convierte el tiempo de tablet en aprendizaje que puedes auditar: <strong>te muestra un diploma</strong> con las palabras que dominó cada día para que las evalúes. Sin estrés.</p>
+                
+                <div style="margin-top: 35px;">
+                    <button class="btn trigger-modal">
+                        ACCEDE AHORA
+                        <span class="btn-subtext">S/14.99 Pago Único.</span>
+                    </button>
+                </div>
             </div>
-            <div class="hero-image-wrapper">
-                <img src="assets/hero-app.webp" width="600" height="450" alt="Niño usando la app de My World" loading="eager">
+            
+            <div class="hero-video">
+                <div class="video-wrapper" style="cursor: default;">
+                    <img src="assets/hero-app.webp" alt="Niño y padre aprendiendo inglés juntos" class="video-thumbnail" loading="eager" width="600" height="337">
+                </div>
             </div>
         </div>
     </section>
 
-    <section class="agitation container">
-        <h2 class="section-title text-center">¿Ya probaste de todo, <span class="underline">verdad</span>? 😫</h2>
-        <div class="grid-container">
-            <div class="card-simple">
-                <h4>Apps Populares</h4>
-                <p>Solo presionan colores o tocan dibujitos hasta que aciertan por descarte, sin aprender a formar oraciones.</p>
-            </div>
-            <div class="card-simple">
-                <h4>Videos de YouTube</h4>
-                <p>Los mantienen hipnotizados por horas, pero el aprendizaje es 100% pasivo. Entienden, pero no hablan.</p>
-            </div>
-            <div class="card-simple">
-                <h4>Academias Tradicionales</h4>
-                <p>Mensualidades caras, libros nuevos cada ciclo y clases por Zoom con otros alumnos donde apenas participan.</p>
-            </div>
-        </div>
-    </section>
-
-    <section class="benefits">
+    <section class="what-you-get section-padding">
         <div class="container">
-            <h2 class="section-title text-center">Por qué nuestro método <span class="underline">funciona</span> 🚀</h2>
-            <div class="grid-container" style="margin-top: 40px;">
-                <div class="benefit-item">
-                    <div class="benefit-icon">✍️</div>
-                    <h3>Escribe Antes de Jugar</h3>
-                    <p>El "peaje cognitivo". Tienen que escribir la traducción correcta para desbloquear el minijuego.</p>
+            <h2 class="section-title">¿Qué incluye tu <span class="underline">inversión hoy</span>? 📦</h2>
+            <p class="section-subtitle">Te entregamos las herramientas para que tu hijo <strong>aprenda solo</strong> diariamente!</p>
+            
+            <div class="get-grid">
+                <div class="get-card">
+                    <span class="get-badge">Para Siempre</span>
+                    <h4>🧠 Las 500 palabras más usadas del inglés</h4>
+                    <p>Tu hijo practica y domina vocabulario real que sí se usa en conversaciones.</p>
                 </div>
-                <div class="benefit-item">
-                    <div class="benefit-icon">🗣️</div>
-                    <h3>Voz Nativa y Mnemotecnias</h3>
-                    <p>Asociamos palabras en inglés con sonidos divertidos en español con pronunciación 100% nativa.</p>
+                <div class="get-card">
+                    <span class="get-badge">Inteligencia</span>
+                    <h4>🗺️ Un reto físico de 30 días</h4>
+
+                    <p><strong>Un algoritmo</strong> que adapta los desafíos a las palabras que tu hijo eligió aprender ese día. Autonomía guiada que aniquila el aburrimiento.</p>
                 </div>
-                <div class="benefit-item">
-                    <div class="benefit-icon">💳</div>
-                    <h3>Cero Mensualidades</h3>
-                    <p>Las suscripciones recurrentes son estresantes. Pagas una sola vez y lo usan para siempre.</p>
+                <div class="get-card">
+                    <span class="get-badge">Mnemotecnia</span>
+                    <h4>🗣️ Trucos de Pronunciación</h4>
+                    <p>Audios nativos y trucos visuales en español (ej: "ápol", "jáus") para que aprenda sin miedo a equivocarse.</p>
+                </div>
+                <div class="get-card">
+                    <span class="get-badge">Imprimible</span>
+                    <h4>🗺️ Pasaporte de Aventurero</h4>
+                     <p><strong>Un algoritmo</strong> que adapta los desafíos a las palabras que tu hijo eligió aprender ese día. Autonomía guiada que aniquila el aburrimiento.</p>
                 </div>
             </div>
         </div>
     </section>
 
-    <section class="features container">
-        <div class="feature-row">
-            <div class="feature-image">
-                <img src="assets/dashboard-mockup.webp" loading="lazy" width="500" height="400" alt="Dashboard de progreso para padres">
-            </div>
-            <div class="feature-text">
-                <h2>Progreso que puedes <span class="underline">ver y medir</span> 📈</h2>
-                <p>Nuestra plataforma te entrega un diploma digital diario indicándote exactamente qué 5 palabras aprendió tu hijo hoy. Perfecto para preguntárselas en la cena y validar su avance.</p>
-            </div>
-        </div>
-        <div class="feature-row">
-            <div class="feature-text">
-                <h2>Juegos adaptados <span class="underline">sin estrés</span> 🎮</h2>
-                <p>Ellos mismos eligen qué categoría de palabras quieren aprender hoy. Los minijuegos de recompensa se adaptan automáticamente a su elección para mantener la motivación al máximo.</p>
-            </div>
-            <div class="feature-image">
-                <img src="assets/game-mockup.webp" loading="lazy" width="500" height="400" alt="Minijuegos educativos de recompensa">
-            </div>
-        </div>
-    </section>
-
-    <section class="checkout-section">
+    <section class="how-you-look section-padding">
         <div class="container">
-            <h2 class="checkout-script-font">El inglés que tu hijo sí quiere aprender.</h2>
+            <h2 class="section-title">Sé el que tome la decisión <span class="highlight">inteligente 🧠</span></h2>
+            <p class="section-subtitle">Ahorraste miles de soles en academias y construiste un vínculo irrompible compartiendo una aventura bilingüe.</p>
+
+            <div class="feature-row">
+                <div class="feature-image">
+                    <img src="assets/dashboard-mockup.webp" loading="lazy" width="500" height="400" alt="Diploma digital con reporte de progreso diario">
+                </div>
+                <div class="feature-text">
+                    <h2>Audita su progreso en <span class="highlight">la mesa a la hora de cenar</span>. 🍽️</h2>
+                    <p>Ya no tendrás la duda de <em>"¿estará aprendiendo algo con esa tablet?"</em>. Al final de cada sesión de 15 minutos, el sistema exige un examen.</p>
+                    <p>Si lo pasa, obtienes un <strong>Diploma de Logros Descargable</strong> con las palabras exactas que dominó. Verás a tu hijo emocionado por mostrarte su éxito y pronunciando con confianza frente a la familia.</p>
+                    <div class="diploma-badge">🏆 Cero excusas: Progreso auditable 100% real</div>
+                </div>
+            </div>
+            
+            <div class="feature-row" style="margin-bottom: 0;">
+                <div class="feature-text">
+                    <h2>Transforma el tiempo de pantalla en <span class="highlight">tiempo de calidad</span> ❤️</h2>
+                    <p>Otras apps aíslan al niño. My World te da el <strong>superpoder</strong> de ser su cómplice. Se reirán juntos con las mnemotecnias y tú le darás el "visto bueno" a su aprendizaje.</p>
+                    <div class="diploma-badge">🚀 Padre e Hijo vs. El Mundo</div>
+                </div>
+                <div class="feature-image">
+                    <img src="assets/game-mockup.webp" loading="lazy" width="500" height="400" alt="Padre e hijo riendo mientras aprenden inglés en My World">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="checkout" class="checkout-section">
+        <div class="container">
+            <h2 class="section-title">El inglés que tu hijo sí quiere aprender.</h2>
+            <p class="section-subtitle">Asegura su futuro hoy mismo, no postergues su educación.</p>
             
             <div class="checkout-box">
                 <div class="price-tag">
-                    S/14.99 <span>Pago único. Acceso de por vida.</span>
+                    S/14.99 
+                    <div class="badge-container">
+                        <span class="badge">Pago Único. Acceso de por Vida.</span>
+                    </div>
+                    <p class="desc">Aprovecha esta promoción hoy. Cero Riesgos.</p>
                 </div>
                 
                 <form id="bottom-payment-form">
                     <div class="form-group">
-                        <label for="bottom_child_name">Nombre de tu hijo/a</label>
-                        <input type="text" id="bottom_child_name" class="form-control" placeholder="Ej: Mateo" required>
+                        <label for="bottom_parent_name">Escribe tu nombre (Padre/Madre)</label>
+                        <input type="text" id="bottom_parent_name" class="form-control" placeholder="Ej: Juan Pérez" required>
                     </div>
                     <div class="form-group">
-                        <label for="bottom_parent_phone">Tu número de WhatsApp</label>
+                        <label for="bottom_parent_phone">Escribe tu número de WhatsApp</label>
                         <input type="tel" id="bottom_parent_phone" class="form-control" placeholder="Ej: 999888777" pattern="^9\d{8}$" maxlength="9" required title="Debe empezar con 9 y tener 9 dígitos">
                     </div>
                     
-                    <button type="submit" id="btn-comprar-bottom" class="btn btn-pay">Comprar Acceso Seguro 🔒</button>
+                    <button type="submit" id="btn-comprar-bottom" class="btn btn-pay">
+                        COMPRAR AHORA Y SER SU GUÍA
+                        <span class="btn-subtext">Transacción encriptada por Mercado Pago</span>
+                    </button>
                     
-                    <div class="guarantee" style="margin-top: 15px; color: var(--text-muted); font-size: 0.85rem;">
-                        Pago seguro procesado por Culqi
+                    <div class="trust-badges">
+                        <span>💳 Visa / Mastercard / Yape / Plin 100% Seguro</span>
                     </div>
                 </form>
             </div>
         </div>
     </section>
 
+    <div class="wave-container-bottom">
+        <svg viewBox="0 0 1440 200" preserveAspectRatio="none">
+            <path fill="var(--wave-color)" d="M0,200 L1440,200 L1440,50 C1000,-50 400,150 0,0 Z"></path>
+        </svg>
+    </div>
+
     <div class="modal-overlay" id="checkoutModal">
         <div class="modal-content">
-            <button class="modal-close" id="closeModal">&times;</button>
-            <div class="price-tag" style="margin-bottom: 20px; font-size: clamp(1.8rem, 5vw, 2rem);">
-                S/14.99 <span style="font-size: 1rem;">Pago único. Acceso de por vida.</span>
+            <button class="modal-close" id="closeModal" aria-label="Cerrar">&times;</button>
+            <div class="price-tag" style="margin-bottom: 25px; font-size: clamp(2rem, 5vw, 2.5rem);">
+                S/14.99 
+                <div class="badge-container">
+                    <span class="badge">Oferta Única Vitalicia</span>
+                </div>
+                <p class="desc" style="font-size: 0.95rem; margin-top: 10px;">Aprovecha esta promoción hoy.</p>
             </div>
             <form id="payment-form">
                 <div class="form-group">
-                    <label for="child_name">Nombre de tu hijo/a</label>
-                    <input type="text" id="child_name" class="form-control" placeholder="Ej: Mateo" required>
+                    <label for="parent_name">Escribe tu nombre (Padre/Madre)</label>
+                    <input type="text" id="parent_name" class="form-control" placeholder="Ej: Juan Pérez" pattern="[A-Za-zÁÉÍÓÚáéíóúñÑ\s]+" title="Solo letras y espacios" required>
                 </div>
                 <div class="form-group">
-                    <label for="parent_phone">Tu número de WhatsApp</label>
+                    <label for="parent_phone">Escribe tu número de WhatsApp</label>
                     <input type="tel" id="parent_phone" class="form-control" placeholder="Ej: 999888777" pattern="^9\d{8}$" maxlength="9" required title="Debe empezar con 9 y tener 9 dígitos">
                 </div>
                 
-                <button type="submit" id="btn-comprar-modal" class="btn btn-pay">Procesar Pago Seguro 🔒</button>
+                <button type="submit" id="btn-comprar-modal" class="btn btn-pay">
+                    ¡Comprar y acceder ahora!
+                </button>
                 
-                <div class="guarantee" style="margin-top: 15px; color: var(--text-muted); font-size: 0.85rem; text-align: center;">
-                    Encriptado y procesado por Culqi
-                </div>
+                <p style="text-align: center; font-size: 0.8rem; color: var(--text-muted); margin-top: 15px;">
+                    Paga 100% seguro. Encriptado por Mercado Pago.
+                </p>
             </form>
         </div>
     </div>
 
+    <div class="modal-overlay" id="bumpModal">
+        <div class="modal-content" style="background: var(--white); border-top: 6px solid var(--brand-green); text-align: left;">
+            <button class="modal-close" id="closeBumpModal" aria-label="Cerrar">&times;</button>
+            <h3 style="color: var(--brand-blue); font-size: 1.4rem; font-weight: 800; margin-bottom: 10px; text-align: center;">¡Espera! Asegura la escritura 🚀</h3>
+            <p style="color: var(--text-muted); font-size: 0.95rem; margin-bottom: 20px; text-align: center;">Antes de ir al pago, añade este potenciador físico.</p>
+            
+            <div style="background: var(--bg-light); border: 2px dashed var(--brand-orange); border-radius: 12px; padding: 15px; margin-bottom: 20px; transition: border-color 0.3s;">
+                <label style="display: flex; align-items: flex-start; gap: 10px; cursor: pointer;">
+                    <input type="checkbox" id="bump_checkbox" style="width: 24px; height: 24px; accent-color: var(--brand-green);">
+                    <div>
+                        <span style="display: inline-block; background: var(--brand-orange); color: var(--white); padding: 4px 12px; border-radius: 50px; font-size: 0.75rem; font-weight: bold; margin-bottom: 5px; box-shadow: 0 2px 5px rgba(242, 156, 56, 0.3);">⭐️ RECOMENDADO + S/5.00</span>
+                        <h4 style="color: var(--brand-blue); font-size: 1rem; margin-bottom: 5px; font-weight: 800;">Pack de Mnemotecnias y Pasaporte (PDF)</h4>
+                        <p style="color: var(--text-muted); font-size: 0.8rem; line-height: 1.4;">Descarga 500 palabras ilustradas y el "Pasaporte de Aventurero" para que marque sus logros físicos.</p>
+                    </div>
+                </label>
+            </div>
+
+            <label style="font-size: 0.95rem; font-weight: 700; color: var(--brand-blue); display:block; margin-bottom: 8px;">Método de Pago Final</label>
+            <div class="payment-methods" style="display: flex; gap: 10px; margin-bottom: 20px;">
+                <input type="radio" name="pay_method" id="pay_card" value="card" class="pay-method-input" checked style="display:none;">
+                <label for="pay_card" class="pay-method-label">💳 Mercado Pago</label>
+                
+                <input type="radio" name="pay_method" id="pay_yape" value="yape" class="pay-method-input" style="display:none;">
+                <label for="pay_yape" class="pay-method-label">📱 Yape/Plin Manual</label>
+            </div>
+            
+            <button id="btn-final-pay" class="btn btn-pay" style="width: 100%; font-size: 1.2rem; padding: 18px; margin-top: 5px;">
+                IR A PAGAR AHORA
+            </button>
+            <button id="btn-no-thanks" class="btn-no-thanks" type="button">
+                No, gracias. Solo quiero el acceso base.
+            </button>
+        </div>
+    </div>
+
     <script>
-        // FASE 5: Parseo Twemoji de la Landing
         document.addEventListener("DOMContentLoaded", function() {
-            twemoji.parse(document.body, { folder: 'svg', ext: '.svg' });
-        });
-
-        function procesarPago(childName, parentPhone, btnElement) {
-            // Verificación estricta de seguridad
-            const phoneRegex = /^9\d{8}$/;
-            if (!phoneRegex.test(parentPhone)) {
-                return alert("Por favor, ingresa un número de WhatsApp válido que empiece con 9 y tenga 9 dígitos.");
+            if (typeof twemoji !== 'undefined') {
+                twemoji.parse(document.body, { folder: 'svg', ext: '.svg' });
             }
-
-            const originalText = btnElement.innerText;
-            btnElement.innerText = "Procesando...";
-            btnElement.disabled = true;
-
-            fetch('app/process_payment.php', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ 
-                    token: "token_falso_de_prueba", 
-                    child_name: childName, 
-                    parent_phone: parentPhone 
-                })
-            })
-            .then(response => {
-                if (!response.ok) throw new Error("Error de red");
-                return response.json();
-            })
-            .then(data => {
-                if(data.success) {
-                    alert(data.message); 
-                    window.location.href = 'dashboard.php'; 
-                } else {
-                    alert("Error: " + data.message);
-                    btnElement.innerText = originalText;
-                    btnElement.disabled = false;
-                }
-            })
-            .catch(err => {
-                console.error(err);
-                alert("Hubo un problema procesando el pago. Revisa tu conexión.");
-                btnElement.innerText = originalText;
-                btnElement.disabled = false;
-            });
-        }
+        });
 
         const modal = document.getElementById('checkoutModal');
         const triggers = document.querySelectorAll('.trigger-modal');
@@ -333,21 +381,102 @@
         });
 
         closeBtn.addEventListener('click', () => { modal.classList.remove('active'); });
-        window.addEventListener('click', (e) => { if (e.target === modal) modal.classList.remove('active'); });
+        
+        const bumpModal = document.getElementById('bumpModal');
+        const closeBumpModal = document.getElementById('closeBumpModal');
+        let currentParentName = "";
+        let currentParentPhone = "";
 
-        document.getElementById('payment-form').addEventListener('submit', function (e) {
-            e.preventDefault();
-            const childName = document.getElementById('child_name').value.trim();
-            const parentPhone = document.getElementById('parent_phone').value.trim();
-            procesarPago(childName, parentPhone, document.getElementById('btn-comprar-modal'));
+        closeBumpModal.addEventListener('click', () => { bumpModal.classList.remove('active'); });
+
+        function openBumpModal(parentName, parentPhone) {
+            currentParentName = parentName.replace(/<[^>]*>?/gm, ''); 
+            currentParentPhone = parentPhone;
+            modal.classList.remove('active'); 
+            bumpModal.classList.add('active'); 
+        }
+
+        const bottomBtn = document.getElementById('btn-comprar-bottom');
+        const bottomName = document.getElementById('bottom_parent_name');
+        const bottomPhone = document.getElementById('bottom_parent_phone');
+
+        bottomBtn.addEventListener('click', function (e) {
+            if (bottomName.value.trim() === '' && bottomPhone.value.trim() === '') {
+                e.preventDefault(); 
+                modal.classList.add('active');
+            }
         });
 
         document.getElementById('bottom-payment-form').addEventListener('submit', function (e) {
             e.preventDefault();
-            const childName = document.getElementById('bottom_child_name').value.trim();
-            const parentPhone = document.getElementById('bottom_parent_phone').value.trim();
-            procesarPago(childName, parentPhone, document.getElementById('btn-comprar-bottom'));
+            const parentName = bottomName.value.trim();
+            const parentPhone = bottomPhone.value.trim();
+            openBumpModal(parentName, parentPhone);
         });
+
+        document.getElementById('payment-form').addEventListener('submit', function (e) {
+            e.preventDefault();
+            const parentName = document.getElementById('parent_name').value.trim();
+            const parentPhone = document.getElementById('parent_phone').value.trim();
+            openBumpModal(parentName, parentPhone);
+        });
+
+        document.getElementById('btn-final-pay').addEventListener('click', function(e) {
+            e.preventDefault();
+            const btnElement = document.getElementById('btn-final-pay');
+            const hasBump = document.getElementById('bump_checkbox').checked;
+            const payMethod = document.querySelector('input[name="pay_method"]:checked').value;
+            
+            procesarPagoSeguro(currentParentName, currentParentPhone, hasBump, payMethod, btnElement);
+        });
+
+        document.getElementById('btn-no-thanks').addEventListener('click', function(e) {
+            e.preventDefault();
+            document.getElementById('bump_checkbox').checked = false; 
+            
+            const btnElement = document.getElementById('btn-final-pay');
+            const hasBump = false; 
+            const payMethod = document.querySelector('input[name="pay_method"]:checked').value;
+            
+            procesarPagoSeguro(currentParentName, currentParentPhone, hasBump, payMethod, btnElement);
+        });
+
+        function procesarPagoSeguro(parentName, parentPhone, hasBump, payMethod, btnElement) {
+            const phoneRegex = /^9\d{8}$/;
+            if (!phoneRegex.test(parentPhone)) {
+                return alert("Por favor, ingresa un número de WhatsApp válido que empiece con 9 y tenga 9 dígitos.");
+            }
+
+            const originalText = btnElement.innerHTML;
+            btnElement.innerHTML = "Redirigiendo a pago seguro... ⏳";
+            btnElement.disabled = true;
+
+            // Trigger Meta Pixel Event for Checkout Intent
+            if (typeof fbq !== 'undefined') {
+                fbq('track', 'InitiateCheckout', {
+                    value: hasBump ? 19.99 : 14.99,
+                    currency: 'PEN'
+                });
+            }
+
+            // REDIRECCIÓN INTELIGENTE SEGÚN EL MÉTODO DE PAGO Y BUMP
+            if (payMethod === 'yape') {
+                // Va al checkout manual creado en esta fase
+                window.location.href = `checkout_yape.php?bump=${hasBump}&name=${encodeURIComponent(parentName)}&phone=${encodeURIComponent(parentPhone)}`;
+            } else {
+                // Reemplaza estos enlaces con tus enlaces reales de Mercado Pago
+                const linkMercadoPagoNormal = "https://link.mercadopago.com.pe/PON_TU_LINK_1499_AQUI"; 
+                const linkMercadoPagoBump = "https://link.mercadopago.com.pe/PON_TU_LINK_1999_AQUI";
+                
+                window.location.href = hasBump ? linkMercadoPagoBump : linkMercadoPagoNormal;
+            }
+            
+            // Seguridad: Rehabilitar el botón después de unos segundos si el navegador bloquea el redirect
+            setTimeout(() => {
+                btnElement.innerHTML = originalText;
+                btnElement.disabled = false;
+            }, 5000);
+        }
     </script>
 </body>
 </html>
