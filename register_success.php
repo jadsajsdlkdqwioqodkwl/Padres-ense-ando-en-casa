@@ -16,7 +16,7 @@ $payment_verified = false;
 
 // TOKEN DE ACCESO DE MERCADO PAGO (PRODUCCIÓN)
 // Integrado con tu credencial real para validar pagos
-$mp_access_token = "APP_USR-8915347577829943-031114-80ac2226a9778466beab8a07e4419f43-3259142883";
+$mp_access_token = "APP_USR-6122068330896334-031116-fb54d0e609056882561210e9e7c074a0-3259142883";
 
 // 2. VERIFICACIÓN ANTI-FRAUDE CON LA API DE MERCADO PAGO
 if (empty($payment_id) || $status !== 'approved') {
