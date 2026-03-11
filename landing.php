@@ -67,9 +67,9 @@
         .btn:hover { background: #579232; transform: translateY(-3px); box-shadow: 0 8px 25px rgba(104, 169, 62, 0.5); }
         .btn-subtext { display: block; font-size: 0.75rem; font-weight: 500; text-transform: none; margin-top: 5px; opacity: 0.9; letter-spacing: 0; }
         
-        /* Botón No Gracias */
-        .btn-no-thanks { background: transparent; border: none; color: var(--text-muted); width: 100%; padding: 12px; margin-top: 10px; cursor: pointer; text-decoration: underline; font-size: 0.95rem; transition: color 0.3s, transform 0.2s; font-weight: 500; }
-        .btn-no-thanks:hover { color: var(--text-main); transform: scale(1.02); }
+        /* Botón de regresar simplificado para el Modal */
+        .btn-back-modal { background: transparent; border: none; color: var(--text-muted); width: 100%; padding: 12px; margin-top: 5px; cursor: pointer; text-decoration: underline; font-size: 0.95rem; transition: color 0.3s; font-weight: 500; }
+        .btn-back-modal:hover { color: var(--text-main); }
 
         .underline { position: relative; white-space: nowrap; z-index: 1; }
         .underline::after { content: ''; position: absolute; left: 0; bottom: 8%; width: 100%; height: 35%; background-color: var(--brand-orange); z-index: -1; opacity: 0.6; }
@@ -91,7 +91,7 @@
         .video-wrapper:hover { transform: rotate(0deg); }
         .video-thumbnail { width: 100%; height: 100%; object-fit: cover; opacity: 1; display: block; }
 
-        /* Estructura Base de Secciones (Marketing Copy) */
+        /* Estructura Base de Secciones */
         .section-padding { padding: clamp(60px, 8vw, 90px) 5%; }
         .section-title { font-size: clamp(2rem, 4vw, 2.5rem); color: var(--brand-blue); margin-bottom: 20px; font-weight: 800; letter-spacing: -0.5px; text-align: center; }
         .section-subtitle { text-align: center; font-size: 1.2rem; color: var(--text-muted); max-width: 800px; margin: 0 auto 50px; }
@@ -107,8 +107,19 @@
         .get-card p { font-size: 0.95rem; color: rgba(255,255,255,0.9); }
         .get-badge { position: absolute; top: 12px; right: 15px; background: var(--brand-green); color: white; font-size: 0.7rem; font-weight: bold; padding: 4px 10px; border-radius: 50px; text-transform: uppercase; z-index: 2; }
 
-        /* 3. ¿Cómo me veré? (Transformación) */
-        .how-you-look { background: var(--bg-light); }
+        /* 3. SECCIÓN DE PROBLEMA Y SOLUCIÓN (Ajuste de espaciado inferior para conectar mejor) */
+        .problem-section { background: var(--white); padding: clamp(60px, 8vw, 80px) 5% clamp(30px, 4vw, 40px); }
+        .problem-card { background: var(--bg-light); border: 1px solid #E2E8F0; border-radius: 16px; padding: clamp(20px, 5vw, 40px); margin: 0 auto; max-width: 800px; text-align: left; box-shadow: 0 15px 35px rgba(28, 61, 106, 0.05); }
+        .problem-list { list-style: none; padding: 0; margin: 0; }
+        .problem-list li { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 18px; font-size: 1.05rem; color: var(--text-muted); }
+        .problem-list li:last-child { margin-bottom: 0; }
+        .problem-icon { color: #E53E3E; font-weight: 900; font-size: 1.2rem; line-height: 1.2; flex-shrink: 0; }
+        .solution-card { background: #ECFCCB; border: 2px solid var(--brand-green); border-radius: 16px; padding: clamp(20px, 5vw, 30px); margin: 30px auto 0; max-width: 800px; box-shadow: 0 10px 25px rgba(104, 169, 62, 0.1); }
+        .solution-card h3 { color: var(--brand-green); font-size: 1.3rem; margin-bottom: 15px; font-weight: 800; }
+        .solution-flow { font-weight: 700; color: var(--brand-blue); font-size: 1.15rem; margin-bottom: 12px; line-height: 1.4; }
+
+        /* 4. ¿Cómo me veré? (Transformación) (Ajuste de espaciado para enlazar con la sección anterior) */
+        .how-you-look { background: var(--bg-light); padding: clamp(40px, 6vw, 60px) 5% clamp(50px, 8vw, 70px); }
         .feature-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: clamp(30px, 5vw, 60px); align-items: center; margin-bottom: clamp(50px, 8vw, 80px); }
         .feature-row:nth-child(even) .feature-text { order: -1; }
         .feature-text h2 { font-size: clamp(1.8rem, 4vw, 2.2rem); color: var(--brand-blue); margin-bottom: 20px; line-height: 1.2; }
@@ -120,10 +131,12 @@
         .checkout-section { background: var(--white); padding: clamp(60px, 8vw, 80px) 5% 20px; text-align: center; position: relative; }
         .checkout-box { max-width: 550px; margin: 0 auto; background: var(--white); padding: clamp(30px, 5vw, 50px); border-radius: 24px; box-shadow: 0 25px 60px rgba(28, 61, 106, 0.1); text-align: center; border-top: 6px solid var(--brand-green); width: 100%; box-sizing: border-box; position: relative; z-index: 1; border: 1px solid #E2E8F0; border-top: 6px solid var(--brand-green); }
         
-        .price-tag { text-align: center; font-size: clamp(2.5rem, 6vw, 3.5rem); font-weight: 900; color: var(--brand-blue); margin-bottom: 15px; line-height: 1; }
-        .price-tag .badge-container { margin-top: 10px; margin-bottom: 15px; }
-        .price-tag span.badge { display: inline-block; font-size: 0.85rem; background: var(--brand-orange); color: white; padding: 8px 16px; border-radius: 50px; text-transform: uppercase; letter-spacing: 1px; box-shadow: 0 4px 10px rgba(242, 156, 56, 0.3); }
-        .price-tag p.desc { font-size: clamp(1rem, 2vw, 1.1rem); color: var(--text-muted); font-weight: 500; display: block; margin-top: 15px; }
+        /* Ajuste Fino de Price Tag (Separado un poquito más como se solicitó: 12px) */
+        .price-tag { text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center; margin-bottom: 25px; }
+        .price-tag .amount { font-size: clamp(3rem, 7vw, 4rem); font-weight: 900; color: var(--brand-blue); line-height: 1; margin-bottom: 12px; }
+        .price-tag .badge-container { margin: 0; }
+        .price-tag span.badge { display: inline-block; font-size: 0.85rem; background: var(--brand-orange); color: white; padding: 6px 14px; border-radius: 50px; text-transform: uppercase; letter-spacing: 0.5px; box-shadow: 0 4px 10px rgba(242, 156, 56, 0.3); font-weight: 700; }
+        .price-tag p.desc { font-size: clamp(0.95rem, 2vw, 1.05rem); color: var(--text-muted); font-weight: 500; margin-top: 10px; }
         
         /* Forms */
         .form-group { margin-bottom: 20px; text-align: left; }
@@ -153,6 +166,7 @@
             .nav-inner { flex-direction: column; text-align: center; }
             .nav-links { width: 100%; flex-direction: column; gap: 15px; }
             .btn { width: 100%; }
+            .payment-methods { flex-direction: column; }
         }
     </style>
 </head>
@@ -200,14 +214,13 @@
             <div class="get-grid">
                 <div class="get-card">
                     <span class="get-badge">Para Siempre</span>
-                    <h4>🧠 Las 500 palabras más usadas del inglés</h4>
+                    <h4>🧠 Las 500 palabras más usadas</h4>
                     <p>Tu hijo practica y domina vocabulario real que sí se usa en conversaciones.</p>
                 </div>
                 <div class="get-card">
                     <span class="get-badge">Inteligencia</span>
-                    <h4>🗺️ Un reto físico de 30 días</h4>
-
-                    <p><strong>Un algoritmo</strong> que adapta los desafíos a las palabras que tu hijo eligió aprender ese día. Autonomía guiada que aniquila el aburrimiento.</p>
+                    <h4>🗺️ Reto físico de 30 días</h4>
+                    <p>Un algoritmo que adapta los desafíos a las palabras que tu hijo eligió aprender ese día. Autonomía guiada que aniquila el aburrimiento.</p>
                 </div>
                 <div class="get-card">
                     <span class="get-badge">Mnemotecnia</span>
@@ -217,13 +230,43 @@
                 <div class="get-card">
                     <span class="get-badge">Imprimible</span>
                     <h4>🗺️ Pasaporte de Aventurero</h4>
-                     <p><strong>Un algoritmo</strong> que adapta los desafíos a las palabras que tu hijo eligió aprender ese día. Autonomía guiada que aniquila el aburrimiento.</p>
+                     <p>Herramientas descargables para que marque sus logros físicos e interactúe contigo al final del día.</p>
                 </div>
             </div>
         </div>
     </section>
 
-    <section class="how-you-look section-padding">
+    <section class="problem-section">
+        <div class="container text-center">
+            <h2 class="section-title" style="font-size: clamp(1.8rem, 4vw, 2.2rem);">El problema no es tu hijo. Es que todos esos métodos <span class="highlight">saltaron el primer paso.</span></h2>
+            <p class="section-subtitle" style="margin-bottom: 35px; color: var(--text-main); font-weight: 600;">Sin vocabulario base, la academia frustra. La app entretiene. El colegio abandona.</p>
+            
+            <div class="problem-card">
+                <ul class="problem-list">
+                    <li>
+                        <span class="problem-icon">✕</span>
+                        <div><strong>Academias:</strong> 2 horas a la semana sin refuerzo diario &rarr; olvido garantizado.</div>
+                    </li>
+                    <li>
+                        <span class="problem-icon">✕</span>
+                        <div><strong>Apps:</strong> recompensan el clic, no el conocimiento &rarr; cero retención escrita.</div>
+                    </li>
+                    <li>
+                        <span class="problem-icon">✕</span>
+                        <div><strong>YouTube:</strong> consumo pasivo sin estructura &rarr; aprende a pedir juegos, no a hablar inglés.</div>
+                    </li>
+                </ul>
+            </div>
+            
+            <div class="solution-card text-center">
+                <h3>My World refuerza lo importante primero.</h3>
+                <p class="solution-flow">Escribe &rarr; Escucha &rarr; Interactúa &rarr; Evalúa &rarr; tú corroboras.</p>
+                <p style="color: var(--text-muted); font-size: 1.05rem;"><strong>500 palabras dominadas.</strong> La base que hace que todo lo demás funcione.</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="how-you-look">
         <div class="container">
             <h2 class="section-title">Sé el que tome la decisión <span class="highlight">inteligente 🧠</span></h2>
             <p class="section-subtitle">Ahorraste miles de soles en academias y construiste un vínculo irrompible compartiendo una aventura bilingüe.</p>
@@ -260,9 +303,9 @@
             
             <div class="checkout-box">
                 <div class="price-tag">
-                    S/14.99 
+                    <div class="amount">S/14.99</div>
                     <div class="badge-container">
-                        <span class="badge">Pago Único. Acceso de por Vida.</span>
+                        <span class="badge">Acceso de por vida</span>
                     </div>
                     <p class="desc">Aprovecha esta promoción hoy. Cero Riesgos.</p>
                 </div>
@@ -279,7 +322,7 @@
                     
                     <button type="submit" id="btn-comprar-bottom" class="btn btn-pay">
                         COMPRAR AHORA Y SER SU GUÍA
-                        <span class="btn-subtext">Transacción encriptada por Mercado Pago</span>
+                        <span class="btn-subtext">Proceso encriptado vía Mercado Pago o Yape</span>
                     </button>
                     
                     <div class="trust-badges">
@@ -299,12 +342,12 @@
     <div class="modal-overlay" id="checkoutModal">
         <div class="modal-content">
             <button class="modal-close" id="closeModal" aria-label="Cerrar">&times;</button>
-            <div class="price-tag" style="margin-bottom: 25px; font-size: clamp(2rem, 5vw, 2.5rem);">
-                S/14.99 
+            <div class="price-tag">
+                <div class="amount" style="font-size: clamp(2rem, 5vw, 2.5rem);">S/14.99</div>
                 <div class="badge-container">
                     <span class="badge">Oferta Única Vitalicia</span>
                 </div>
-                <p class="desc" style="font-size: 0.95rem; margin-top: 10px;">Aprovecha esta promoción hoy.</p>
+                <p class="desc">Aprovecha esta promoción hoy.</p>
             </div>
             <form id="payment-form">
                 <div class="form-group">
@@ -321,43 +364,32 @@
                 </button>
                 
                 <p style="text-align: center; font-size: 0.8rem; color: var(--text-muted); margin-top: 15px;">
-                    Paga 100% seguro. Encriptado por Mercado Pago.
+                    Paga 100% seguro con Mercado Pago o Yape.
                 </p>
             </form>
         </div>
     </div>
 
-    <div class="modal-overlay" id="bumpModal">
+    <div class="modal-overlay" id="paymentModal">
         <div class="modal-content" style="background: var(--white); border-top: 6px solid var(--brand-green); text-align: left;">
-            <button class="modal-close" id="closeBumpModal" aria-label="Cerrar">&times;</button>
-            <h3 style="color: var(--brand-blue); font-size: 1.4rem; font-weight: 800; margin-bottom: 10px; text-align: center;">¡Espera! Asegura la escritura 🚀</h3>
-            <p style="color: var(--text-muted); font-size: 0.95rem; margin-bottom: 20px; text-align: center;">Antes de ir al pago, añade este potenciador físico.</p>
+            <button class="modal-close" id="closePaymentModal" aria-label="Cerrar">&times;</button>
+            <h3 style="color: var(--brand-blue); font-size: 1.5rem; font-weight: 800; margin-bottom: 10px; text-align: center;">Último paso 🚀</h3>
+            <p style="color: var(--text-muted); font-size: 0.95rem; margin-bottom: 25px; text-align: center;">Elige el método que te sea más cómodo para activar el acceso.</p>
             
-            <div style="background: var(--bg-light); border: 2px dashed var(--brand-orange); border-radius: 12px; padding: 15px; margin-bottom: 20px; transition: border-color 0.3s;">
-                <label style="display: flex; align-items: flex-start; gap: 10px; cursor: pointer;">
-                    <input type="checkbox" id="bump_checkbox" style="width: 24px; height: 24px; accent-color: var(--brand-green);">
-                    <div>
-                        <span style="display: inline-block; background: var(--brand-orange); color: var(--white); padding: 4px 12px; border-radius: 50px; font-size: 0.75rem; font-weight: bold; margin-bottom: 5px; box-shadow: 0 2px 5px rgba(242, 156, 56, 0.3);">⭐️ RECOMENDADO + S/5.00</span>
-                        <h4 style="color: var(--brand-blue); font-size: 1rem; margin-bottom: 5px; font-weight: 800;">Pack de Mnemotecnias y Pasaporte (PDF)</h4>
-                        <p style="color: var(--text-muted); font-size: 0.8rem; line-height: 1.4;">Descarga 500 palabras ilustradas y el "Pasaporte de Aventurero" para que marque sus logros físicos.</p>
-                    </div>
-                </label>
-            </div>
-
-            <label style="font-size: 0.95rem; font-weight: 700; color: var(--brand-blue); display:block; margin-bottom: 8px;">Método de Pago Final</label>
-            <div class="payment-methods" style="display: flex; gap: 10px; margin-bottom: 20px;">
+            <label style="font-size: 1.05rem; font-weight: 700; color: var(--brand-blue); display:block; margin-bottom: 15px; text-align: center;">Método de Pago (S/ 14.99)</label>
+            <div class="payment-methods" style="display: flex; gap: 15px; margin-bottom: 25px;">
                 <input type="radio" name="pay_method" id="pay_card" value="card" class="pay-method-input" checked style="display:none;">
-                <label for="pay_card" class="pay-method-label">💳 Mercado Pago</label>
+                <label for="pay_card" class="pay-method-label" style="padding: 15px 10px;">💳 Mercado Pago <br><small style="font-weight: 400;">(Tarjetas / Efectivo)</small></label>
                 
                 <input type="radio" name="pay_method" id="pay_yape" value="yape" class="pay-method-input" style="display:none;">
-                <label for="pay_yape" class="pay-method-label">📱 Yape/Plin Manual</label>
+                <label for="pay_yape" class="pay-method-label" style="padding: 15px 10px;">📱 Transferencia <br><small style="font-weight: 400;">(Yape / Plin Manual)</small></label>
             </div>
             
             <button id="btn-final-pay" class="btn btn-pay" style="width: 100%; font-size: 1.2rem; padding: 18px; margin-top: 5px;">
                 IR A PAGAR AHORA
             </button>
-            <button id="btn-no-thanks" class="btn-no-thanks" type="button">
-                No, gracias. Solo quiero el acceso base.
+            <button id="btn-back-modal" class="btn-back-modal" type="button">
+                ← Regresar a cambiar mis datos
             </button>
         </div>
     </div>
@@ -382,18 +414,26 @@
 
         closeBtn.addEventListener('click', () => { modal.classList.remove('active'); });
         
-        const bumpModal = document.getElementById('bumpModal');
-        const closeBumpModal = document.getElementById('closeBumpModal');
+        // MODAL FINAL DE PAGO
+        const paymentModal = document.getElementById('paymentModal');
+        const closePaymentModal = document.getElementById('closePaymentModal');
+        const btnBackModal = document.getElementById('btn-back-modal');
+        
         let currentParentName = "";
         let currentParentPhone = "";
 
-        closeBumpModal.addEventListener('click', () => { bumpModal.classList.remove('active'); });
+        closePaymentModal.addEventListener('click', () => { paymentModal.classList.remove('active'); });
+        
+        btnBackModal.addEventListener('click', () => { 
+            paymentModal.classList.remove('active'); 
+            modal.classList.add('active'); 
+        });
 
-        function openBumpModal(parentName, parentPhone) {
+        function openPaymentModal(parentName, parentPhone) {
             currentParentName = parentName.replace(/<[^>]*>?/gm, ''); 
             currentParentPhone = parentPhone;
             modal.classList.remove('active'); 
-            bumpModal.classList.add('active'); 
+            paymentModal.classList.add('active'); 
         }
 
         const bottomBtn = document.getElementById('btn-comprar-bottom');
@@ -411,37 +451,25 @@
             e.preventDefault();
             const parentName = bottomName.value.trim();
             const parentPhone = bottomPhone.value.trim();
-            openBumpModal(parentName, parentPhone);
+            openPaymentModal(parentName, parentPhone);
         });
 
         document.getElementById('payment-form').addEventListener('submit', function (e) {
             e.preventDefault();
             const parentName = document.getElementById('parent_name').value.trim();
             const parentPhone = document.getElementById('parent_phone').value.trim();
-            openBumpModal(parentName, parentPhone);
+            openPaymentModal(parentName, parentPhone);
         });
 
         document.getElementById('btn-final-pay').addEventListener('click', function(e) {
             e.preventDefault();
             const btnElement = document.getElementById('btn-final-pay');
-            const hasBump = document.getElementById('bump_checkbox').checked;
             const payMethod = document.querySelector('input[name="pay_method"]:checked').value;
             
-            procesarPagoSeguro(currentParentName, currentParentPhone, hasBump, payMethod, btnElement);
+            procesarPagoSeguro(currentParentName, currentParentPhone, payMethod, btnElement);
         });
 
-        document.getElementById('btn-no-thanks').addEventListener('click', function(e) {
-            e.preventDefault();
-            document.getElementById('bump_checkbox').checked = false; 
-            
-            const btnElement = document.getElementById('btn-final-pay');
-            const hasBump = false; 
-            const payMethod = document.querySelector('input[name="pay_method"]:checked').value;
-            
-            procesarPagoSeguro(currentParentName, currentParentPhone, hasBump, payMethod, btnElement);
-        });
-
-        function procesarPagoSeguro(parentName, parentPhone, hasBump, payMethod, btnElement) {
+        function procesarPagoSeguro(parentName, parentPhone, payMethod, btnElement) {
             const phoneRegex = /^9\d{8}$/;
             if (!phoneRegex.test(parentPhone)) {
                 return alert("Por favor, ingresa un número de WhatsApp válido que empiece con 9 y tenga 9 dígitos.");
@@ -451,27 +479,21 @@
             btnElement.innerHTML = "Redirigiendo a pago seguro... ⏳";
             btnElement.disabled = true;
 
-            // Trigger Meta Pixel Event for Checkout Intent
             if (typeof fbq !== 'undefined') {
                 fbq('track', 'InitiateCheckout', {
-                    value: hasBump ? 19.99 : 14.99,
+                    value: 14.99,
                     currency: 'PEN'
                 });
             }
 
-            // REDIRECCIÓN INTELIGENTE SEGÚN EL MÉTODO DE PAGO Y BUMP
             if (payMethod === 'yape') {
-                // Va al checkout manual creado en esta fase
-                window.location.href = `checkout_yape.php?bump=${hasBump}&name=${encodeURIComponent(parentName)}&phone=${encodeURIComponent(parentPhone)}`;
+                window.location.href = `checkout_yape.php?bump=false&name=${encodeURIComponent(parentName)}&phone=${encodeURIComponent(parentPhone)}`;
             } else {
-                // Reemplaza estos enlaces con tus enlaces reales de Mercado Pago
-                const linkMercadoPagoNormal = "https://link.mercadopago.com.pe/PON_TU_LINK_1499_AQUI"; 
-                const linkMercadoPagoBump = "https://link.mercadopago.com.pe/PON_TU_LINK_1999_AQUI";
-                
-                window.location.href = hasBump ? linkMercadoPagoBump : linkMercadoPagoNormal;
+                // Link oficial de Mercado Pago inyectado correctamente
+                const linkMercadoPago = "https://mpago.la/1YrHdis"; 
+                window.location.href = linkMercadoPago;
             }
             
-            // Seguridad: Rehabilitar el botón después de unos segundos si el navegador bloquea el redirect
             setTimeout(() => {
                 btnElement.innerHTML = originalText;
                 btnElement.disabled = false;
