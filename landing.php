@@ -490,7 +490,7 @@
                 window.location.href = `checkout_yape.php?bump=false&name=${encodeURIComponent(parentName)}&phone=${encodeURIComponent(parentPhone)}`;
             } else {
                 // Link oficial de Mercado Pago inyectado correctamente
-                const linkMercadoPago = "https://mpago.la/1YrHdis"; 
+                const linkMercadoPago = "https://mpago.la/1eBkEeq"; 
                 window.location.href = linkMercadoPago;
             }
             
