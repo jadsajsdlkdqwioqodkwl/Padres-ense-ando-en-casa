@@ -28,7 +28,17 @@ function getUserInfo($pdo, $user_id) {
 // 🛡️ SISTEMA DE PROTECCIÓN (REDIRECCIÓN)
 // ==========================================
 $current_page = basename($_SERVER['PHP_SELF']);
-$public_pages = ['login.php', 'register.php', 'reparar_bd.php', 'process_payment.php'];
+
+// AÑADIDAS LAS NUEVAS PÁGINAS DEL EMBUDO A LA LISTA BLANCA:
+$public_pages = [
+    'login.php', 
+    'register.php', 
+    'reparar_bd.php', 
+    'process_payment.php',
+    'register_success.php',     // <- Permite entrar tras pagar en Mercado Pago
+    'admin_register_yape.php',  // <- Permite entrar al panel secreto de Yape
+    'checkout_yape.php'         // <- (Por si acaso decides conectarlo a BD en el futuro)
+];
 
 if (!isset($_SESSION['user_id']) && !in_array($current_page, $public_pages)) {
     header("Location: login.php");
