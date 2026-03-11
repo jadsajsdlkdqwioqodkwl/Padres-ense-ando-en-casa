@@ -15,8 +15,8 @@ $error = '';
 $payment_verified = false;
 
 // TOKEN DE ACCESO DE MERCADO PAGO (PRODUCCIÓN)
-// Reemplaza esto con tu Access Token real de Mercado Pago (Empieza con APP_USR-...)
-$mp_access_token = "TU_ACCESS_TOKEN_MERCADO_PAGO_AQUI";
+// Integrado con tu credencial real para validar pagos
+$mp_access_token = "APP_USR-8915347577829943-031114-80ac2226a9778466beab8a07e4419f43-3259142883";
 
 // 2. VERIFICACIÓN ANTI-FRAUDE CON LA API DE MERCADO PAGO
 if (empty($payment_id) || $status !== 'approved') {
@@ -46,8 +46,8 @@ if (empty($payment_id) || $status !== 'approved') {
                 $error = "El pago existe pero su estado actual no es 'Aprobado'.";
             }
         } else {
-            // Si no pones tu Access Token real, esto fallará por defecto protegiendo la ruta
-            $error = "No se pudo validar el pago con el banco. Contacta a soporte.";
+            // Si el Access Token falla o hay error de red
+            $error = "No se pudo validar el pago con el banco. Intenta recargar la página.";
         }
     }
 }
