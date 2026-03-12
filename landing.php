@@ -26,8 +26,8 @@
     s.parentNode.insertBefore(t,s)}(window, document,'script',
     'https://connect.facebook.net/en_US/fbevents.js');
     
-fbq('init', '1602561284224693');
-fbq('track', 'PageView', {}, {test_event_code: 'TEST42184'});
+    fbq('init', '1602561284224693'); 
+    fbq('track', 'PageView');
     
     // EVENTO: ViewContent al cargar la landing
     fbq('track', 'ViewContent', {
@@ -152,6 +152,7 @@ fbq('track', 'PageView', {}, {test_event_code: 'TEST42184'});
 
         .pay-method-label { flex: 1; text-align: center; border: 2px solid #CBD5E1; border-radius: 10px; padding: 12px 5px; cursor: pointer; font-weight: 700; color: var(--text-muted); transition: all 0.2s; background: #F8FAFC; font-size: 0.95rem; }
         .pay-method-label:hover { border-color: var(--brand-blue); }
+        /* EFECTO VISUAL AL SELECCIONAR UN MÉTODO */
         .pay-method-input:checked + .pay-method-label { border-color: var(--brand-green) !important; background: rgba(104, 169, 62, 0.05) !important; color: var(--brand-green) !important; box-shadow: 0 0 0 2px rgba(104, 169, 62, 0.2); }
 
         @media (max-width: 480px) {
@@ -447,18 +448,25 @@ fbq('track', 'PageView', {}, {test_event_code: 'TEST42184'});
             modal.classList.remove('active'); 
             paymentModal.classList.add('active'); 
             
-            // ==========================================
-            // EVENTO ADD TO CART (Corregido)
-            // Se dispara con fiabilidad cuando el usuario avanza al modal de pago.
-            // ==========================================
-            if (typeof fbq !== 'undefined') {
-                fbq('track', 'AddToCart', {
-                    value: 14.99,
-                    currency: 'PEN',
-                    content_name: 'Acceso Vitalicio - Datos Ingresados'
-                });
-            }
+            // Opcional: Deseleccionar los radio buttons cada vez que se abre el modal
+            document.querySelectorAll('.pay-method-input').forEach(input => input.checked = false);
         }
+
+        // ==========================================
+        // LÓGICA: INITIATE CHECKOUT AL SELECCIONAR MÉTODO (AL HACER CLIC)
+        // ==========================================
+        const payMethodInputs = document.querySelectorAll('.pay-method-input');
+        payMethodInputs.forEach(input => {
+            input.addEventListener('change', function(e) {
+                if (typeof fbq !== 'undefined') {
+                    fbq('track', 'InitiateCheckout', {
+                        value: 14.99,
+                        currency: 'PEN',
+                        content_name: 'Seleccionó Método: ' + (e.target.value === 'yape' ? 'Yape Directo' : 'Tarjeta/Yape Código')
+                    });
+                }
+            });
+        });
 
         const bottomBtn = document.getElementById('btn-comprar-bottom');
         const bottomName = document.getElementById('bottom_parent_name');
@@ -486,17 +494,16 @@ fbq('track', 'PageView', {}, {test_event_code: 'TEST42184'});
         });
 
         // ==========================================
-        // VALIDACIÓN DEL BOTÓN DE PAGO FINAL
+        // VALIDACIÓN DEL BOTÓN DE PAGO FINAL + RETRASO DE 500ms
         // ==========================================
         document.getElementById('btn-final-pay').addEventListener('click', function(e) {
             e.preventDefault();
             
-            // Verificamos si el usuario ha seleccionado alguna opción
+            // Bloqueo: Si no hay nada seleccionado, alerta y no avanza.
             const selectedOption = document.querySelector('input[name="pay_method"]:checked');
-            
             if (!selectedOption) {
-                alert("Por favor, selecciona Tarjeta o Yape para continuar con el pago.");
-                return; // Detiene la ejecución si no hay nada seleccionado
+                alert("Por favor, selecciona 'Tarjeta' o 'Yape' para continuar con el pago.");
+                return; 
             }
             
             const btnElement = document.getElementById('btn-final-pay');
@@ -514,18 +521,6 @@ fbq('track', 'PageView', {}, {test_event_code: 'TEST42184'});
             const originalText = btnElement.innerHTML;
             btnElement.innerHTML = "Redirigiendo a pago seguro... ⏳";
             btnElement.disabled = true;
-
-            // ==========================================
-            // EVENTO INITIATE CHECKOUT (Corregido)
-            // Se dispara justo al hacer clic para ir a pagar.
-            // ==========================================
-            if (typeof fbq !== 'undefined') {
-                fbq('track', 'InitiateCheckout', {
-                    value: 14.99,
-                    currency: 'PEN',
-                    content_name: payMethod === 'yape' ? 'Checkout Yape Directo' : 'Checkout Mercado Pago'
-                });
-            }
 
             if (payMethod === 'yape') {
                 if (typeof fbq !== 'undefined') {
