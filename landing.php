@@ -447,26 +447,18 @@
             modal.classList.remove('active'); 
             paymentModal.classList.add('active'); 
             
-            // Si quieres reiniciar las opciones al abrir el modal, descomenta la siguiente línea:
-            // document.querySelectorAll('.pay-method-input').forEach(input => input.checked = false);
+            // ==========================================
+            // EVENTO ADD TO CART (Corregido)
+            // Se dispara con fiabilidad cuando el usuario avanza al modal de pago.
+            // ==========================================
+            if (typeof fbq !== 'undefined') {
+                fbq('track', 'AddToCart', {
+                    value: 14.99,
+                    currency: 'PEN',
+                    content_name: 'Acceso Vitalicio - Datos Ingresados'
+                });
+            }
         }
-
-        // ==========================================
-        // LÓGICA: INITIATE CHECKOUT AL SELECCIONAR MÉTODO
-        // ==========================================
-        const payMethodInputs = document.querySelectorAll('.pay-method-input');
-        payMethodInputs.forEach(input => {
-            input.addEventListener('change', function(e) {
-                // AQUÍ OCURRE LA MAGIA. AHORA SÍ SE DISPARARÁ AL HACER CLIC.
-                if (typeof fbq !== 'undefined') {
-                    fbq('track', 'InitiateCheckout', {
-                        value: 14.99,
-                        currency: 'PEN',
-                        content_name: 'Seleccionó Método: ' + (e.target.value === 'yape' ? 'Yape Directo' : 'Tarjeta/Yape Código')
-                    });
-                }
-            });
-        });
 
         const bottomBtn = document.getElementById('btn-comprar-bottom');
         const bottomName = document.getElementById('bottom_parent_name');
@@ -522,6 +514,18 @@
             const originalText = btnElement.innerHTML;
             btnElement.innerHTML = "Redirigiendo a pago seguro... ⏳";
             btnElement.disabled = true;
+
+            // ==========================================
+            // EVENTO INITIATE CHECKOUT (Corregido)
+            // Se dispara justo al hacer clic para ir a pagar.
+            // ==========================================
+            if (typeof fbq !== 'undefined') {
+                fbq('track', 'InitiateCheckout', {
+                    value: 14.99,
+                    currency: 'PEN',
+                    content_name: payMethod === 'yape' ? 'Checkout Yape Directo' : 'Checkout Mercado Pago'
+                });
+            }
 
             if (payMethod === 'yape') {
                 if (typeof fbq !== 'undefined') {
