@@ -14,7 +14,7 @@
     <link rel="dns-prefetch" href="https://connect.facebook.net">
     <link rel="preload" as="image" href="assets/hero-app.webp" fetchpriority="high">
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/twemoji/14.0.2/twemoji.min.js" defer></script>
+    <script src="https://unpkg.com/twemoji@14.0.2/dist/twemoji.min.js" crossorigin="anonymous" defer></script>
 
     <script>
     !function(f,b,e,v,n,t,s)
@@ -26,11 +26,10 @@
     s.parentNode.insertBefore(t,s)}(window, document,'script',
     'https://connect.facebook.net/en_US/fbevents.js');
     
-    // REEMPLAZA 'TU_PIXEL_ID' CON EL ID REAL DE TU PÍXEL
     fbq('init', '1602561284224693'); 
     fbq('track', 'PageView');
     
-    // EVENTO: ViewContent (Píxel) - Se dispara al cargar la landing.php
+    // EVENTO: ViewContent al cargar la landing
     fbq('track', 'ViewContent', {
         content_name: 'My World - Acceso Vitalicio',
         content_category: 'Educación',
@@ -38,7 +37,7 @@
         currency: 'PEN'
     });
     </script>
-    <noscript><img height="1" width="1" style="display:none" src="https://www.facebook.com/tr?id=TU_PIXEL_ID&ev=PageView&noscript=1"/></noscript>
+    <noscript><img height="1" width="1" style="display:none" src="https://www.facebook.com/tr?id=1602561284224693&ev=PageView&noscript=1"/></noscript>
     <style>
         :root {
             --brand-blue: #1C3D6A;   
@@ -53,30 +52,27 @@
             --wave-color: #E8EEF2; 
         }
 
-        /* Reset & Tipografía Fluida */
         * { box-sizing: border-box; margin: 0; padding: 0; }
         html, body { overflow-x: hidden; width: 100%; scroll-behavior: smooth; }
         body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; color: var(--text-main); line-height: 1.6; background-color: var(--white); position: relative; }
         img { max-width: 100%; height: auto; display: block; }
         a { text-decoration: none; }
+        
+        /* Ciberseguridad UI: Evitar clicks fantasma en los SVGs de Twemoji */
         img.emoji { height: 1.2em; width: 1.2em; margin: 0 .05em 0 .1em; vertical-align: -0.1em; display: inline-block; pointer-events: none; }
 
-        /* Clases Globales Responsivas */
         .container { max-width: 1200px; margin: 0 auto; padding: 0 5%; width: 100%; box-sizing: border-box;}
         .grid-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 30px; }
         .flex-container { display: flex; flex-wrap: wrap; gap: 20px; align-items: center; }
         .text-center { text-align: center; }
         
-        /* Header Principal Simétrico */
         .main-header { display: flex; justify-content: center; align-items: center; padding: 20px 5%; background-color: var(--white); box-shadow: 0 4px 15px rgba(28, 61, 106, 0.05); position: relative; z-index: 10; width: 100%; }
         .main-header img { height: clamp(45px, 6vw, 65px); width: auto; max-width: 100%; }
 
-        /* Botones Persuasivos */
         .btn { display: inline-flex; flex-direction: column; align-items: center; justify-content: center; background: var(--brand-green); color: var(--white); font-weight: 800; padding: clamp(14px, 2vw, 18px) clamp(24px, 4vw, 36px); border-radius: 50px; text-align: center; transition: all 0.3s ease; border: none; cursor: pointer; font-size: clamp(1rem, 2vw, 1.15rem); box-shadow: 0 4px 14px rgba(104, 169, 62, 0.4); word-wrap: break-word; max-width: 100%; box-sizing: border-box; text-transform: uppercase; letter-spacing: 0.5px; }
         .btn:hover { background: #579232; transform: translateY(-3px); box-shadow: 0 8px 25px rgba(104, 169, 62, 0.5); }
         .btn-subtext { display: block; font-size: 0.75rem; font-weight: 500; text-transform: none; margin-top: 5px; opacity: 0.9; letter-spacing: 0; }
         
-        /* Botón de regresar simplificado para el Modal */
         .btn-back-modal { background: transparent; border: none; color: var(--text-muted); width: 100%; padding: 12px; margin-top: 5px; cursor: pointer; text-decoration: underline; font-size: 0.95rem; transition: color 0.3s; font-weight: 500; }
         .btn-back-modal:hover { color: var(--text-main); }
 
@@ -84,28 +80,23 @@
         .underline::after { content: ''; position: absolute; left: 0; bottom: 8%; width: 100%; height: 35%; background-color: var(--brand-orange); z-index: -1; opacity: 0.6; }
         .highlight { color: var(--brand-orange); }
 
-        /* Componentes Escalables: Sistema de Olas (Waves) */
         .wave-container-top { position: absolute; top: 0; left: 0; width: 100%; height: clamp(150px, 25vw, 350px); overflow: hidden; z-index: 0; pointer-events: none; }
         .wave-container-top svg { width: 100%; height: 100%; display: block; }
         .wave-container-bottom { width: 100%; overflow: hidden; line-height: 0; margin-top: -5px; background: var(--white); pointer-events: none; }
         .wave-container-bottom svg { width: 100%; height: auto; display: block; }
 
-        /* Hero Section Persuasivo */
         .hero { position: relative; background: var(--white); padding: clamp(60px, 12vw, 100px) 0 clamp(60px, 10vw, 100px); overflow: hidden; }
         .hero-text h1 { font-size: clamp(2.2rem, 5vw, 3.8rem); font-weight: 800; line-height: 1.1; color: var(--brand-blue); margin-bottom: 25px; letter-spacing: -1px; }
         .hero-text p { font-size: clamp(1.1rem, 2.5vw, 1.3rem); color: var(--text-muted); margin-bottom: 20px; font-weight: 500; }
         
-        /* Video Facade UI */
         .video-wrapper { position: relative; width: 100%; max-width: 600px; margin: 0 auto; border-radius: 20px; overflow: hidden; box-shadow: 0 25px 50px rgba(28, 61, 106, 0.2); background: #000; border: 4px solid var(--white); transform: rotate(1deg); transition: transform 0.4s; aspect-ratio: 16/9; z-index: 2; }
         .video-wrapper:hover { transform: rotate(0deg); }
         .video-thumbnail { width: 100%; height: 100%; object-fit: cover; opacity: 1; display: block; }
 
-        /* Estructura Base de Secciones */
         .section-padding { padding: clamp(60px, 8vw, 90px) 5%; }
         .section-title { font-size: clamp(2rem, 4vw, 2.5rem); color: var(--brand-blue); margin-bottom: 20px; font-weight: 800; letter-spacing: -0.5px; text-align: center; }
         .section-subtitle { text-align: center; font-size: 1.2rem; color: var(--text-muted); max-width: 800px; margin: 0 auto 50px; }
 
-        /* 2. ¿Qué voy a obtener? */
         .what-you-get { background: var(--brand-blue); color: var(--white); }
         .what-you-get .section-title { color: var(--white); }
         .what-you-get .section-subtitle { color: rgba(255,255,255,0.8); }
@@ -116,7 +107,6 @@
         .get-card p { font-size: 0.95rem; color: rgba(255,255,255,0.9); }
         .get-badge { position: absolute; top: 12px; right: 15px; background: var(--brand-green); color: white; font-size: 0.7rem; font-weight: bold; padding: 4px 10px; border-radius: 50px; text-transform: uppercase; z-index: 2; }
 
-        /* 3. SECCIÓN DE PROBLEMA Y SOLUCIÓN */
         .problem-section { background: var(--white); padding: clamp(60px, 8vw, 80px) 5% clamp(30px, 4vw, 40px); }
         .problem-card { background: var(--bg-light); border: 1px solid #E2E8F0; border-radius: 16px; padding: clamp(20px, 5vw, 40px); margin: 0 auto; max-width: 800px; text-align: left; box-shadow: 0 15px 35px rgba(28, 61, 106, 0.05); }
         .problem-list { list-style: none; padding: 0; margin: 0; }
@@ -127,7 +117,6 @@
         .solution-card h3 { color: var(--brand-green); font-size: 1.3rem; margin-bottom: 15px; font-weight: 800; }
         .solution-flow { font-weight: 700; color: var(--brand-blue); font-size: 1.15rem; margin-bottom: 12px; line-height: 1.4; }
 
-        /* 4. ¿Cómo me veré? */
         .how-you-look { background: var(--bg-light); padding: clamp(40px, 6vw, 60px) 5% clamp(50px, 8vw, 70px); }
         .feature-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: clamp(30px, 5vw, 60px); align-items: center; margin-bottom: clamp(50px, 8vw, 80px); }
         .feature-row:nth-child(even) .feature-text { order: -1; }
@@ -136,37 +125,31 @@
         .feature-image img { border-radius: 16px; box-shadow: 0 20px 40px rgba(28, 61, 106, 0.12); width: 100%; border: 1px solid #E2E8F0; }
         .diploma-badge { display: inline-flex; align-items: center; gap: 10px; background: #FEF3C7; color: #D97706; padding: 10px 20px; border-radius: 50px; font-weight: 700; font-size: 0.95rem; margin-top: 10px; }
 
-        /* Checkout Centralizado */
         .checkout-section { background: var(--white); padding: clamp(60px, 8vw, 80px) 5% 20px; text-align: center; position: relative; }
         .checkout-box { max-width: 550px; margin: 0 auto; background: var(--white); padding: clamp(30px, 5vw, 50px); border-radius: 24px; box-shadow: 0 25px 60px rgba(28, 61, 106, 0.1); text-align: center; border-top: 6px solid var(--brand-green); width: 100%; box-sizing: border-box; position: relative; z-index: 1; border: 1px solid #E2E8F0; border-top: 6px solid var(--brand-green); }
         
-        /* Ajuste Fino de Price Tag */
         .price-tag { text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center; margin-bottom: 25px; }
         .price-tag .amount { font-size: clamp(3rem, 7vw, 4rem); font-weight: 900; color: var(--brand-blue); line-height: 1; margin-bottom: 12px; }
         .price-tag .badge-container { margin: 0; }
         .price-tag span.badge { display: inline-block; font-size: 0.85rem; background: var(--brand-orange); color: white; padding: 6px 14px; border-radius: 50px; text-transform: uppercase; letter-spacing: 0.5px; box-shadow: 0 4px 10px rgba(242, 156, 56, 0.3); font-weight: 700; }
         .price-tag p.desc { font-size: clamp(0.95rem, 2vw, 1.05rem); color: var(--text-muted); font-weight: 500; margin-top: 10px; }
         
-        /* Forms */
         .form-group { margin-bottom: 20px; text-align: left; }
         .form-group label { display: block; font-size: 0.95rem; font-weight: 700; margin-bottom: 8px; color: var(--brand-blue); }
         .form-control { width: 100%; padding: 16px; border: 2px solid #CBD5E1; border-radius: 12px; font-size: 16px; transition: all 0.3s; box-sizing: border-box; max-width: 100%; background: #F8FAFC; }
         .form-control:focus { border-color: var(--brand-blue); outline: none; box-shadow: 0 0 0 4px rgba(28, 61, 106, 0.1); background: var(--white); }
         .btn-pay { width: 100%; font-size: 1.2rem; padding: 18px; margin-top: 15px; box-shadow: 0 10px 25px rgba(104, 169, 62, 0.3); }
         
-        /* Modales Fluidos */
         .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.8); z-index: 1000; justify-content: center; align-items: center; padding: 15px; opacity: 0; transition: opacity 0.3s ease; overflow-y: auto; backdrop-filter: blur(5px); box-sizing: border-box; }
         .modal-overlay.active { display: flex; opacity: 1; }
         .modal-content { background: var(--white); width: 100%; max-width: 500px; padding: clamp(25px, 5vw, 40px); border-radius: 20px; position: relative; box-shadow: 0 25px 50px rgba(0,0,0,0.3); border-top: 6px solid var(--brand-green); margin: auto; box-sizing: border-box; }
         .modal-close { position: absolute; top: 15px; right: 20px; font-size: 2.5rem; color: #94A3B8; cursor: pointer; border: none; background: none; line-height: 1; transition: color 0.2s; }
         .modal-close:hover { color: var(--text-main); }
 
-        /* Trust Badges */
         .trust-badges { display: flex; justify-content: center; gap: 20px; margin-top: 25px; opacity: 0.7; }
         .trust-badges img { height: 25px; filter: grayscale(100%); transition: filter 0.3s; }
         .trust-badges img:hover { filter: grayscale(0%); }
 
-        /* Estilos Añadidos: Yape/Tarjeta en el Modal Pre-Redirect */
         .pay-method-label { flex: 1; text-align: center; border: 2px solid #CBD5E1; border-radius: 10px; padding: 12px 5px; cursor: pointer; font-weight: 700; color: var(--text-muted); transition: all 0.2s; background: #F8FAFC; font-size: 0.95rem; }
         .pay-method-label:hover { border-color: var(--brand-blue); }
         .pay-method-input:checked + .pay-method-label { border-color: var(--brand-green) !important; background: rgba(104, 169, 62, 0.05) !important; color: var(--brand-green) !important; box-shadow: 0 0 0 2px rgba(104, 169, 62, 0.2); }
@@ -197,7 +180,7 @@
         <div class="container grid-container" style="align-items: center; position: relative; z-index: 1;">
             <div class="hero-text text-center" style="text-align: left;">
                 <h1><span class="highlight">El orgullo de ser el</span> Padre Héroe 🦸‍♂️</h1>
-                <p>En 15 minutos al día, My World convierte el tiempo de tablet en aprendizaje que puedes ver: <strong>te muestra un diploma</strong> con las palabras que dominó cada día para que las evalúes. Sin estrés.</p>
+                <p>En 15 minutos al día, My World convierte el tiempo de tablet en aprendizaje que puedes auditar: <strong>te muestra un diploma</strong> con las palabras que dominó cada día para que las evalúes. Sin estrés.</p>
                 
                 <div style="margin-top: 35px;">
                     <button class="btn trigger-modal">
@@ -247,7 +230,7 @@
 
     <section class="problem-section">
         <div class="container text-center">
-            <h2 class="section-title" style="font-size: clamp(1.8rem, 4vw, 2.2rem);">El problema no es tu hijo. <span class="highlight">Son todos esos métodos: </span></h2>
+            <h2 class="section-title" style="font-size: clamp(1.8rem, 4vw, 2.2rem);">El problema no es tu hijo. Es que todos esos métodos <span class="highlight">saltaron el primer paso.</span></h2>
             <p class="section-subtitle" style="margin-bottom: 35px; color: var(--text-main); font-weight: 600;">Sin vocabulario base, la academia frustra. La app entretiene. El colegio abandona.</p>
             
             <div class="problem-card">
@@ -258,7 +241,7 @@
                     </li>
                     <li>
                         <span class="problem-icon">✕</span>
-                        <div><strong>Apps:</strong> recompensan el clic, no el conocimiento &rarr; cero escritura.</div>
+                        <div><strong>Apps:</strong> recompensan el clic, no el conocimiento &rarr; cero retención escrita.</div>
                     </li>
                     <li>
                         <span class="problem-icon">✕</span>
@@ -387,11 +370,18 @@
             
             <label style="font-size: 1.05rem; font-weight: 700; color: var(--brand-blue); display:block; margin-bottom: 15px; text-align: center;">Método de Pago (S/ 14.99)</label>
             <div class="payment-methods" style="display: flex; gap: 15px; margin-bottom: 25px;">
+                
                 <input type="radio" name="pay_method" id="pay_card" value="card" class="pay-method-input" checked style="display:none;">
-                <label for="pay_card" class="pay-method-label" style="padding: 15px 10px;">💳 Mercado Pago <br><small style="font-weight: 400;">(Tarjetas / Efectivo)</small></label>
+                <label for="pay_card" class="pay-method-label" style="padding: 15px 10px;">
+                    💳 Tarjeta / Yape <br>
+                    <small style="font-weight: 400;">(Con código de aprobación)</small>
+                </label>
                 
                 <input type="radio" name="pay_method" id="pay_yape" value="yape" class="pay-method-input" style="display:none;">
-                <label for="pay_yape" class="pay-method-label" style="padding: 15px 10px;">📱 Transferencia <br><small style="font-weight: 400;">(Yape / Plin Manual)</small></label>
+                <label for="pay_yape" class="pay-method-label" style="padding: 15px 10px;">
+                    📱 Yape / Plin <br>
+                    <small style="font-weight: 400;">(Directo al número)</small>
+                </label>
             </div>
             
             <button id="btn-final-pay" class="btn btn-pay" style="width: 100%; font-size: 1.2rem; padding: 18px; margin-top: 5px;">
@@ -404,10 +394,24 @@
     </div>
 
     <script>
+        // ==========================================
+        // REGLA DE ORO: Twemoji Carga Segura con Fallback y CDN JSDelivr
+        // ==========================================
         document.addEventListener("DOMContentLoaded", function() {
-            if (typeof twemoji !== 'undefined') {
-                twemoji.parse(document.body, { folder: 'svg', ext: '.svg' });
-            }
+            const loadEmojis = () => {
+                if (typeof twemoji !== 'undefined') {
+                    twemoji.parse(document.body, { 
+                        // Apuntamos explícitamente a un repositorio que no esté caído
+                        base: 'https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/',
+                        folder: 'svg', 
+                        ext: '.svg' 
+                    });
+                } else {
+                    console.warn("Twemoji cargando. Reintentando en 500ms...");
+                    setTimeout(loadEmojis, 500);
+                }
+            };
+            loadEmojis();
         });
 
         const modal = document.getElementById('checkoutModal');
@@ -443,16 +447,23 @@
             currentParentPhone = parentPhone;
             modal.classList.remove('active'); 
             paymentModal.classList.add('active'); 
-            
-            // EVENTO: InitiateCheckout (Píxel) - Se dispara cuando abren el modal para elegir método de pago
-            if (typeof fbq !== 'undefined') {
-                fbq('track', 'InitiateCheckout', {
-                    value: 14.99,
-                    currency: 'PEN',
-                    content_name: 'Elegir Método de Pago'
-                });
-            }
         }
+
+        // ==========================================
+        // LÓGICA: INITIATE CHECKOUT AL SELECCIONAR MÉTODO
+        // ==========================================
+        const payMethodInputs = document.querySelectorAll('.pay-method-input');
+        payMethodInputs.forEach(input => {
+            input.addEventListener('change', function(e) {
+                if (typeof fbq !== 'undefined') {
+                    fbq('track', 'InitiateCheckout', {
+                        value: 14.99,
+                        currency: 'PEN',
+                        content_name: 'Seleccionó Método: ' + (e.target.value === 'yape' ? 'Yape Directo' : 'Tarjeta/Yape Código')
+                    });
+                }
+            });
+        });
 
         const bottomBtn = document.getElementById('btn-comprar-bottom');
         const bottomName = document.getElementById('bottom_parent_name');
@@ -498,19 +509,24 @@
             btnElement.disabled = true;
 
             if (payMethod === 'yape') {
-                // EVENTO: Contact (Píxel) - Se dispara al ser redirigidos por Yape/WhatsApp
                 if (typeof fbq !== 'undefined') {
                     fbq('track', 'Contact', {
-                        content_name: 'Contacto por Yape',
+                        content_name: 'Contacto por Yape Directo',
                         value: 14.99,
                         currency: 'PEN'
                     });
                 }
-                window.location.href = `checkout_yape.php?bump=false&name=${encodeURIComponent(parentName)}&phone=${encodeURIComponent(parentPhone)}`;
+                
+                // Mantenemos los 500ms de seguridad para que el evento Contact se envíe a Meta
+                setTimeout(() => {
+                    window.location.href = `checkout_yape.php?bump=false&name=${encodeURIComponent(parentName)}&phone=${encodeURIComponent(parentPhone)}`;
+                }, 500);
+                
             } else {
-                // Link oficial de Mercado Pago inyectado correctamente
-                const linkMercadoPago = "https://mpago.la/1eBkEeq"; 
-                window.location.href = linkMercadoPago;
+                setTimeout(() => {
+                    const linkMercadoPago = "https://mpago.la/1eBkEeq"; 
+                    window.location.href = linkMercadoPago;
+                }, 500);
             }
             
             setTimeout(() => {

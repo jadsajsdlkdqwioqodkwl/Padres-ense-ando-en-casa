@@ -6,6 +6,8 @@ $parent_phone = isset($_GET['phone']) ? htmlspecialchars($_GET['phone']) : '';
 
 $monto = $bump ? "19.99" : "14.99";
 $plan_texto = $bump ? "Plan Completo + Pack de Escritura" : "Plan Básico (Acceso a la App)";
+
+// Mantenemos tu número de WhatsApp para el envío de la captura
 $whatsapp_number = "51928529656"; 
 
 // Generación de Mensaje prellenado para WhatsApp
@@ -30,26 +32,54 @@ $link_whatsapp = "https://wa.me/{$whatsapp_number}?text={$mensaje_ws}";
             --brand-orange: #F29C38; 
             --bg-light: #F8FAFC;     
             --text-main: #333333;
+            --yape-color: #7B2CBF;
         }
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
         body { background: var(--bg-light); color: var(--text-main); display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 20px; }
-        .checkout-box { background: white; max-width: 500px; width: 100%; border-radius: 20px; box-shadow: 0 25px 50px rgba(28, 61, 106, 0.1); padding: 40px 30px; text-align: center; border-top: 6px solid #7B2CBF; /* Color Yape */ }
+        .checkout-box { background: white; max-width: 500px; width: 100%; border-radius: 20px; box-shadow: 0 25px 50px rgba(28, 61, 106, 0.1); padding: 40px 30px; text-align: center; border-top: 6px solid var(--yape-color); }
         
         .checkout-box h1 { color: var(--brand-blue); font-size: 1.8rem; margin-bottom: 10px; }
         .checkout-box p.subtitle { color: #64748B; margin-bottom: 30px; font-size: 1.1rem; }
         
-        .price-display { font-size: 3rem; font-weight: 800; color: #7B2CBF; margin: 20px 0; }
+        .price-display { font-size: 3rem; font-weight: 800; color: var(--yape-color); margin: 20px 0; }
         .plan-badge { display: inline-block; background: #F3E8FF; color: #6B21A8; padding: 6px 15px; border-radius: 50px; font-weight: 700; font-size: 0.9rem; margin-bottom: 20px; }
         
         .instructions-list { text-align: left; background: #F8FAFC; padding: 20px; border-radius: 12px; border: 1px solid #E2E8F0; margin-bottom: 30px; }
-        .instructions-list p { margin-bottom: 12px; font-size: 1.05rem; display: flex; align-items: flex-start; gap: 10px; }
+        .instructions-list p { margin-bottom: 15px; font-size: 1.05rem; display: flex; align-items: flex-start; gap: 10px; line-height: 1.5; }
         .instructions-list p:last-child { margin-bottom: 0; }
         .step-num { background: var(--brand-blue); color: white; width: 24px; height: 24px; display: inline-flex; justify-content: center; align-items: center; border-radius: 50%; font-size: 0.8rem; font-weight: bold; flex-shrink: 0; margin-top: 3px; }
+        
+        /* Estilos del Botón de Copiar (Copy to Clipboard) */
+        .copy-wrapper { display: flex; flex-direction: column; align-items: flex-start; gap: 5px; margin-top: 5px; width: 100%; }
+        .btn-copy { 
+            display: inline-flex; 
+            align-items: center; 
+            gap: 8px; 
+            background: #F3E8FF; 
+            color: var(--yape-color); 
+            border: 2px dashed #D8B4FE; 
+            padding: 8px 16px; 
+            border-radius: 10px; 
+            font-size: 1.15rem; 
+            font-weight: 800; 
+            cursor: pointer; 
+            transition: all 0.2s;
+            width: fit-content;
+        }
+        .btn-copy:hover { background: #E9D5FF; border-color: var(--yape-color); transform: translateY(-2px); box-shadow: 0 4px 10px rgba(123, 44, 191, 0.15); }
+        .btn-copy:active { transform: translateY(0); }
+        .btn-copy svg { width: 18px; height: 18px; fill: currentColor; }
+        .copy-feedback { font-size: 0.85rem; color: #10B981; font-weight: 700; opacity: 0; transition: opacity 0.3s; margin-left: 5px; }
         
         .btn-whatsapp { display: flex; align-items: center; justify-content: center; gap: 10px; background: #25D366; color: white; padding: 18px 25px; border-radius: 50px; text-decoration: none; font-weight: 800; font-size: 1.2rem; transition: 0.3s; box-shadow: 0 10px 25px rgba(37, 211, 102, 0.3); }
         .btn-whatsapp:hover { background: #128C7E; transform: translateY(-3px); box-shadow: 0 12px 30px rgba(37, 211, 102, 0.4); }
         
         .security-note { font-size: 0.85rem; color: #94A3B8; margin-top: 20px; display: flex; justify-content: center; align-items: center; gap: 5px; }
+
+        @media (max-width: 480px) {
+            .btn-copy { width: 100%; justify-content: center; } /* Botón ancho en móviles para no fallar el click */
+            .copy-wrapper { align-items: stretch; }
+        }
     </style>
 </head>
 <body>
@@ -67,7 +97,19 @@ $link_whatsapp = "https://wa.me/{$whatsapp_number}?text={$mensaje_ws}";
         <div class="instructions-list">
             <p>
                 <span class="step-num">1</span> 
-                <span>Abre tu app de Yape o Plin y transfiere <strong>S/ <?php echo $monto; ?></strong> al número <strong>928 529 656</strong> (Moises O.).</span>
+                <span style="width: 100%;">
+                    Abre tu app de Yape o Plin y transfiere <strong>S/ <?php echo $monto; ?></strong> a este número:
+                    <div class="copy-wrapper">
+                        <button type="button" class="btn-copy" id="copyBtn" onclick="copyYapeNumber('927633099')" aria-label="Copiar número de Yape">
+                            927 633 099
+                            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M16 1H4C2.9 1 2 1.9 2 3V17H4V3H16V1ZM19 5H8C6.9 5 6 5.9 6 7V21C6 22.1 6.9 23 8 23H19C20.1 23 21 22.1 21 21V7C21 5.9 20.1 5 19 5ZM19 21H8V7H19V21Z"/>
+                            </svg>
+                        </button>
+                        <span id="copyFeedback" class="copy-feedback">¡Número copiado! ✅</span>
+                    </div>
+                    <small style="color: #64748B; display: block; margin-top: 5px;">(A nombre de Moises O.)</small>
+                </span>
             </p>
             <p>
                 <span class="step-num">2</span> 
@@ -75,7 +117,7 @@ $link_whatsapp = "https://wa.me/{$whatsapp_number}?text={$mensaje_ws}";
             </p>
             <p>
                 <span class="step-num">3</span> 
-                <span>Haz clic en el botón verde de abajo para enviarnos la captura y generarte tu link de creación de cuenta de inmediato.</span>
+                <span>Haz clic en el botón verde de abajo para enviarnos la captura y generarte tu link de acceso de inmediato.</span>
             </p>
         </div>
 
@@ -91,5 +133,32 @@ $link_whatsapp = "https://wa.me/{$whatsapp_number}?text={$mensaje_ws}";
         </div>
     </div>
 
+    <script>
+        function copyYapeNumber(number) {
+            // API del Portapapeles (Segura y moderna)
+            navigator.clipboard.writeText(number).then(() => {
+                const feedback = document.getElementById('copyFeedback');
+                const btn = document.getElementById('copyBtn');
+                
+                // Mostrar feedback visual
+                feedback.style.opacity = '1';
+                btn.style.backgroundColor = '#D1FAE5'; // Verde éxito
+                btn.style.borderColor = '#34D399';
+                btn.style.color = '#065F46';
+                
+                // Ocultar feedback después de 2.5 segundos
+                setTimeout(() => {
+                    feedback.style.opacity = '0';
+                    btn.style.backgroundColor = ''; 
+                    btn.style.borderColor = '';
+                    btn.style.color = '';
+                }, 2500);
+            }).catch(err => {
+                console.error('Error al copiar al portapapeles: ', err);
+                // Fallback amigable si el navegador del usuario bloquea el portapapeles
+                alert(`Por favor, copia este número manualmente: ${number}`);
+            });
+        }
+    </script>
 </body>
 </html>
