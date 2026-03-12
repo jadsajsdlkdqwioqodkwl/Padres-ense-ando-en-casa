@@ -27,7 +27,7 @@
     'https://connect.facebook.net/en_US/fbevents.js');
     
 fbq('init', '1602561284224693');
-fbq('track', 'PageView', {}, {test_event_code: 'TEST98765'});
+fbq('track', 'PageView', {}, {test_event_code: 'TEST42184'});
     
     // EVENTO: ViewContent al cargar la landing
     fbq('track', 'ViewContent', {
