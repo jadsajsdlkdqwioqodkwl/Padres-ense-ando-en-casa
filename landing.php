@@ -371,7 +371,7 @@
             <label style="font-size: 1.05rem; font-weight: 700; color: var(--brand-blue); display:block; margin-bottom: 15px; text-align: center;">Método de Pago (S/ 14.99)</label>
             <div class="payment-methods" style="display: flex; gap: 15px; margin-bottom: 25px;">
                 
-                <input type="radio" name="pay_method" id="pay_card" value="card" class="pay-method-input" checked style="display:none;">
+                <input type="radio" name="pay_method" id="pay_card" value="card" class="pay-method-input" style="display:none;">
                 <label for="pay_card" class="pay-method-label" style="padding: 15px 10px;">
                     💳 Tarjeta / Yape <br>
                     <small style="font-weight: 400;">(Con código de aprobación)</small>
@@ -401,7 +401,6 @@
             const loadEmojis = () => {
                 if (typeof twemoji !== 'undefined') {
                     twemoji.parse(document.body, { 
-                        // Apuntamos explícitamente a un repositorio que no esté caído
                         base: 'https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/',
                         folder: 'svg', 
                         ext: '.svg' 
@@ -447,6 +446,9 @@
             currentParentPhone = parentPhone;
             modal.classList.remove('active'); 
             paymentModal.classList.add('active'); 
+            
+            // Si quieres reiniciar las opciones al abrir el modal, descomenta la siguiente línea:
+            // document.querySelectorAll('.pay-method-input').forEach(input => input.checked = false);
         }
 
         // ==========================================
@@ -455,6 +457,7 @@
         const payMethodInputs = document.querySelectorAll('.pay-method-input');
         payMethodInputs.forEach(input => {
             input.addEventListener('change', function(e) {
+                // AQUÍ OCURRE LA MAGIA. AHORA SÍ SE DISPARARÁ AL HACER CLIC.
                 if (typeof fbq !== 'undefined') {
                     fbq('track', 'InitiateCheckout', {
                         value: 14.99,
@@ -490,10 +493,22 @@
             openPaymentModal(parentName, parentPhone);
         });
 
+        // ==========================================
+        // VALIDACIÓN DEL BOTÓN DE PAGO FINAL
+        // ==========================================
         document.getElementById('btn-final-pay').addEventListener('click', function(e) {
             e.preventDefault();
+            
+            // Verificamos si el usuario ha seleccionado alguna opción
+            const selectedOption = document.querySelector('input[name="pay_method"]:checked');
+            
+            if (!selectedOption) {
+                alert("Por favor, selecciona Tarjeta o Yape para continuar con el pago.");
+                return; // Detiene la ejecución si no hay nada seleccionado
+            }
+            
             const btnElement = document.getElementById('btn-final-pay');
-            const payMethod = document.querySelector('input[name="pay_method"]:checked').value;
+            const payMethod = selectedOption.value;
             
             procesarPagoSeguro(currentParentName, currentParentPhone, payMethod, btnElement);
         });
@@ -517,7 +532,6 @@
                     });
                 }
                 
-                // Mantenemos los 500ms de seguridad para que el evento Contact se envíe a Meta
                 setTimeout(() => {
                     window.location.href = `checkout_yape.php?bump=false&name=${encodeURIComponent(parentName)}&phone=${encodeURIComponent(parentPhone)}`;
                 }, 500);
