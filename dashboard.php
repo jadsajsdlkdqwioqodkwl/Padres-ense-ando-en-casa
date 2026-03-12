@@ -46,9 +46,18 @@ $is_new_registration = $fire_purchase; // Si acaba de comprar, es un registro nu
 ?>
 
 <script>
-// Tu código base del Píxel (el init normal)
-!function(f,b,e,v,n,t,s){if(f.fbq)return;/* ... */} // (Asegúrate de tener el código base del píxel aquí)
-fbq('init', 'TU_PIXEL_ID');
+// Código Base del Meta Píxel (Completo con tu Pixel ID Real)
+!function(f,b,e,v,n,t,s)
+{if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+n.queue=[];t=b.createElement(e);t.async=!0;
+t.src=v;s=b.getElementsByTagName(e)[0];
+s.parentNode.insertBefore(t,s)}(window, document,'script',
+'https://connect.facebook.net/en_US/fbevents.js');
+
+// ID REAL INYECTADO
+fbq('init', '1602561284224693');
 fbq('track', 'PageView');
 
 <?php if ($fire_purchase): ?>
@@ -58,7 +67,7 @@ fbq('track', 'PageView');
         currency: 'PEN',
         content_name: 'My World - Acceso Vitalicio'
     }, {
-        eventID: '<?php echo $event_id; ?>' // ¡CRÍTICO PARA LA DEDUPLICACIÓN!
+        eventID: '<?php echo $event_id; ?>' // ¡CRÍTICO PARA LA DEDUPLICACIÓN CON CAPI!
     });
 
     // Disparamos CompleteRegistration
@@ -75,8 +84,9 @@ fbq('track', 'PageView');
     ?>
 <?php endif; ?>
 </script>
+<noscript><img height="1" width="1" style="display:none" src="https://www.facebook.com/tr?id=1602561284224693&ev=PageView&noscript=1"/></noscript>
 
-<script src="https://unpkg.com/twemoji@latest/dist/twemoji.min.js" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/twemoji@14.0.2/dist/twemoji.min.js" crossorigin="anonymous"></script>
 
 <style>
 /* REGLA DE ORO: Estilos Twemoji Responsivos y Seguros */
@@ -373,18 +383,24 @@ img.emoji {
 </div>
 
 <script>
-
 document.addEventListener('DOMContentLoaded', () => {
 
-    /* Ciberseguridad/Robustez: Comprobar que Twemoji haya cargado de la CDN */
-    if (typeof twemoji !== 'undefined') {
-        twemoji.parse(document.body, { folder: 'svg', ext: '.svg' });
-    } else {
-        console.warn('Twemoji no cargó a tiempo. Reintentando...');
-        setTimeout(() => {
-            if (typeof twemoji !== 'undefined') twemoji.parse(document.body, { folder: 'svg', ext: '.svg' });
-        }, 1000);
-    }
+    // ==========================================
+    // REGLA DE ORO: Twemoji Carga Segura con Fallback y CDN JSDelivr
+    // ==========================================
+    const loadEmojis = () => {
+        if (typeof twemoji !== 'undefined') {
+            twemoji.parse(document.body, { 
+                base: 'https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/',
+                folder: 'svg', 
+                ext: '.svg' 
+            });
+        } else {
+            console.warn('Twemoji no cargó a tiempo. Reintentando en 500ms...');
+            setTimeout(loadEmojis, 500);
+        }
+    };
+    loadEmojis();
 
     /* Lógica del Modal de bienvenida */
     const modal = document.getElementById('welcomeParentModal');
@@ -408,7 +424,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
 });
-
 </script>
 
 <script src="assets/js/engine.js"></script>
