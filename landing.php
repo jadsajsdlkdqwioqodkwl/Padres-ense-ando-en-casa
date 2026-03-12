@@ -26,8 +26,8 @@
     s.parentNode.insertBefore(t,s)}(window, document,'script',
     'https://connect.facebook.net/en_US/fbevents.js');
     
-    fbq('init', '1602561284224693'); 
-    fbq('track', 'PageView');
+fbq('init', '1602561284224693');
+fbq('track', 'PageView', {}, {test_event_code: 'TEST98765'});
     
     // EVENTO: ViewContent al cargar la landing
     fbq('track', 'ViewContent', {
