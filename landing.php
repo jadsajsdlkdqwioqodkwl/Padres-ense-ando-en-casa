@@ -25,11 +25,20 @@
     t.src=v;s=b.getElementsByTagName(e)[0];
     s.parentNode.insertBefore(t,s)}(window, document,'script',
     'https://connect.facebook.net/en_US/fbevents.js');
-    fbq('init', 'TU_PIXEL_ID');
+    
+    // REEMPLAZA 'TU_PIXEL_ID' CON EL ID REAL DE TU PÍXEL
+    fbq('init', '1602561284224693'); 
     fbq('track', 'PageView');
+    
+    // EVENTO: ViewContent (Píxel) - Se dispara al cargar la landing.php
+    fbq('track', 'ViewContent', {
+        content_name: 'My World - Acceso Vitalicio',
+        content_category: 'Educación',
+        value: 14.99,
+        currency: 'PEN'
+    });
     </script>
     <noscript><img height="1" width="1" style="display:none" src="https://www.facebook.com/tr?id=TU_PIXEL_ID&ev=PageView&noscript=1"/></noscript>
-    
     <style>
         :root {
             --brand-blue: #1C3D6A;   
@@ -107,7 +116,7 @@
         .get-card p { font-size: 0.95rem; color: rgba(255,255,255,0.9); }
         .get-badge { position: absolute; top: 12px; right: 15px; background: var(--brand-green); color: white; font-size: 0.7rem; font-weight: bold; padding: 4px 10px; border-radius: 50px; text-transform: uppercase; z-index: 2; }
 
-        /* 3. SECCIÓN DE PROBLEMA Y SOLUCIÓN (Ajuste de espaciado inferior para conectar mejor) */
+        /* 3. SECCIÓN DE PROBLEMA Y SOLUCIÓN */
         .problem-section { background: var(--white); padding: clamp(60px, 8vw, 80px) 5% clamp(30px, 4vw, 40px); }
         .problem-card { background: var(--bg-light); border: 1px solid #E2E8F0; border-radius: 16px; padding: clamp(20px, 5vw, 40px); margin: 0 auto; max-width: 800px; text-align: left; box-shadow: 0 15px 35px rgba(28, 61, 106, 0.05); }
         .problem-list { list-style: none; padding: 0; margin: 0; }
@@ -118,7 +127,7 @@
         .solution-card h3 { color: var(--brand-green); font-size: 1.3rem; margin-bottom: 15px; font-weight: 800; }
         .solution-flow { font-weight: 700; color: var(--brand-blue); font-size: 1.15rem; margin-bottom: 12px; line-height: 1.4; }
 
-        /* 4. ¿Cómo me veré? (Transformación) (Ajuste de espaciado para enlazar con la sección anterior) */
+        /* 4. ¿Cómo me veré? */
         .how-you-look { background: var(--bg-light); padding: clamp(40px, 6vw, 60px) 5% clamp(50px, 8vw, 70px); }
         .feature-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: clamp(30px, 5vw, 60px); align-items: center; margin-bottom: clamp(50px, 8vw, 80px); }
         .feature-row:nth-child(even) .feature-text { order: -1; }
@@ -131,7 +140,7 @@
         .checkout-section { background: var(--white); padding: clamp(60px, 8vw, 80px) 5% 20px; text-align: center; position: relative; }
         .checkout-box { max-width: 550px; margin: 0 auto; background: var(--white); padding: clamp(30px, 5vw, 50px); border-radius: 24px; box-shadow: 0 25px 60px rgba(28, 61, 106, 0.1); text-align: center; border-top: 6px solid var(--brand-green); width: 100%; box-sizing: border-box; position: relative; z-index: 1; border: 1px solid #E2E8F0; border-top: 6px solid var(--brand-green); }
         
-        /* Ajuste Fino de Price Tag (Separado un poquito más como se solicitó: 12px) */
+        /* Ajuste Fino de Price Tag */
         .price-tag { text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center; margin-bottom: 25px; }
         .price-tag .amount { font-size: clamp(3rem, 7vw, 4rem); font-weight: 900; color: var(--brand-blue); line-height: 1; margin-bottom: 12px; }
         .price-tag .badge-container { margin: 0; }
@@ -188,7 +197,7 @@
         <div class="container grid-container" style="align-items: center; position: relative; z-index: 1;">
             <div class="hero-text text-center" style="text-align: left;">
                 <h1><span class="highlight">El orgullo de ser el</span> Padre Héroe 🦸‍♂️</h1>
-                <p>En 15 minutos al día, My World convierte el tiempo de tablet en aprendizaje que puedes auditar: <strong>te muestra un diploma</strong> con las palabras que dominó cada día para que las evalúes. Sin estrés.</p>
+                <p>En 15 minutos al día, My World convierte el tiempo de tablet en aprendizaje que puedes ver: <strong>te muestra un diploma</strong> con las palabras que dominó cada día para que las evalúes. Sin estrés.</p>
                 
                 <div style="margin-top: 35px;">
                     <button class="btn trigger-modal">
@@ -238,7 +247,7 @@
 
     <section class="problem-section">
         <div class="container text-center">
-            <h2 class="section-title" style="font-size: clamp(1.8rem, 4vw, 2.2rem);">El problema no es tu hijo. Es que todos esos métodos <span class="highlight">saltaron el primer paso.</span></h2>
+            <h2 class="section-title" style="font-size: clamp(1.8rem, 4vw, 2.2rem);">El problema no es tu hijo. <span class="highlight">Son todos esos métodos: </span></h2>
             <p class="section-subtitle" style="margin-bottom: 35px; color: var(--text-main); font-weight: 600;">Sin vocabulario base, la academia frustra. La app entretiene. El colegio abandona.</p>
             
             <div class="problem-card">
@@ -249,7 +258,7 @@
                     </li>
                     <li>
                         <span class="problem-icon">✕</span>
-                        <div><strong>Apps:</strong> recompensan el clic, no el conocimiento &rarr; cero retención escrita.</div>
+                        <div><strong>Apps:</strong> recompensan el clic, no el conocimiento &rarr; cero escritura.</div>
                     </li>
                     <li>
                         <span class="problem-icon">✕</span>
@@ -434,6 +443,15 @@
             currentParentPhone = parentPhone;
             modal.classList.remove('active'); 
             paymentModal.classList.add('active'); 
+            
+            // EVENTO: InitiateCheckout (Píxel) - Se dispara cuando abren el modal para elegir método de pago
+            if (typeof fbq !== 'undefined') {
+                fbq('track', 'InitiateCheckout', {
+                    value: 14.99,
+                    currency: 'PEN',
+                    content_name: 'Elegir Método de Pago'
+                });
+            }
         }
 
         const bottomBtn = document.getElementById('btn-comprar-bottom');
@@ -479,14 +497,15 @@
             btnElement.innerHTML = "Redirigiendo a pago seguro... ⏳";
             btnElement.disabled = true;
 
-            if (typeof fbq !== 'undefined') {
-                fbq('track', 'InitiateCheckout', {
-                    value: 14.99,
-                    currency: 'PEN'
-                });
-            }
-
             if (payMethod === 'yape') {
+                // EVENTO: Contact (Píxel) - Se dispara al ser redirigidos por Yape/WhatsApp
+                if (typeof fbq !== 'undefined') {
+                    fbq('track', 'Contact', {
+                        content_name: 'Contacto por Yape',
+                        value: 14.99,
+                        currency: 'PEN'
+                    });
+                }
                 window.location.href = `checkout_yape.php?bump=false&name=${encodeURIComponent(parentName)}&phone=${encodeURIComponent(parentPhone)}`;
             } else {
                 // Link oficial de Mercado Pago inyectado correctamente

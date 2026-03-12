@@ -35,6 +35,46 @@ $page_title = "Mis Módulos";
 <head>
 
 <?php include 'includes/head.php'; ?>
+<?php
+// En dashboard.php (Asegúrate de tener session_start() al inicio)
+$fire_purchase = isset($_SESSION['fire_purchase_pixel']) && $_SESSION['fire_purchase_pixel'] === true;
+$event_id = isset($_SESSION['purchase_event_id']) ? $_SESSION['purchase_event_id'] : '';
+$purchase_value = isset($_SESSION['purchase_value']) ? $_SESSION['purchase_value'] : 14.99;
+
+// También disparamos el evento CompleteRegistration cada vez que llega aquí nuevo
+$is_new_registration = $fire_purchase; // Si acaba de comprar, es un registro nuevo
+?>
+
+<script>
+// Tu código base del Píxel (el init normal)
+!function(f,b,e,v,n,t,s){if(f.fbq)return;/* ... */} // (Asegúrate de tener el código base del píxel aquí)
+fbq('init', 'TU_PIXEL_ID');
+fbq('track', 'PageView');
+
+<?php if ($fire_purchase): ?>
+    // Disparamos Purchase Client-Side con el MISMO event_id para deduplicar
+    fbq('track', 'Purchase', {
+        value: <?php echo $purchase_value; ?>,
+        currency: 'PEN',
+        content_name: 'My World - Acceso Vitalicio'
+    }, {
+        eventID: '<?php echo $event_id; ?>' // ¡CRÍTICO PARA LA DEDUPLICACIÓN!
+    });
+
+    // Disparamos CompleteRegistration
+    fbq('track', 'CompleteRegistration', {
+        value: <?php echo $purchase_value; ?>,
+        currency: 'PEN'
+    });
+    
+    <?php 
+    // Limpiamos la sesión para que no se dispare de nuevo si el usuario recarga la página
+    unset($_SESSION['fire_purchase_pixel']);
+    unset($_SESSION['purchase_event_id']);
+    unset($_SESSION['purchase_value']);
+    ?>
+<?php endif; ?>
+</script>
 
 <script src="https://unpkg.com/twemoji@latest/dist/twemoji.min.js" crossorigin="anonymous"></script>
 
