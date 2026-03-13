@@ -1,7 +1,29 @@
 <?php
 require_once 'includes/config.php';
+
+// ==========================================
+// CIBERSEGURIDAD: ENDPOINT AJAX PARA VALIDAR CONTRASEÑA DE PADRES
+// ==========================================
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'verify_password') {
+    header('Content-Type: application/json');
+    $pass = $_POST['password'] ?? '';
+    
+    // Consulta segura
+    $stmtPass = $pdo->prepare("SELECT password FROM users WHERE id = ?");
+    $stmtPass->execute([$_SESSION['user_id']]);
+    $hash = $stmtPass->fetchColumn();
+    
+    if ($hash && password_verify($pass, $hash)) {
+        echo json_encode(['success' => true]);
+    } else {
+        echo json_encode(['success' => false, 'message' => 'Contraseña incorrecta.']);
+    }
+    exit;
+}
+// ==========================================
+
 $lesson_id = isset($_GET['id']) ? (int)$_GET['id'] : 1;
-$step = isset($_GET['step']) ? (int)$_GET['step'] : 0; // 0 = Mnemotecnias, 1-5 = Juegos
+$step = isset($_GET['step']) ? (int)$_GET['step'] : 0; // 0 = Mnemotecnias/Examen, 1-5 = Juegos
 
 // Ciberseguridad: Consulta preparada con validación estricta
 $stmt = $pdo->prepare("SELECT l.*, m.title as module_title FROM lessons l JOIN modules m ON l.module_id = m.id WHERE l.id = ?");
@@ -65,16 +87,22 @@ $stmtWords->execute([$_SESSION['user_id'], $lesson_id]);
 $json_words = $stmtWords->fetchColumn();
 $saved_words = $json_words ? json_decode($json_words, true) : [];
 
-// LÓGICA DE JUEGOS DENTRO DEL CURSO
+// ==========================================
+// LÓGICA DE JUEGOS DENTRO DEL CURSO: ROTACIÓN CIRCULAR MATEMÁTICA
+// ==========================================
 $dynamic_rounds = [];
 $template_file = '';
 
+$total_saved = count($saved_words);
+
 if ($step > 0 && $step <= 5) {
-    if (empty($saved_words) || !isset($saved_words[$step - 1])) {
+    if ($total_saved == 0) {
         header("Location: lesson.php?id=" . $lesson_id); exit;
     }
     
-    $current_word = $saved_words[$step - 1];
+    // MEJORA: Rotación circular. Si son 2 palabras y 5 juegos: Juego 1 usa palabra 1, Juego 2 palabra 2, Juego 3 palabra 1...
+    $word_index = ($step - 1) % $total_saved;
+    $current_word = $saved_words[$word_index];
 
     $distractor_pool = array_filter($pool_palabras, function($p) use ($current_word) {
         return strtoupper($p['en']) !== strtoupper($current_word['en']);
@@ -156,7 +184,6 @@ if ($step > 0 && $step <= 5) {
     <style>
         img.emoji { height: 1.2em; width: 1.2em; margin: 0 .05em 0 .1em; vertical-align: -0.1em; display: inline-block; pointer-events: none; }
         
-        /* Modales seguros sin desbordamiento derecho */
         .overlay-fullscreen { 
             position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
             background: rgba(28, 61, 106, 0.95); backdrop-filter: blur(5px); 
@@ -176,7 +203,6 @@ if ($step > 0 && $step <= 5) {
         .btn-play.bg-green-500 { background: var(--brand-green, #10B981); box-shadow: 0 10px 20px rgba(16, 185, 129, 0.3); }
         .btn-play.bg-green-500:hover { background: #059669; }
 
-        /* BOTÓN DE AUDIO GIGANTE UX MEJORADO */
         .btn-audio-huge {
             font-size: clamp(25px, 5vw, 35px); background: #DBEAFE; color: #1E3A8A;
             border: 4px solid #3B82F6; border-radius: 50%;
@@ -188,7 +214,6 @@ if ($step > 0 && $step <= 5) {
         .btn-audio-huge:hover { transform: scale(1.15) rotate(5deg); background: #BFDBFE; box-shadow: 0 12px 30px rgba(59, 130, 246, 0.5); }
         .btn-audio-huge:active { transform: scale(0.95); }
 
-        /* TAMAÑO DEL BOTÓN DE MÚSICA DEL JUEGO */
         .btn-music-game {
             font-size: clamp(24px, 5vw, 32px); background: #F8FAFC;
             border: 3px solid #E2E8F0; border-radius: 50%;
@@ -199,7 +224,6 @@ if ($step > 0 && $step <= 5) {
         }
         .btn-music-game:hover { transform: scale(1.1) rotate(-10deg); border-color: var(--brand-lblue); }
 
-        /* POOL DE PALABRAS ESTILO BURGER APILADAS */
         .word-pool-grid { 
             display: flex; flex-direction: column; gap: 15px; margin: 25px 0; 
             width: 100%; box-sizing: border-box; 
@@ -226,6 +250,9 @@ if ($step > 0 && $step <= 5) {
         }
         .exam-option-label:hover { background: #F0F9FF; border-color: var(--brand-lblue); }
         .exam-option-label input[type="radio"] { transform: scale(1.3); margin-right: 10px; }
+
+        .login-input { width: 100%; padding: 15px; border-radius: 10px; border: 2px solid #E2E8F0; font-size: 16px; margin-bottom: 20px; box-sizing: border-box; transition: 0.3s; color: var(--text-main); }
+        .login-input:focus { border-color: var(--brand-blue); outline: none; box-shadow: 0 0 0 3px rgba(28, 61, 106, 0.1); }
     </style>
 </head>
 <body>
@@ -233,7 +260,19 @@ if ($step > 0 && $step <= 5) {
 
     <?php if($step == 0): ?>
         <?php if($lesson['order_num'] > 1): ?>
-        <div id="exam-modal" class="overlay-fullscreen">
+        
+        <div id="parent-auth-modal" class="overlay-fullscreen">
+            <div class="modal-box" style="border-top-color: var(--brand-blue);">
+                <div style="font-size: 50px; margin-bottom: 15px;">👨‍👩‍👧‍👦</div>
+                <h2 style="color: var(--brand-blue); font-size: clamp(1.8rem, 5vw, 2rem); margin-bottom: 10px;">Zona de Padres</h2>
+                <p style="color: #64748B; font-size: clamp(1rem, 3vw, 1.1rem); margin-bottom: 20px;">Por favor, ingresa tu contraseña para autorizar a tu hijo(a) a tomar el examen de ayer y continuar aprendiendo. Esto evita que juegue todo el mes de golpe.</p>
+                <input type="password" id="parent-password-input" class="login-input" placeholder="Tu contraseña de registro">
+                <div id="auth-error-msg" style="color: #DC2626; margin-bottom: 15px; display: none; font-weight: bold; background: #FEF2F2; padding: 10px; border-radius: 8px;">Contraseña incorrecta. Intenta de nuevo.</div>
+                <button id="btn-verify-password" class="btn-large" style="background: var(--brand-blue);" onclick="verifyParentPassword()">Autorizar Examen ➡️</button>
+            </div>
+        </div>
+
+        <div id="exam-modal" class="overlay-fullscreen" style="display: none;">
             <div class="modal-box" style="border-top-color: var(--brand-orange);">
                 <h2 style="color: var(--brand-orange); font-size: clamp(1.8rem, 5vw, 2rem); margin-bottom: 10px;">📝 Examen de las Palabras de Ayer</h2>
                 <div id="exam-questions" style="text-align: left; margin: 25px 0;"></div>
@@ -256,16 +295,15 @@ if ($step > 0 && $step <= 5) {
         <div id="pool-modal" class="overlay-fullscreen" style="<?php echo ($lesson['order_num'] > 1) ? 'display: none;' : ''; ?>">
             <div class="modal-box">
                 <h2 style="color: var(--brand-blue); font-size: clamp(1.8rem, 5vw, 2rem);">🎯 Tu Pool de Palabras</h2>
-                <p style="color: #64748B; font-size: clamp(1rem, 3vw, 1.1rem);">Selecciona <strong>5 palabras</strong> para aprender el día de hoy.</p>
-                <div class="word-pool-grid" id="pool-grid">
-                    </div>
+                <p style="color: #64748B; font-size: clamp(1rem, 3vw, 1.1rem);">Selecciona <strong>entre 2 y 4 palabras</strong> para aprender el día de hoy.</p>
+                <div class="word-pool-grid" id="pool-grid"></div>
                 <div style="display:flex; justify-content:center; align-items:center; gap:15px; margin-top:15px; width: 100%;">
                     <button onclick="changePoolPage(-1)" id="btn-prev-page" class="btn" style="padding: 10px 20px; margin:0; background: #CBD5E1; flex: 1;">⬅️</button>
                     <span id="page-indicator" style="font-weight:bold; color: var(--brand-blue); flex: 1;">1 / 5</span>
                     <button onclick="changePoolPage(1)" id="btn-next-page" class="btn" style="padding: 10px 20px; margin:0; background: var(--brand-lblue); flex: 1;">➡️</button>
                 </div>
-                <div style="font-size: 18px; font-weight: 700; color: var(--brand-blue); margin-top: 15px;">Seleccionadas: <span id="selection-count">0</span>/5</div>
-                <button id="btn-confirm-pool" class="btn-large" disabled onclick="confirmarSeleccion()">Confirmar mis 5 palabras</button>
+                <div style="font-size: 18px; font-weight: 700; color: var(--brand-blue); margin-top: 15px;">Seleccionadas: <span id="selection-count">0</span>/4</div>
+                <button id="btn-confirm-pool" class="btn-large" disabled onclick="confirmarSeleccion()">Confirmar mis palabras</button>
             </div>
         </div>
 
@@ -317,7 +355,7 @@ if ($step > 0 && $step <= 5) {
         <div id="cuaderno-modal" class="overlay-fullscreen" style="display: none; z-index: 99999;">
             <div class="modal-box" style="border-top-color: var(--brand-blue); max-width: 700px;">
                 <h2 style="color: var(--brand-blue); font-size: clamp(1.8rem, 5vw, 2.2rem); margin-bottom: 10px;">📓 ¡Hora de Copiar! 📓</h2>
-                <p style="color: #64748B; font-size: clamp(1rem, 3vw, 1.1rem); margin-bottom: 20px;">Copia estas 5 palabras y sus trucos en tu cuaderno para que no las olvides en el examen de mañana.</p>
+                <p style="color: #64748B; font-size: clamp(1rem, 3vw, 1.1rem); margin-bottom: 20px;">Copia estas palabras y sus trucos en tu cuaderno para que no las olvides en el examen de mañana.</p>
                 
                 <div style="text-align: left; background: #F8FAFC; padding: 15px; border-radius: 12px; border: 1px solid #E2E8F0; max-height: 50vh; overflow-y: auto; margin-bottom: 20px;">
                     <?php if(!empty($saved_words)): foreach($saved_words as $w): ?>
@@ -337,7 +375,6 @@ if ($step > 0 && $step <= 5) {
     <?php endif; ?>
 
     <script>
-    // --- LÓGICA DE API DICTIONARY Y FALLBACK CIBERSEGURO ---
     const audioCache = {};
 
     async function playPronunciation(word) {
@@ -380,7 +417,6 @@ if ($step > 0 && $step <= 5) {
                 fallbackTTS();
             }
         } catch (error) {
-            console.warn("API Dictionary falló, usando TTS:", error);
             fallbackTTS();
         }
     }
@@ -391,7 +427,6 @@ if ($step > 0 && $step <= 5) {
 
     const currentPlayingWord = <?php echo json_encode($current_word ?? null); ?>;
 
-    // EL SISTEMA AHORA INTEGRA LA LÓGICA DE DIPLOMA DEL CUADERNO
     function unlockNextButton(lessonId, stars, moduleId) {
         if(currentPlayingWord) {
             document.getElementById('end-emoji').innerText = currentPlayingWord.emoji;
@@ -418,14 +453,12 @@ if ($step > 0 && $step <= 5) {
         if (currentStep < 5) {
             window.location.href = 'lesson.php?id=' + lessonId + '&step=' + (currentStep + 1);
         } else {
-            // Muestra el Cuaderno Modal en vez de ir de golpe a course.php
             document.getElementById('end-game-modal').style.display = 'none';
             document.getElementById('cuaderno-modal').style.display = 'flex';
             if (typeof twemoji !== 'undefined') twemoji.parse(document.getElementById('cuaderno-modal'), { folder: 'svg', ext: '.svg' });
         }
     }
 
-    // DISPARADO AL PRESIONAR "YA LAS COPIÉ" EN EL CUADERNO
     function finalizarLeccion() {
         fetch('app/save_progress.php', {
             method: 'POST',
@@ -437,6 +470,52 @@ if ($step > 0 && $step <= 5) {
     }
 
     <?php if($step == 0): ?>
+    
+    // ==========================================
+    // JS: AUTORIZACIÓN DE PADRES AJAX
+    // ==========================================
+    function verifyParentPassword() {
+        const pass = document.getElementById('parent-password-input').value;
+        const btn = document.getElementById('btn-verify-password');
+        const errMsg = document.getElementById('auth-error-msg');
+        
+        if(!pass) return;
+        
+        btn.innerHTML = "Verificando...";
+        btn.disabled = true;
+        errMsg.style.display = 'none';
+
+        const formData = new FormData();
+        formData.append('action', 'verify_password');
+        formData.append('password', pass);
+
+        fetch(window.location.href, {
+            method: 'POST',
+            body: formData
+        })
+        .then(r => r.json())
+        .then(data => {
+            btn.innerHTML = "Autorizar Examen ➡️";
+            btn.disabled = false;
+            
+            if(data.success) {
+                document.getElementById('parent-auth-modal').style.display = 'none';
+                document.getElementById('exam-modal').style.display = 'flex';
+            } else {
+                errMsg.style.display = 'block';
+                errMsg.innerText = data.message;
+            }
+        })
+        .catch(() => {
+            btn.innerHTML = "Autorizar Examen ➡️";
+            btn.disabled = false;
+            alert("Error de conexión. Intenta nuevamente.");
+        });
+    }
+
+    // ==========================================
+    // JS: GESTOR DE POOL Y OPCIONALIDAD
+    // ==========================================
     const poolPalabras = <?php echo json_encode($pool_palabras); ?>;
     let palabrasSeleccionadas = [];
     let currentPage = 0;
@@ -478,18 +557,23 @@ if ($step > 0 && $step <= 5) {
             element.classList.remove('selected');
             palabrasSeleccionadas = palabrasSeleccionadas.filter(p => p.en !== element.dataset.en);
         } else {
-            if (palabrasSeleccionadas.length >= 5) { alert("Ya seleccionaste 5 palabras."); return; }
+            // Límite modificado a 4
+            if (palabrasSeleccionadas.length >= 4) { alert("El límite es de 4 palabras para no saturar a tu hijo."); return; }
             element.classList.add('selected');
             palabrasSeleccionadas.push({
-                en: element.dataset.en,
-                es: element.dataset.es,
-                emoji: element.dataset.emoji,
-                mnemonic: element.dataset.mnemonic,
-                phonetic: element.dataset.phonetic
+                en: element.dataset.en, es: element.dataset.es, emoji: element.dataset.emoji,
+                mnemonic: element.dataset.mnemonic, phonetic: element.dataset.phonetic
             });
         }
         document.getElementById('selection-count').innerText = palabrasSeleccionadas.length;
-        document.getElementById('btn-confirm-pool').disabled = palabrasSeleccionadas.length !== 5;
+        
+        // Botón condicionado a tener entre 2 y 4 palabras
+        const btnConfirm = document.getElementById('btn-confirm-pool');
+        if(palabrasSeleccionadas.length >= 2 && palabrasSeleccionadas.length <= 4) {
+            btnConfirm.disabled = false;
+        } else {
+            btnConfirm.disabled = true;
+        }
     }
 
     function confirmarSeleccion() {
@@ -559,20 +643,13 @@ if ($step > 0 && $step <= 5) {
             const radios = document.getElementsByName('q' + i);
             let answered = false;
             let isCorrect = false;
-            
             for (let radio of radios) {
                 if (radio.checked) {
                     answered = true;
-                    if (radio.value === 'correct') {
-                        isCorrect = true;
-                    }
+                    if (radio.value === 'correct') { isCorrect = true; }
                 }
             }
-            
-            if (!answered || !isCorrect) {
-                allCorrect = false;
-                break;
-            }
+            if (!answered || !isCorrect) { allCorrect = false; break; }
         }
 
         if (!allCorrect) {
@@ -612,7 +689,6 @@ if ($step > 0 && $step <= 5) {
     function descargarDiploma() {
         const canvas = document.getElementById('diploma-canvas');
         const dataURL = canvas.toDataURL('image/png');
-        
         const a = document.createElement('a');
         a.href = dataURL;
         a.download = 'Mi_Reporte_Ingles.png';

@@ -13,22 +13,20 @@ $is_bump = (isset($_GET['external_reference']) && $_GET['external_reference'] ==
 
 $error = '';
 $payment_verified = false;
+$fire_pixel_now = false;
 
 // TOKEN DE ACCESO DE MERCADO PAGO (PRODUCCIÓN)
-// Integrado con tu credencial real para validar pagos
 $mp_access_token = "APP_USR-6122068330896334-031116-fb54d0e609056882561210e9e7c074a0-3259142883";
 
 // 2. VERIFICACIÓN ANTI-FRAUDE CON LA API DE MERCADO PAGO
 if (empty($payment_id) || $status !== 'approved') {
     $error = "Acceso denegado. Pago no detectado o no aprobado.";
 } else {
-    // Comprobar si el payment_id ya fue usado en nuestra Base de Datos
     $stmtCheckPayment = $pdo->prepare("SELECT id FROM users WHERE payment_id = ?");
     $stmtCheckPayment->execute([$payment_id]);
     if ($stmtCheckPayment->fetch()) {
         $error = "Este pago ya ha sido registrado previamente. El enlace ha expirado por seguridad.";
     } else {
-        // Llamada cURL a Mercado Pago para verificar que el pago existe y no es falsificado
         $ch = curl_init("https://api.mercadopago.com/v1/payments/" . $payment_id);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_HTTPHEADER, [
@@ -42,11 +40,65 @@ if (empty($payment_id) || $status !== 'approved') {
             $mp_data = json_decode($response, true);
             if (isset($mp_data['status']) && $mp_data['status'] === 'approved') {
                 $payment_verified = true;
+                
+                // =========================================================================
+                // INICIO MEJORA: META CAPI DISPARADO INMEDIATAMENTE AL VALIDAR EL PAGO
+                // =========================================================================
+                // Solo disparamos si no lo hemos hecho en esta sesión para evitar duplicados en recargas
+                if (!isset($_SESSION['pixel_fired_' . $payment_id])) {
+                    $pixel_id = '1602561284224693'; 
+                    $access_token = 'EAAMOcyoXvxQBQZBjuE72IyuQolQ0ZBPOvqfj4FpaMku5aNJgxuUrbKkhS1o7O06iGf5u5E2xlBMffHVx2EmGBOT4IJCI8hVgBPyqZAnW2hLGa22nshDPeSBowDVXd38FQ3UDq99h93aCBBW0YnvXPrivxu9mXGr2lmTbFBPHjvWjCLWglwZA2FulqTs79wZDZD';
+                    $test_event_code = 'TEST38270'; 
+
+                    $client_ip = $_SERVER['REMOTE_ADDR'] ?? '';
+                    if (isset($_SERVER['HTTP_X_FORWARDED_FOR'])) {
+                        $ip_array = explode(',', $_SERVER['HTTP_X_FORWARDED_FOR']);
+                        $client_ip = trim($ip_array[0]);
+                    }
+                    $client_user_agent = $_SERVER['HTTP_USER_AGENT'] ?? '';
+                    $purchase_value = ($is_bump == 1) ? 19.99 : 14.99;
+
+                    $event_data = [
+                        'data' => [
+                            [
+                                'event_name' => 'Purchase',
+                                'event_time' => time(),
+                                'action_source' => 'website',
+                                'event_id' => (string)$payment_id,
+                                'user_data' => [
+                                    'client_ip_address' => $client_ip,
+                                    'client_user_agent' => $client_user_agent
+                                ],
+                                'custom_data' => [
+                                    'currency' => 'PEN',
+                                    'value' => $purchase_value,
+                                    'content_name' => 'My World - Acceso Vitalicio'
+                                ]
+                            ]
+                        ],
+                        'test_event_code' => $test_event_code 
+                    ];
+
+                    $ch_capi = curl_init("https://graph.facebook.com/v19.0/{$pixel_id}/events?access_token={$access_token}");
+                    curl_setopt($ch_capi, CURLOPT_RETURNTRANSFER, true);
+                    curl_setopt($ch_capi, CURLOPT_POST, true);
+                    curl_setopt($ch_capi, CURLOPT_POSTFIELDS, json_encode($event_data));
+                    curl_setopt($ch_capi, CURLOPT_HTTPHEADER, ['Content-Type: application/json']);
+                    curl_setopt($ch_capi, CURLOPT_TIMEOUT, 5); 
+                    curl_exec($ch_capi);
+                    curl_close($ch_capi);
+
+                    $_SESSION['pixel_fired_' . $payment_id] = true;
+                    $fire_pixel_now = true; 
+                    $pixel_purchase_value = $purchase_value;
+                }
+                // =========================================================================
+                // FIN MEJORA META CAPI
+                // =========================================================================
             } else {
                 $error = "El pago existe pero su estado actual no es 'Aprobado'.";
             }
         } else {
-            // Si el Access Token falla o hay error de red
             $error = "No se pudo validar el pago con el banco. Intenta recargar la página.";
         }
     }
@@ -71,7 +123,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && $payment_verified) {
         $error = "Por favor, completa todos los campos.";
     } elseif ($captcha_answer !== $correct_captcha) {
         $error = "El resultado de la suma de seguridad es incorrecto. Eres un humano, ¿verdad?";
-        // Regenerar Captcha
         $_SESSION['captcha_num1'] = rand(1, 9);
         $_SESSION['captcha_num2'] = rand(1, 9);
     } elseif (strlen($password) < 6) {
@@ -85,79 +136,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && $payment_verified) {
         } else {
             try {
                 $hashed_password = password_hash($password, PASSWORD_DEFAULT);
-                // INSERTAMOS EL payment_id PARA QUEMAR ESTE LINK
                 $stmtInsert = $pdo->prepare("INSERT INTO users (child_name, parent_phone, password, has_bump, payment_id, total_stars) VALUES (?, ?, ?, ?, ?, 0)");
                 if ($stmtInsert->execute([$child_name, $parent_phone, $hashed_password, $is_bump, $payment_id])) {
-                    
-                    // =========================================================================
-                    // INICIO INYECCIÓN: META CONVERSIONS API (CAPI) - EVENTO PURCHASE
-                    // =========================================================================
-                    $pixel_id = '1602561284224693'; // PIXEL REAL
-                    $access_token = 'EAAMOcyoXvxQBQZBjuE72IyuQolQ0ZBPOvqfj4FpaMku5aNJgxuUrbKkhS1o7O06iGf5u5E2xlBMffHVx2EmGBOT4IJCI8hVgBPyqZAnW2hLGa22nshDPeSBowDVXd38FQ3UDq99h93aCBBW0YnvXPrivxu9mXGr2lmTbFBPHjvWjCLWglwZA2FulqTs79wZDZD'; // TOKEN REAL
-                    $test_event_code = 'TEST38270'; // CÓDIGO DE PRUEBAS ACTIVO
-
-                    // 1. Recolección de IP y User Agent (Crucial para el Event Match Quality)
-                    $client_ip = isset($_SERVER['REMOTE_ADDR']) ? $_SERVER['REMOTE_ADDR'] : '';
-                    if (isset($_SERVER['HTTP_X_FORWARDED_FOR'])) {
-                        $ip_array = explode(',', $_SERVER['HTTP_X_FORWARDED_FOR']);
-                        $client_ip = trim($ip_array[0]);
-                    }
-                    $client_user_agent = isset($_SERVER['HTTP_USER_AGENT']) ? $_SERVER['HTTP_USER_AGENT'] : '';
-
-                    // 2. Limpieza y Hashing del Teléfono a SHA-256 (Obligatorio por Meta)
-                    $clean_phone = preg_replace('/[^0-9]/', '', $parent_phone);
-                    // Validamos si es un número peruano sin código de país (9 dígitos)
-                    if (strlen($clean_phone) == 9) {
-                        $clean_phone = '51' . $clean_phone; // Se concatena el 51
-                    }
-                    $hashed_phone = hash('sha256', $clean_phone);
-
-                    // 3. Determinamos el valor del Purchase
-                    $purchase_value = ($is_bump == 1) ? 19.99 : 14.99;
-
-                    // 4. Armamos el Payload (JSON)
-                    $event_data = [
-                        'data' => [
-                            [
-                                'event_name' => 'Purchase',
-                                'event_time' => time(),
-                                'action_source' => 'website',
-                                'event_id' => (string)$payment_id, // CLAVE DE DEDUPLICACIÓN
-                                'user_data' => [
-                                    'client_ip_address' => $client_ip,
-                                    'client_user_agent' => $client_user_agent,
-                                    'ph' => [$hashed_phone] // Teléfono encriptado en array
-                                ],
-                                'custom_data' => [
-                                    'currency' => 'PEN',
-                                    'value' => $purchase_value,
-                                    'content_name' => 'My World - Acceso Vitalicio'
-                                ]
-                            ]
-                        ],
-                        'test_event_code' => $test_event_code // BORRAR AL PASAR A PRODUCCIÓN
-                    ];
-
-                    // 5. Envío de datos vía cURL hacia Graph API (Sin trabar el servidor)
-                    $ch_capi = curl_init("https://graph.facebook.com/v19.0/{$pixel_id}/events?access_token={$access_token}");
-                    curl_setopt($ch_capi, CURLOPT_RETURNTRANSFER, true);
-                    curl_setopt($ch_capi, CURLOPT_POST, true);
-                    curl_setopt($ch_capi, CURLOPT_POSTFIELDS, json_encode($event_data));
-                    curl_setopt($ch_capi, CURLOPT_HTTPHEADER, [
-                        'Content-Type: application/json'
-                    ]);
-                    curl_setopt($ch_capi, CURLOPT_TIMEOUT, 5); // Seguridad: Límite de 5s para no congelar tu app
-                    curl_exec($ch_capi);
-                    curl_close($ch_capi);
-
-                    // 6. Configuración de Variables de Sesión para la Deduplicación del Píxel
-                    $_SESSION['fire_purchase_pixel'] = true;
-                    $_SESSION['purchase_event_id'] = $payment_id;
-                    $_SESSION['purchase_value'] = $purchase_value;
-                    // =========================================================================
-                    // FIN INYECCIÓN: META CONVERSIONS API
-                    // =========================================================================
-
                     $_SESSION['user_id'] = $pdo->lastInsertId();
                     header("Location: dashboard.php");
                     exit;
@@ -195,6 +175,34 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && $payment_verified) {
         .captcha-box { display: flex; align-items: center; gap: 10px; background: #F8FAFC; padding: 10px 15px; border-radius: 10px; border: 1px solid #E2E8F0; margin-bottom: 20px; }
         .captcha-question { font-size: 18px; font-weight: 800; color: var(--brand-blue); white-space: nowrap; }
     </style>
+
+    <?php if ($fire_pixel_now): ?>
+    <script>
+    !function(f,b,e,v,n,t,s)
+    {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+    n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+    if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+    n.queue=[];t=b.createElement(e);t.async=!0;
+    t.src=v;s=b.getElementsByTagName(e)[0];
+    s.parentNode.insertBefore(t,s)}(window, document,'script',
+    'https://connect.facebook.net/en_US/fbevents.js');
+    
+    fbq('init', '1602561284224693');
+    fbq('track', 'PageView');
+    fbq('track', 'Purchase', {
+        value: <?php echo $pixel_purchase_value; ?>,
+        currency: 'PEN',
+        content_name: 'My World - Acceso Vitalicio'
+    }, {
+        eventID: '<?php echo $payment_id; ?>' 
+    });
+    fbq('track', 'CompleteRegistration', {
+        value: <?php echo $pixel_purchase_value; ?>,
+        currency: 'PEN'
+    });
+    </script>
+    <noscript><img height="1" width="1" style="display:none" src="https://www.facebook.com/tr?id=1602561284224693&ev=PageView&noscript=1"/></noscript>
+    <?php endif; ?>
 </head>
 <body>
     <div class="login-wrapper">
@@ -226,7 +234,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && $payment_verified) {
                     </div>
 
                     <div class="form-group">
-                        <label class="form-label">Crea una Contraseña:</label>
+                        <label class="form-label">Crea una Contraseña (Para aprobar exámenes):</label>
                         <input type="password" name="password" class="login-input" placeholder="Mínimo 6 caracteres" minlength="6" required>
                     </div>
 
