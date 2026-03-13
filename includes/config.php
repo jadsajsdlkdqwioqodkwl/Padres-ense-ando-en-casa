@@ -37,7 +37,8 @@ $public_pages = [
     'process_payment.php',
     'register_success.php',     // <- Permite entrar tras pagar en Mercado Pago
     'admin_register_yape.php',  // <- Permite entrar al panel secreto de Yape
-    'checkout_yape.php'         // <- (Por si acaso decides conectarlo a BD en el futuro)
+    'checkout_yape.php',        // <- (Por si acaso decides conectarlo a BD en el futuro)
+    'create_preference.php'     // <- NUEVO: Permite crear la preferencia vía API sin estar logueado
 ];
 
 if (!isset($_SESSION['user_id']) && !in_array($current_page, $public_pages)) {

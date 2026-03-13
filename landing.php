@@ -375,13 +375,13 @@
                 <input type="radio" name="pay_method" id="pay_card" value="card" class="pay-method-input" style="display:none;">
                 <label for="pay_card" class="pay-method-label" style="padding: 15px 10px;">
                     💳 Tarjeta / Yape <br>
-                    <small style="font-weight: 400;">(Con código de aprobación)</small>
+                    <small style="font-weight: 400;">(Pago Seguro Automático)</small>
                 </label>
                 
                 <input type="radio" name="pay_method" id="pay_yape" value="yape" class="pay-method-input" style="display:none;">
                 <label for="pay_yape" class="pay-method-label" style="padding: 15px 10px;">
                     📱 Yape / Plin <br>
-                    <small style="font-weight: 400;">(Directo al número)</small>
+                    <small style="font-weight: 400;">(Transferencia Manual)</small>
                 </label>
             </div>
             
@@ -494,12 +494,11 @@
         });
 
         // ==========================================
-        // VALIDACIÓN DEL BOTÓN DE PAGO FINAL + RETRASO DE 500ms
+        // VALIDACIÓN Y CONEXIÓN A LA API DE MERCADO PAGO
         // ==========================================
-        document.getElementById('btn-final-pay').addEventListener('click', function(e) {
+        document.getElementById('btn-final-pay').addEventListener('click', async function(e) {
             e.preventDefault();
             
-            // Bloqueo: Si no hay nada seleccionado, alerta y no avanza.
             const selectedOption = document.querySelector('input[name="pay_method"]:checked');
             if (!selectedOption) {
                 alert("Por favor, selecciona 'Tarjeta' o 'Yape' para continuar con el pago.");
@@ -509,17 +508,13 @@
             const btnElement = document.getElementById('btn-final-pay');
             const payMethod = selectedOption.value;
             
-            procesarPagoSeguro(currentParentName, currentParentPhone, payMethod, btnElement);
-        });
-
-        function procesarPagoSeguro(parentName, parentPhone, payMethod, btnElement) {
             const phoneRegex = /^9\d{8}$/;
-            if (!phoneRegex.test(parentPhone)) {
+            if (!phoneRegex.test(currentParentPhone)) {
                 return alert("Por favor, ingresa un número de WhatsApp válido que empiece con 9 y tenga 9 dígitos.");
             }
 
             const originalText = btnElement.innerHTML;
-            btnElement.innerHTML = "Redirigiendo a pago seguro... ⏳";
+            btnElement.innerHTML = "Generando pago seguro... ⏳";
             btnElement.disabled = true;
 
             if (payMethod === 'yape') {
@@ -530,23 +525,39 @@
                         currency: 'PEN'
                     });
                 }
-                
                 setTimeout(() => {
-                    window.location.href = `checkout_yape.php?bump=false&name=${encodeURIComponent(parentName)}&phone=${encodeURIComponent(parentPhone)}`;
+                    window.location.href = `checkout_yape.php?bump=false&name=${encodeURIComponent(currentParentName)}&phone=${encodeURIComponent(currentParentPhone)}`;
                 }, 500);
-                
             } else {
-                setTimeout(() => {
-                    const linkMercadoPago = "https://mpago.la/1eBkEeq"; 
-                    window.location.href = linkMercadoPago;
-                }, 500);
+                // LLAMADA A TU NUEVA API PHP
+                try {
+                    const response = await fetch('app/create_preference.php', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            name: currentParentName,
+                            phone: currentParentPhone,
+                            bump: false
+                        })
+                    });
+                    
+                    const result = await response.json();
+                    
+                    if (result.success && result.init_point) {
+                        window.location.href = result.init_point;
+                    } else {
+                        alert("Hubo un error al generar el pago. Por favor intenta de nuevo.");
+                        console.error(result);
+                        btnElement.innerHTML = originalText;
+                        btnElement.disabled = false;
+                    }
+                } catch (error) {
+                    alert("Error de red. Verifica tu conexión a internet.");
+                    btnElement.innerHTML = originalText;
+                    btnElement.disabled = false;
+                }
             }
-            
-            setTimeout(() => {
-                btnElement.innerHTML = originalText;
-                btnElement.disabled = false;
-            }, 5000);
-        }
+        });
     </script>
 </body>
 </html>

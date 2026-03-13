@@ -232,7 +232,7 @@ img.emoji {
             2. <strong>Descargas Diarias:</strong> Debajo podrás descargar el resumen imprimible (CSV/Diplomas) de las palabras aprendidas cada día para repasar.
         </p>
 
-        <h3 style="color: var(--brand-blue); font-size: 1.2rem; text-align: left; margin-bottom: 10px; border-bottom: 2px solid #E2E8F0; padding-bottom: 5px;">🖨️ Archivos Imprimibles</h3>
+<h3 style="color: var(--brand-blue); font-size: 1.2rem; text-align: left; margin-bottom: 10px; border-bottom: 2px solid #E2E8F0; padding-bottom: 5px;">🖨️ Archivos Imprimibles</h3>
         <?php if(empty($completed_lessons)): ?>
             <p style="color: #64748B; font-style: italic; text-align: left;">Completa tu primer día para desbloquear archivos descargables aquí.</p>
         <?php else: ?>
@@ -240,7 +240,7 @@ img.emoji {
                 <?php foreach($completed_lessons as $cl): ?>
                     <div class="printable-item">
                         <span style="color: var(--brand-blue); font-weight: 600; font-size: 0.95rem;">📄 <?php echo htmlspecialchars($cl['module_title'] . " - " . $cl['title']); ?></span>
-                        <a href="download_csv.php?lesson_id=<?php echo $cl['lesson_id']; ?>" class="btn-sm-download">Descargar</a>
+                        <a href="printable_material.php?lesson_id=<?php echo $cl['lesson_id']; ?>" target="_blank" class="btn-sm-download" style="background: var(--brand-green); box-shadow: 0 4px 10px rgba(104, 169, 62, 0.3);">🖨️ Imprimir</a>
                     </div>
                 <?php endforeach; ?>
             </div>

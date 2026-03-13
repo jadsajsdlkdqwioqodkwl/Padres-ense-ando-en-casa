@@ -6,17 +6,21 @@ if (isset($_SESSION['user_id'])) {
     exit;
 }
 
-// 1. RECEPCIÓN DE VARIABLES DE MERCADO PAGO
+// 1. RECEPCIÓN DE VARIABLES DE MERCADO PAGO Y NUESTRAS (BACK_URLS)
 $payment_id = isset($_GET['payment_id']) ? filter_var($_GET['payment_id'], FILTER_SANITIZE_NUMBER_INT) : '';
 $status = isset($_GET['status']) ? $_GET['status'] : '';
 $is_bump = (isset($_GET['external_reference']) && $_GET['external_reference'] === 'bump') ? 1 : 0;
+
+// Variables capturadas en la URL desde create_preference.php
+$get_parent_name = isset($_GET['parent_name']) ? htmlspecialchars(trim($_GET['parent_name'])) : '';
+$get_parent_phone = isset($_GET['parent_phone']) ? htmlspecialchars(trim($_GET['parent_phone'])) : '';
 
 $error = '';
 $payment_verified = false;
 $fire_pixel_now = false;
 
-// TOKEN DE ACCESO DE MERCADO PAGO (PRODUCCIÓN)
-$mp_access_token = "APP_USR-6122068330896334-031116-fb54d0e609056882561210e9e7c074a0-3259142883";
+// TOKEN DE ACCESO DE MERCADO PAGO (PRUEBAS - Asegúrate de cambiarlo a Producción en su momento)
+$mp_access_token = "TEST-3157555154327509-031319-932de737b0e86f1a1346bca9d06a74f2-3256090307";
 
 // 2. VERIFICACIÓN ANTI-FRAUDE CON LA API DE MERCADO PAGO
 if (empty($payment_id) || $status !== 'approved') {
@@ -44,7 +48,6 @@ if (empty($payment_id) || $status !== 'approved') {
                 // =========================================================================
                 // INICIO MEJORA: META CAPI DISPARADO INMEDIATAMENTE AL VALIDAR EL PAGO
                 // =========================================================================
-                // Solo disparamos si no lo hemos hecho en esta sesión para evitar duplicados en recargas
                 if (!isset($_SESSION['pixel_fired_' . $payment_id])) {
                     $pixel_id = '1602561284224693'; 
                     $access_token = 'EAAMOcyoXvxQBQZBjuE72IyuQolQ0ZBPOvqfj4FpaMku5aNJgxuUrbKkhS1o7O06iGf5u5E2xlBMffHVx2EmGBOT4IJCI8hVgBPyqZAnW2hLGa22nshDPeSBowDVXd38FQ3UDq99h93aCBBW0YnvXPrivxu9mXGr2lmTbFBPHjvWjCLWglwZA2FulqTs79wZDZD';
@@ -67,7 +70,8 @@ if (empty($payment_id) || $status !== 'approved') {
                                 'event_id' => (string)$payment_id,
                                 'user_data' => [
                                     'client_ip_address' => $client_ip,
-                                    'client_user_agent' => $client_user_agent
+                                    'client_user_agent' => $client_user_agent,
+                                    'ph' => [hash('sha256', preg_replace('/[^0-9]/', '', $get_parent_phone))]
                                 ],
                                 'custom_data' => [
                                     'currency' => 'PEN',
@@ -216,7 +220,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && $payment_verified) {
             <?php else: ?>
                 <span class="success-icon">🎉</span>
                 <h1 style="color: var(--brand-blue); margin-bottom: 5px;">¡Pago Confirmado!</h1>
-                <p style="color: #64748B; margin-bottom: 25px; font-size: 15px;">Pago <strong>#<?php echo htmlspecialchars($payment_id); ?></strong> verificado. Establece los datos de acceso para tu hijo.</p>
+                <p style="color: #64748B; margin-bottom: 25px; font-size: 15px;">¡Hola <?php echo explode(' ', $get_parent_name)[0] ?: 'papá/mamá'; ?>! Pago <strong>#<?php echo htmlspecialchars($payment_id); ?></strong> verificado. Establece los datos de acceso para tu hijo.</p>
                 
                 <?php if (!empty($error)): ?>
                     <div class="error-msg"><?php echo htmlspecialchars($error); ?></div>
@@ -230,7 +234,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && $payment_verified) {
                     
                     <div class="form-group">
                         <label class="form-label">Tu Número de WhatsApp:</label>
-                        <input type="tel" name="parent_phone" class="login-input" placeholder="Ej: 999888777" required>
+                        <input type="tel" name="parent_phone" class="login-input" placeholder="Ej: 999888777" value="<?php echo $get_parent_phone; ?>" required>
                     </div>
 
                     <div class="form-group">
