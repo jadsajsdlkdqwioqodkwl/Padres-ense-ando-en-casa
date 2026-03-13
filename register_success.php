@@ -94,7 +94,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && $payment_verified) {
                     // =========================================================================
                     $pixel_id = '1602561284224693'; // PIXEL REAL
                     $access_token = 'EAAMOcyoXvxQBQZBjuE72IyuQolQ0ZBPOvqfj4FpaMku5aNJgxuUrbKkhS1o7O06iGf5u5E2xlBMffHVx2EmGBOT4IJCI8hVgBPyqZAnW2hLGa22nshDPeSBowDVXd38FQ3UDq99h93aCBBW0YnvXPrivxu9mXGr2lmTbFBPHjvWjCLWglwZA2FulqTs79wZDZD'; // TOKEN REAL
-                    $test_event_code = 'TEST42184'; // CÓDIGO DE PRUEBAS ACTIVO
+                    $test_event_code = 'TEST38270'; // CÓDIGO DE PRUEBAS ACTIVO
 
                     // 1. Recolección de IP y User Agent (Crucial para el Event Match Quality)
                     $client_ip = isset($_SERVER['REMOTE_ADDR']) ? $_SERVER['REMOTE_ADDR'] : '';
