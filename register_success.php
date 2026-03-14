@@ -20,7 +20,7 @@ $payment_verified = false;
 $fire_pixel_now = false;
 
 // TOKEN DE ACCESO DE MERCADO PAGO (PRUEBAS - Asegúrate de cambiarlo a Producción en su momento)
-$mp_access_token = "TEST-3157555154327509-031319-932de737b0e86f1a1346bca9d06a74f2-3256090307";
+$mp_access_token = "APP_USR-3157555154327509-031319-5abc27c624037a097c816f574baeee44-3256090307";
 
 // 2. VERIFICACIÓN ANTI-FRAUDE CON LA API DE MERCADO PAGO
 if (empty($payment_id) || $status !== 'approved') {
@@ -51,7 +51,6 @@ if (empty($payment_id) || $status !== 'approved') {
                 if (!isset($_SESSION['pixel_fired_' . $payment_id])) {
                     $pixel_id = '1602561284224693'; 
                     $access_token = 'EAAMOcyoXvxQBQZBjuE72IyuQolQ0ZBPOvqfj4FpaMku5aNJgxuUrbKkhS1o7O06iGf5u5E2xlBMffHVx2EmGBOT4IJCI8hVgBPyqZAnW2hLGa22nshDPeSBowDVXd38FQ3UDq99h93aCBBW0YnvXPrivxu9mXGr2lmTbFBPHjvWjCLWglwZA2FulqTs79wZDZD';
-                    $test_event_code = 'TEST38270'; 
 
                     $client_ip = $_SERVER['REMOTE_ADDR'] ?? '';
                     if (isset($_SERVER['HTTP_X_FORWARDED_FOR'])) {

@@ -16,7 +16,7 @@ $phone = trim($data['phone']);
 $is_bump = isset($data['bump']) && $data['bump'] === true;
 
 // Credenciales de Prueba (Cámbialas a Producción cuando estés listo)
-$access_token = "TEST-3157555154327509-031319-932de737b0e86f1a1346bca9d06a74f2-3256090307";
+$access_token = "APP_USR-3157555154327509-031319-5abc27c624037a097c816f574baeee44-3256090307";
 
 $price = $is_bump ? 19.99 : 14.99;
 $external_reference = $is_bump ? 'bump' : 'standard';

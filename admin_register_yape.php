@@ -48,7 +48,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                         // =========================================================================
                         $pixel_id = '1602561284224693';
                         $access_token = 'EAAMOcyoXvxQBQZBjuE72IyuQolQ0ZBPOvqfj4FpaMku5aNJgxuUrbKkhS1o7O06iGf5u5E2xlBMffHVx2EmGBOT4IJCI8hVgBPyqZAnW2hLGa22nshDPeSBowDVXd38FQ3UDq99h93aCBBW0YnvXPrivxu9mXGr2lmTbFBPHjvWjCLWglwZA2FulqTs79wZDZD';
-                        $test_event_code = 'TEST38270'; // Puedes quitarlo en producción
                         
                         // 1. Limpieza y Hashing del Teléfono (SHA-256)
                         $clean_phone = preg_replace('/[^0-9]/', '', $parent_phone);

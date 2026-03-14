@@ -71,13 +71,40 @@ $link_whatsapp = "https://wa.me/{$whatsapp_number}?text={$mensaje_ws}";
         .btn-copy svg { width: 18px; height: 18px; fill: currentColor; }
         .copy-feedback { font-size: 0.85rem; color: #10B981; font-weight: 700; opacity: 0; transition: opacity 0.3s; margin-left: 5px; }
         
+        /* Estilos del Botón de Descargar QR */
+        .btn-download-qr {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: white;
+            color: var(--yape-color);
+            border: 2px solid var(--yape-color);
+            padding: 8px 16px;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 700;
+            text-decoration: none;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-top: 10px;
+            width: fit-content;
+        }
+        .btn-download-qr:hover {
+            background: var(--yape-color);
+            color: white;
+            box-shadow: 0 4px 10px rgba(123, 44, 191, 0.2);
+            transform: translateY(-2px);
+        }
+        .btn-download-qr:active { transform: translateY(0); }
+        .btn-download-qr svg { width: 18px; height: 18px; fill: currentColor; }
+
         .btn-whatsapp { display: flex; align-items: center; justify-content: center; gap: 10px; background: #25D366; color: white; padding: 18px 25px; border-radius: 50px; text-decoration: none; font-weight: 800; font-size: 1.2rem; transition: 0.3s; box-shadow: 0 10px 25px rgba(37, 211, 102, 0.3); }
         .btn-whatsapp:hover { background: #128C7E; transform: translateY(-3px); box-shadow: 0 12px 30px rgba(37, 211, 102, 0.4); }
         
         .security-note { font-size: 0.85rem; color: #94A3B8; margin-top: 20px; display: flex; justify-content: center; align-items: center; gap: 5px; }
 
         @media (max-width: 480px) {
-            .btn-copy { width: 100%; justify-content: center; } /* Botón ancho en móviles para no fallar el click */
+            .btn-copy, .btn-download-qr { width: 100%; justify-content: center; } /* Botones anchos en móviles */
             .copy-wrapper { align-items: stretch; }
         }
     </style>
@@ -107,8 +134,15 @@ $link_whatsapp = "https://wa.me/{$whatsapp_number}?text={$mensaje_ws}";
                             </svg>
                         </button>
                         <span id="copyFeedback" class="copy-feedback">¡Número copiado! ✅</span>
+                        
+                        <a href="assets/QR_Yape_MyWorld.jpg" download="QR_Yape_MyWorld.jpg" class="btn-download-qr" aria-label="Descargar código QR">
+                            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/>
+                            </svg>
+                            Guardar QR en mi galería
+                        </a>
                     </div>
-                    <small style="color: #64748B; display: block; margin-top: 5px;">(A nombre de Moises O.)</small>
+                    <small style="color: #64748B; display: block; margin-top: 10px;">(A nombre de Moises O.)</small>
                 </span>
             </p>
             <p>
