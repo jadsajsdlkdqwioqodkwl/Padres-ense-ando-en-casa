@@ -89,8 +89,8 @@
         .hero-text h1 { font-size: clamp(2.2rem, 5vw, 3.8rem); font-weight: 800; line-height: 1.1; color: var(--brand-blue); margin-bottom: 25px; letter-spacing: -1px; }
         .hero-text p { font-size: clamp(1.1rem, 2.5vw, 1.3rem); color: var(--text-muted); margin-bottom: 20px; font-weight: 500; }
         
-        .video-wrapper { position: relative; width: 100%; max-width: 600px; margin: 0 auto; border-radius: 20px; overflow: hidden; box-shadow: 0 25px 50px rgba(28, 61, 106, 0.2); background: #000; border: 4px solid var(--white); transform: rotate(1deg); transition: transform 0.4s; aspect-ratio: 16/9; z-index: 2; }
-        .video-wrapper:hover { transform: rotate(0deg); }
+        /* CORRECCIÓN: Eliminado marco blanco grueso y rotación para una apariencia más limpia */
+        .video-wrapper { position: relative; width: 100%; max-width: 600px; margin: 0 auto; border-radius: 20px; overflow: hidden; box-shadow: 0 25px 50px rgba(28, 61, 106, 0.2); background: #000; transition: transform 0.4s; aspect-ratio: 16/9; z-index: 2; border: none; }
         .video-thumbnail { width: 100%; height: 100%; object-fit: cover; opacity: 1; display: block; }
 
         .section-padding { padding: clamp(60px, 8vw, 90px) 5%; }
@@ -122,8 +122,22 @@
         .feature-row:nth-child(even) .feature-text { order: -1; }
         .feature-text h2 { font-size: clamp(1.8rem, 4vw, 2.2rem); color: var(--brand-blue); margin-bottom: 20px; line-height: 1.2; }
         .feature-text p { font-size: 1.1rem; margin-bottom: 20px; color: var(--text-muted); }
-        .feature-image img { border-radius: 16px; box-shadow: 0 20px 40px rgba(28, 61, 106, 0.12); width: 100%; border: 1px solid #E2E8F0; }
+        .feature-image img { border-radius: 16px; box-shadow: 0 20px 40px rgba(28, 61, 106, 0.12); width: 100%; border: 1px solid #E2E8F0; } /* Marco delgado conservado */
         .diploma-badge { display: inline-flex; align-items: center; gap: 10px; background: #FEF3C7; color: #D97706; padding: 10px 20px; border-radius: 50px; font-weight: 700; font-size: 0.95rem; margin-top: 10px; }
+
+        /* NUEVOS ESTILOS: Sección Calificación */
+        .qualification-section { background: var(--white); padding: clamp(60px, 8vw, 90px) 5% 0; }
+        .qualify-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 40px; max-width: 1000px; margin: 0 auto; }
+        .qualify-box { background: var(--bg-light); padding: 40px; border-radius: 20px; border: 1px solid #E2E8F0; }
+        .qualify-box.is-for-you { border-top: 6px solid var(--brand-green); box-shadow: 0 10px 30px rgba(104, 169, 62, 0.1); }
+        .qualify-box.not-for-you { border-top: 6px solid #CBD5E1; opacity: 0.8; }
+        .qualify-box h3 { font-size: 1.6rem; color: var(--brand-blue); margin-bottom: 25px; font-weight: 800; }
+        .qualify-box.is-for-you h3 { color: var(--brand-green); }
+        .qualify-list { list-style: none; }
+        .qualify-list li { display: flex; align-items: flex-start; gap: 15px; margin-bottom: 20px; font-size: 1.05rem; color: var(--text-main); line-height: 1.5; }
+        .qualify-icon { font-size: 1.3rem; flex-shrink: 0; margin-top: 2px; }
+        .icon-check { color: var(--brand-green); }
+        .icon-x { color: var(--text-muted); }
 
         .checkout-section { background: var(--white); padding: clamp(60px, 8vw, 80px) 5% 20px; text-align: center; position: relative; }
         .checkout-box { max-width: 550px; margin: 0 auto; background: var(--white); padding: clamp(30px, 5vw, 50px); border-radius: 24px; box-shadow: 0 25px 60px rgba(28, 61, 106, 0.1); text-align: center; border-top: 6px solid var(--brand-green); width: 100%; box-sizing: border-box; position: relative; z-index: 1; border: 1px solid #E2E8F0; border-top: 6px solid var(--brand-green); }
@@ -160,6 +174,7 @@
             .nav-links { width: 100%; flex-direction: column; gap: 15px; }
             .btn { width: 100%; }
             .payment-methods { flex-direction: column; }
+            .qualify-box { padding: 30px 20px; }
         }
     </style>
 </head>
@@ -206,24 +221,24 @@
             
             <div class="get-grid">
                 <div class="get-card">
-                    <span class="get-badge">Para Siempre</span>
+                    <span class="get-badge">Las bases</span>
                     <h4>🧠 Las 500 palabras más usadas</h4>
                     <p>Tu hijo practica y domina vocabulario real que sí se usa en conversaciones.</p>
                 </div>
                 <div class="get-card">
                     <span class="get-badge">Inteligencia</span>
-                    <h4>🗺️ Reto físico de 30 días</h4>
-                    <p>Un algoritmo que adapta los desafíos a las palabras que tu hijo eligió aprender ese día. Autonomía guiada que aniquila el aburrimiento.</p>
+                    <h4>🥇 Aprendizaje asegurado</h4>
+                    <p>Un algoritmo que adapta los desafíos a las palabras que tu hijo eligió aprender ese día, haciendo fácil y divertido</p>
                 </div>
                 <div class="get-card">
-                    <span class="get-badge">Mnemotecnia</span>
-                    <h4>🗣️ Trucos de Pronunciación</h4>
-                    <p>Audios nativos y trucos visuales en español (ej: "ápol", "jáus") para que aprenda sin miedo a equivocarse.</p>
+                    <span class="get-badge">Imprimibles</span>
+                    <h4>🗺️ Fichas de trabajo</h4>
+                    <p>Herramientas imprimibles con actividades, generadas según su aprendizaje para que refuerze sus conocimientos.</p>
                 </div>
                 <div class="get-card">
-                    <span class="get-badge">Imprimible</span>
-                    <h4>🗺️ Pasaporte de Aventurero</h4>
-                     <p>Herramientas descargables para que marque sus logros físicos e interactúe contigo al final del día.</p>
+                    <span class="get-badge">Progreso</span>
+                    <h4>🎯 Disciplina escolar</h4>
+                     <p>El sistema se asegura que tu hijo tome nota en su cuaderno para mejorar la retención y desempeño en sus pruebas diarias</p>
                 </div>
             </div>
         </div>
@@ -289,6 +304,59 @@
         </div>
     </section>
 
+    <section class="qualification-section">
+        <div class="container">
+            <h2 class="section-title">¿Es My World <span class="underline">para ti</span>? 🤔</h2>
+            <p class="section-subtitle">Queremos asegurarnos de que este método encaja con lo que buscas para tu hijo.</p>
+            
+            <div class="qualify-grid">
+                <div class="qualify-box is-for-you">
+                    <h3>Esto es para ti si... 👇</h3>
+                    <ul class="qualify-list">
+                        <li>
+                            <span class="qualify-icon icon-check">✅</span>
+                            <div>Tienes un hijo entre 4 y 12 años y el inglés del colegio no te da confianza.</div>
+                        </li>
+                        <li>
+                            <span class="qualify-icon icon-check">✅</span>
+                            <div>Quieres que aprenda divirtiéndose, pero exigiéndole algo a cambio.</div>
+                        </li>
+                        <li>
+                            <span class="qualify-icon icon-check">✅</span>
+                            <div>Buscas un método donde sepas qué aprendió hoy.</div>
+                        </li>
+                        <li>
+                            <span class="qualify-icon icon-check">✅</span>
+                            <div>Estás harto de pagar y no ver avance real.</div>
+                        </li>
+                        <li>
+                            <span class="qualify-icon icon-check">✅</span>
+                            <div>Te gusta verlo apuntar todo en su cuaderno y en sus fichas de trabajo.</div>
+                        </li>
+                    </ul>
+                </div>
+                
+                <div class="qualify-box not-for-you">
+                    <h3>No es para ti si... ✋</h3>
+                    <ul class="qualify-list">
+                        <li>
+                            <span class="qualify-icon icon-x">❌</span>
+                            <div>Buscas una app que done entretenimiento gratis.</div>
+                        </li>
+                        <li>
+                            <span class="qualify-icon icon-x">❌</span>
+                            <div>Quieres que aprenda sin ningún esfuerzo de su parte.</div>
+                        </li>
+                        <li>
+                            <span class="qualify-icon icon-x">❌</span>
+                            <div>No tienes 15 minutos al día para que tu hijo practique.</div>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
     <section id="checkout" class="checkout-section">
         <div class="container">
             <h2 class="section-title">El inglés que tu hijo sí quiere aprender.</h2>
@@ -314,7 +382,7 @@
                     </div>
                     
                     <button type="submit" id="btn-comprar-bottom" class="btn btn-pay">
-                        COMPRAR AHORA Y SER SU GUÍA
+                        COMPRA AHORA
                         <span class="btn-subtext">Proceso encriptado vía Mercado Pago o Yape</span>
                     </button>
                     
